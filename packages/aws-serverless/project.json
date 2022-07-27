@@ -1,0 +1,60 @@
+{
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/aws-serverless/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/aws-serverless",
+        "main": "packages/aws-serverless/src/index.ts",
+        "tsConfig": "packages/aws-serverless/tsconfig.lib.json",
+        "assets": [
+          "packages/aws-serverless/*.md",
+          {
+            "input": "./packages/aws-serverless/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/aws-serverless/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/aws-serverless",
+            "glob": "generators.json",
+            "output": "."
+          },
+          {
+            "input": "./packages/aws-serverless",
+            "glob": "executors.json",
+            "output": "."
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "packages/aws-serverless/**/*.ts",
+          "packages/aws-serverless/generators.json",
+          "packages/aws-serverless/executors.json",
+          "packages/aws-serverless/package.json"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/packages/aws-serverless"],
+      "options": {
+        "jestConfig": "packages/aws-serverless/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
