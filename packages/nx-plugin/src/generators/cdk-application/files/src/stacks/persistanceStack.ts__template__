@@ -1,0 +1,15 @@
+import { Stack, StackProps } from 'aws-cdk-lib'
+import * as s3 from 'aws-cdk-lib/aws-s3'
+import { Construct } from 'constructs'
+
+export class PersistanceStack extends Stack {
+  public readonly s3Bucket: s3.Bucket
+
+  constructor(scope: Construct, id: string, props: StackProps) {
+    super(scope, id, props)
+
+    this.s3Bucket = new s3.Bucket(this, `Bucket`, {
+      bucketName: `test-bucket`,
+    })
+  }
+}

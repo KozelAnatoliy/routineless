@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "$id": "Preset",
+  "title": "",
+  "type": "object",
+  "properties": {
+    "unitTestRunner": {
+      "description": "Adds the specified unit test runner",
+      "type": "string",
+      "enum": ["jest", "none"],
+      "default": "jest"
+    },
+    "linter": {
+      "description": "The tool to use for running lint checks.",
+      "type": "string",
+      "enum": ["eslint", "tslint"],
+      "default": "eslint"
+    },
+    "infraAppName": {
+      "description": "Infrastructure management application name.",
+      "type": "string",
+      "default": "infra"
+    }
+  },
+  "required": []
+}

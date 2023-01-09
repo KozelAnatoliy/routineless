@@ -1,0 +1,8 @@
+export const DEFAULT_REGION = 'us-east-1'
+
+export interface CdkEnvironment {
+  isProduction: boolean
+  accountId: string
+  awsRegion: string
+  envName: string
+}

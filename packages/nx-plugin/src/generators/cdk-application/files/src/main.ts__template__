@@ -1,0 +1,9 @@
+#!/usr/bin/env node
+import * as cdk from 'aws-cdk-lib'
+
+import { environment } from './environments/environment'
+import { PersistanceStack } from './stacks/persistanceStack'
+
+const app = new cdk.App()
+
+new PersistanceStack(app, `Persistance`, {})

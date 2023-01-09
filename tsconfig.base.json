@@ -13,8 +13,18 @@
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "resolveJsonModule": true,
     "baseUrl": ".",
-    "paths": {}
+    "plugins": [
+      {
+        "transform": "ts-auto-mock/transformer",
+        "cacheBetweenTests": false
+      }
+    ],
+    "strict": true,
+    "paths": {
+      "@routineless/nx-plugin": ["packages/nx-plugin/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

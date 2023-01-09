@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSave": true,
+  "workbench.editor.limit.value": 10,
+  "workbench.editor.limit.enabled": true,
+  "jest.jestCommandLine": "npm run test -",
+  "jest.showCoverageOnLoad": true,
+  "jest.autoRun": "off",
+  "github-actions.workflows.pinned.refresh.enabled": true,
+  "github-actions.workflows.pinned.refresh.interval": 65,
+}

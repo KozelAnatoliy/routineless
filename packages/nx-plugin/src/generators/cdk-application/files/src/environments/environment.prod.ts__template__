@@ -1,0 +1,8 @@
+import { CdkEnvironment, DEFAULT_REGION } from './common'
+
+export const environment: CdkEnvironment = {
+  isProduction: true,
+  envName: 'prod',
+  accountId: process.env.AWS_ACCOUNT || '',
+  awsRegion: process.env.AWS_REGION || DEFAULT_REGION,
+}
