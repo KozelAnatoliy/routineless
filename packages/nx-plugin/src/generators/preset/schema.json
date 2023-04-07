@@ -20,7 +20,8 @@
     "infraAppName": {
       "description": "Infrastructure management application name.",
       "type": "string",
-      "default": "infra"
+      "default": "infra",
+      "x-prompt": "Enter infra application name"
     }
   },
   "required": []

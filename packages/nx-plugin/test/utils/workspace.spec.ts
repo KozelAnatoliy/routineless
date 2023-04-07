@@ -1,7 +1,6 @@
-import { Tree } from '@nrwl/devkit'
+import type { Tree } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-
-import { addGitIgnoreEntries } from '../../src/utils/workspace'
+import { addGitIgnoreEntries } from '@routineless/nx-plugin/utils/workspace'
 
 describe('cdk-application generator', () => {
   let tree: Tree

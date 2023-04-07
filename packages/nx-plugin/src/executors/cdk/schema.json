@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "title": "Cdk executor",
+  "description": "Executor for aws cdk",
+  "type": "object",
+  "properties": {
+    "command": {
+      "description": "Cdk command",
+      "type": "string",
+      "enum": [
+        "list",
+        "synthesize",
+        "bootstrap",
+        "deploy",
+        "import",
+        "watch",
+        "destroy",
+        "diff",
+        "metadata",
+        " acknowledge",
+        "notice",
+        "init",
+        "context",
+        "docs",
+        "doctor"
+      ]
+    }
+  },
+  "required": ["command"]
+}

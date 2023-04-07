@@ -1,8 +1,7 @@
 import { Tree, readProjectConfiguration } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-
-import generator from '../../../src/generators/preset/generator'
-import { PresetGeneratorSchema } from '../../../src/generators/preset/schema'
+import generator from '@routineless/nx-plugin/generators/preset'
+import type { PresetGeneratorSchema } from '@routineless/nx-plugin/generators/preset/schema'
 
 describe('preset generator', () => {
   let appTree: Tree
@@ -14,6 +13,7 @@ describe('preset generator', () => {
 
   it('should run successfully', async () => {
     await generator(appTree, options)
+
     const config = readProjectConfiguration(appTree, 'infra')
     expect(config).toBeDefined()
   })

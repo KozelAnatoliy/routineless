@@ -1,0 +1,100 @@
+name: Pull requiest test
+on:
+  pull_request:
+    branches: 
+     - develop
+
+env:
+  NX_CLOUD_DISTRIBUTED_EXECUTION: true
+  NX_BRANCH: ${{ github.head_ref }}
+  NX_RUN_GROUP: ${{ github.run_id }}
+
+jobs:
+  test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
+          fetch-depth: 0
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v2
+        with: 
+          main-branch-name: 'develop'
+      - run: |
+          echo "BASE: ${{ env.NX_BASE }}"
+          echo "HEAD: ${{ env.NX_HEAD }}"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: 'npm'
+      - run: npm install
+      - run: npx nx-cloud start-ci-run 
+      - name: 'Print affected'
+        run: npx nx print-affected   
+      - run: npx nx affected --target=lint --parallel --max-parallel=3
+      - run: npx nx affected --target=build --parallel --max-parallel=3
+      - run: npx nx affected --target=test --parallel --max-parallel=2 --codeCoverage=true --output-style="static" --passWithNoTests=false
+      - run: echo "This job's status is ${{ job.status }}."
+  e2e-tests:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Install LocalStack
+        run: |
+          # install LocalStack cli and awslocal
+          pip install localstack awscli-local[ver1]
+          # Make sure to pull the latest version of the image
+          docker pull localstack/localstack
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          cache: 'npm'
+      - name: Intsall dependencies
+        run: npm install
+      - name: Build applications
+        run: |
+          npx nx-cloud start-ci-run
+          npx nx run-many --all --target=build --parallel --max-parallel=3
+      - name: Start LocalStack
+        run: |
+          chmod +x ${{github.workspace}}/bin/localstack.sh
+          chmod +x ${{github.workspace}}/bin/init/init.sh
+          ${{github.workspace}}/bin/localstack.sh -d && ${{github.workspace}}/bin/init/init.sh
+      - name: Integration tests
+        env:
+          NX_CLOUD_DISTRIBUTED_EXECUTION: false
+        run: npx nx run-many --all --target=e2e
+  agents:
+      runs-on: ubuntu-latest
+      name: Agent
+      timeout-minutes: 10
+      strategy:
+        matrix:
+          agent: [ 1, 2, 3 ]
+      steps:
+        - uses: actions/checkout@v3
+        - uses: actions/setup-node@v3
+          with: 
+            node-version: 14
+        - run: npm install
+        - name: Start Nx Agent ${{ matrix.agent }}
+          run: npx nx-cloud start-agent  
+  stopAgents:
+    runs-on: ubuntu-latest
+    name: Stop Agents on fail
+    needs: [test, integration-tests]
+    if: always()
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: 
+          node-version: 14
+      - run: npm install
+      - name: Stop Nx Agents
+        run: npx nx-cloud stop-all-agents
