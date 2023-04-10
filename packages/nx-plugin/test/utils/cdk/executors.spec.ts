@@ -81,7 +81,7 @@ describe('executors', () => {
       const executionProcess = runCommandProcess(command, cwd)
       mockProcess.emit('exit', exitCode)
 
-      expect(executionProcess).rejects.toEqual(`Exit with error code: ${exitCode}`)
+      await expect(executionProcess).rejects.toThrow(`Exit with error code: ${exitCode}`)
     })
 
     it('should reject on error', async () => {
@@ -89,7 +89,7 @@ describe('executors', () => {
       const executionProcess = runCommandProcess(command, cwd)
       mockProcess.emit('error', error)
 
-      expect(executionProcess).rejects.toEqual(error)
+      await expect(executionProcess).rejects.toEqual(error)
     })
   })
 })
