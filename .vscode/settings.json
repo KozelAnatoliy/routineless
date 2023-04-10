@@ -7,4 +7,5 @@
   "jest.autoRun": "off",
   "github-actions.workflows.pinned.refresh.enabled": true,
   "github-actions.workflows.pinned.refresh.interval": 65,
+  "eslint.validate": ["json"]
 }

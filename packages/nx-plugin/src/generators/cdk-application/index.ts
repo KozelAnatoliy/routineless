@@ -8,17 +8,17 @@ import {
   names,
   offsetFromRoot,
   readProjectConfiguration,
+  runTasksInSerial,
   updateJson,
   updateProjectConfiguration,
 } from '@nrwl/devkit'
 import { Linter } from '@nrwl/linter'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
-import { runTasksInSerial } from '@nrwl/workspace/src/utilities/run-tasks-in-serial'
 import { join } from 'path'
 
-import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/constants'
+import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
 import { addGitIgnoreEntries } from '../../utils/workspace'
-import { CdkApplicationGeneratorSchema } from './schema'
+import type { CdkApplicationGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends CdkApplicationGeneratorSchema {
   projectName: string
@@ -67,6 +67,14 @@ const deleteNodeAppRedundantDirs = (tree: Tree, options: NormalizedSchema) => {
   tree.delete(`${options.projectRoot}/src/app`)
 }
 
+const updateTsConfig = (tree: Tree) => {
+  updateJson(tree, `tsconfig.base.json`, (tsConfig) => {
+    const existingExclusions: string[] = tsConfig.exclude || []
+    tsConfig.exclude = [...existingExclusions, 'cdk.out']
+    return tsConfig
+  })
+}
+
 const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
   updateJson(tree, `${options.projectRoot}/.eslintrc.json`, (json) => {
     json.plugins = json?.plugins || []
@@ -83,8 +91,17 @@ const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
 const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) => {
   const projectConfig = readProjectConfiguration(tree, options.projectName)
   if (projectConfig.targets) {
-    delete projectConfig.targets.serve
+    delete projectConfig.targets['serve']
+  } else {
+    projectConfig.targets = {}
   }
+  projectConfig.targets = {
+    ...projectConfig.targets,
+    cdk: {
+      executor: '@routineless/nx-plugin:cdk',
+    },
+  }
+
   updateProjectConfiguration(tree, options.projectName, projectConfig)
 }
 
@@ -104,14 +121,16 @@ export const cdkApplicationGenerator = async (
   tasks.push(
     await nodeApplicationGenerator(tree, {
       ...normalizedOptions,
-      directory: undefined,
+      e2eTestRunner: 'none',
       skipFormat: true,
     }),
   )
 
+  updateTsConfig(tree)
+
   addFiles(tree, normalizedOptions)
   if (normalizedOptions.unitTestRunner === 'jest') {
-    addFiles(tree, normalizedOptions)
+    addFiles(tree, normalizedOptions, 'jest-files')
   }
 
   if (normalizedOptions.linter === Linter.EsLint) {

@@ -1,8 +1,10 @@
-export const DEFAULT_REGION = 'us-east-1'
+import type { Environment } from 'aws-cdk-lib';
 
-export interface CdkEnvironment {
-  isProduction: boolean
-  accountId: string
-  awsRegion: string
-  envName: string
+export const DEFAULT_REGION = 'us-east-1';
+
+export interface CdkEnvironment extends Environment {
+  readonly account: string;
+  readonly region: string;
+  readonly isProduction: boolean;
+  readonly envName: string;
 }

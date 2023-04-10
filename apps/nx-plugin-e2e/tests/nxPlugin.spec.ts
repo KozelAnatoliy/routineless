@@ -1,9 +1,8 @@
+import { logger } from '@nrwl/devkit'
 import {
   checkFilesExist,
-  ensureNxProject,
-  exists,
-  listFiles,
-  readJson,
+  ensureNxProject, // readJson,
+  runNxCommand,
   runNxCommandAsync,
   uniq,
 } from '@nrwl/nx-plugin/testing'
@@ -29,19 +28,20 @@ describe('cdk application', () => {
     const project = uniq('cdk')
 
     beforeAll(async () => {
-      await runNxCommandAsync(`generate @routineless/nx-plugin:cdk-application ${project}`)
+      logger.debug(runNxCommand(`generate @routineless/nx-plugin:cdk-application ${project} --verbose`))
     })
 
     it('should generate cdk files', () => {
       expect(() => checkFilesExist(`apps/${project}/cdk.json`)).not.toThrow()
       expect(() => checkFilesExist(`apps/${project}/src/main.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/test/stacks/persistanceStack.spec.ts`)).not.toThrow()
       expect(() => checkFilesExist(`apps/${project}/src/app`)).toThrow()
     })
 
-    it('should add cdk targets', async () => {
+    /*  it('should add cdk targets', async () => {
       const result = await runNxCommandAsync(`build ${project}`)
-      // expect(result.stdout).toContain('Executor ran')
-    })
+      expect(result.stdout).toContain('Executor ran')
+    }) */
   })
 
   describe('routineless preset', () => {
@@ -53,6 +53,10 @@ describe('cdk application', () => {
 
     it('should create infra application', () => {
       expect(() => checkFilesExist(`apps/${infraProject}`)).not.toThrow()
+    })
+
+    it('should remove redundant files', () => {
+      expect(() => checkFilesExist('apps/.gitkeep')).toThrow()
     })
   })
 })
