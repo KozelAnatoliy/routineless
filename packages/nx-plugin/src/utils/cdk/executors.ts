@@ -31,10 +31,6 @@ export const createCommand = (options: ParsedCdkExecutorOption): string => {
 }
 
 const getCommandOptions = (options: ParsedCdkExecutorOption): string[] => {
-  console.log('options', JSON.stringify(options))
-  console.log('options.parsedArgs', options.parsedArgs)
-  // console.log('options.__unparsed__', opts.__unparsed__)
-
   const commandArgs: string[] = []
   for (const argKey in options.parsedArgs) {
     const argValue = options.parsedArgs[argKey]
