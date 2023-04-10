@@ -1,7 +1,8 @@
 import { Tree, readProjectConfiguration } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-import generator from '@routineless/nx-plugin/generators/preset'
-import type { PresetGeneratorSchema } from '@routineless/nx-plugin/generators/preset/schema'
+
+import generator from '../../../src/generators/preset'
+import type { PresetGeneratorSchema } from '../../../src/generators/preset/schema'
 
 describe('preset generator', () => {
   let appTree: Tree

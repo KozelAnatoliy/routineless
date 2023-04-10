@@ -7,9 +7,9 @@ import {
   updateJson,
 } from '@nrwl/devkit'
 import { Linter } from '@nrwl/linter'
-import { cdkApplicationGenerator } from '@routineless/nx-plugin/generators/cdk-application'
-import { TSCONFIG_NODE_LTS_STRICTEST_VERSION } from '@routineless/nx-plugin/utils/versions'
 
+import { cdkApplicationGenerator } from '../../generators/cdk-application'
+import { TSCONFIG_NODE_LTS_STRICTEST_VERSION } from '../../utils/versions'
 import type { PresetGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends PresetGeneratorSchema {

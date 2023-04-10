@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "publish:local": "nx build nx-plugin && cd dist/packages/nx-plugin && (npm unpublish @routineless/nx-plugin --force --registry http://localhost:4873 || true) && npm publish --tag=latest --access public --registry http://localhost:4873",
     "build": "nx run-many --target=build --all",
-    "test": "nx run-many --target=test --all",
     "e2e": "nx run-many --target=e2e --all",
+    "lint": "nx run nx-plugin:lint",
+    "publish:local": "nx build nx-plugin && cd dist/packages/nx-plugin && (npm unpublish @routineless/nx-plugin --force --registry http://localhost:4873 || true) && npm publish --tag=latest --access public --registry http://localhost:4873",
+    "test": "nx run-many --target=test --all",
     "test:coverage": "nx run-many --target=test --all --codeCoverage=true --output-style=\"static\" --passWithNoTests=false"
   },
   "private": true,

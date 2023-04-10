@@ -1,7 +1,7 @@
 import { logger } from '@nrwl/devkit'
-import type { ParsedCdkExecutorOption } from '@routineless/nx-plugin/executors/cdk'
 import * as child_process from 'child_process'
 
+import type { ParsedCdkExecutorOption } from '../../../src/executors/cdk'
 import { createCommand, runCommandProcess } from '../../../src/utils/cdk/executors'
 import { MockChildProcess, mockChildProcess } from '../../helpers/executor'
 

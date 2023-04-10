@@ -1,7 +1,8 @@
 import { Tree, readJson, readProjectConfiguration } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-import generator from '@routineless/nx-plugin/generators/cdk-application'
-import type { CdkApplicationGeneratorSchema } from '@routineless/nx-plugin/generators/cdk-application/schema'
+
+import generator from '../../../src/generators/cdk-application'
+import type { CdkApplicationGeneratorSchema } from '../../../src/generators/cdk-application/schema'
 
 describe('cdk-application generator', () => {
   let tree: Tree

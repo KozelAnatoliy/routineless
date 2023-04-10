@@ -14,15 +14,10 @@ import {
 } from '@nrwl/devkit'
 import { Linter } from '@nrwl/linter'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
-import {
-  CDK_CONSTRUCTS_VERSION,
-  CDK_ESLINT_VERSION,
-  CDK_LOCAL_VERSION,
-  CDK_VERSION,
-} from '@routineless/nx-plugin/utils/versions'
-import { addGitIgnoreEntries } from '@routineless/nx-plugin/utils/workspace'
 import { join } from 'path'
 
+import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
+import { addGitIgnoreEntries } from '../../utils/workspace'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends CdkApplicationGeneratorSchema {

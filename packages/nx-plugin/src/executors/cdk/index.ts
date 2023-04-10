@@ -1,9 +1,9 @@
 import type { ExecutorContext } from '@nrwl/devkit'
 import { logger } from '@nrwl/devkit'
-import { createCommand, runCommandProcess } from '@routineless/nx-plugin/utils/cdk/executors'
 import * as path from 'path'
 import parser from 'yargs-parser'
 
+import { createCommand, runCommandProcess } from '../../utils/cdk/executors'
 import type { CdkExecutorOptions } from './schema'
 
 export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
@@ -61,7 +61,13 @@ const parseArgs = (options: CdkExecutorOptions): Record<string, string | string[
   const keys = Object.keys(options)
   const unknownOptionsTreatedAsArgs = keys
     .filter((p) => executorPropKeys.indexOf(p) === -1)
-    .reduce((acc, key) => ((acc[key] = options[key]), acc), {} as Record<string, string | string[] | boolean>)
+    .reduce((acc, key) => {
+      const optionValue = options[key]
+      if ((optionValue && typeof optionValue !== 'object') || Array.isArray(optionValue)) {
+        acc[key] = optionValue
+      }
+      return acc
+    }, {} as Record<string, string | string[] | boolean>)
   return { ...parsedArgs, ...unknownOptionsTreatedAsArgs }
 }
 

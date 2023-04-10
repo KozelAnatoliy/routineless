@@ -1,10 +1,10 @@
 import type { ExecutorContext } from '@nrwl/devkit'
 import { logger } from '@nrwl/devkit'
-import executor from '@routineless/nx-plugin/executors/cdk'
-import type { CdkExecutorOptions } from '@routineless/nx-plugin/executors/cdk/schema'
-import { ProcessExitInfo, createCommand, runCommandProcess } from '@routineless/nx-plugin/utils/cdk/executors'
 import * as path from 'path'
 
+import executor from '../../../src/executors/cdk'
+import type { CdkExecutorOptions } from '../../../src/executors/cdk/schema'
+import { ProcessExitInfo, createCommand, runCommandProcess } from '../../../src/utils/cdk/executors'
 import { mockExecutorContext } from '../../helpers/executor'
 
 jest.mock('@routineless/nx-plugin/utils/cdk/executors')
