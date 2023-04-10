@@ -1,29 +1,20 @@
 {
+  "extends": ["@tsconfig/node-lts/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
   "compileOnSave": false,
   "compilerOptions": {
+    "ignoreDeprecations": "5.0",
     "rootDir": ".",
     "sourceMap": true,
     "declaration": false,
-    "moduleResolution": "node",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
-    "module": "esnext",
-    "lib": ["es2017", "dom"],
-    "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false,
     "baseUrl": ".",
-    "plugins": [
-      {
-        "transform": "ts-auto-mock/transformer",
-        "cacheBetweenTests": false
-      }
-    ],
-    "strict": true,
     "paths": {
-      "@routineless/nx-plugin": ["packages/nx-plugin/src/index.ts"]
+      "@routineless/nx-plugin/*": ["packages/nx-plugin/src/*"],
+      "@routineless/test-plugin": ["packages/test-plugin/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

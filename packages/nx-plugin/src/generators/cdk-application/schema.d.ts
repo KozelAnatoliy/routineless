@@ -1,3 +1,3 @@
-import { DefaultAppSchema } from '../../utils/schema'
+import { DefaultAppSchema } from '../../types/schema'
 
 export type CdkApplicationGeneratorSchema = DefaultAppSchema

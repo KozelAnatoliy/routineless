@@ -4,12 +4,13 @@
   "version": "0.0.1",
   "generators": {
     "preset": {
-      "factory": "./src/generators/preset/generator",
+      "factory": "./src/generators/preset",
       "schema": "./src/generators/preset/schema.json",
-      "description": "preset generator"
+      "description": "preset generator",
+      "hidden": true
     },
     "cdk-application": {
-      "factory": "./src/generators/cdk-application/generator",
+      "factory": "./src/generators/cdk-application",
       "schema": "./src/generators/cdk-application/schema.json",
       "description": "cdk-application generator"
     }

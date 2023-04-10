@@ -34,7 +34,8 @@
             "glob": "executors.json",
             "output": "."
           }
-        ]
+        ],
+        "transformers": [{ "name": "typescript-transform-paths/nx-transformer" }]
       }
     },
     "lint": {
