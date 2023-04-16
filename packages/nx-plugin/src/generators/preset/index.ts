@@ -3,10 +3,12 @@ import {
   Tree,
   addDependenciesToPackageJson,
   formatFiles,
+  generateFiles,
   runTasksInSerial,
   updateJson,
 } from '@nrwl/devkit'
 import { Linter } from '@nrwl/linter'
+import { join } from 'path'
 
 import { cdkApplicationGenerator } from '../../generators/cdk-application'
 import { TSCONFIG_NODE_LTS_STRICTEST_VERSION } from '../../utils/versions'
@@ -33,6 +35,13 @@ const addDependencies = (host: Tree): GeneratorCallback => {
       '@tsconfig/node-lts-strictest': TSCONFIG_NODE_LTS_STRICTEST_VERSION,
     },
   )
+}
+
+const addFiles = (tree: Tree) => {
+  const templateOptions = {
+    template: '',
+  }
+  generateFiles(tree, join(__dirname, 'files'), '.', templateOptions)
 }
 
 const updateTsConfig = (tree: Tree) => {
@@ -73,6 +82,7 @@ const presetGenerator = async (tree: Tree, options: PresetGeneratorSchema) => {
   )
 
   updateTsConfig(tree)
+  addFiles(tree)
   deleteRedundantFiles(tree)
 
   await formatFiles(tree)

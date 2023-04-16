@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 
-import { PersistanceStack } from '../../src/stacks/persistanceStack';
-import { environment } from '../../src/environments/environment.local';
+import { PersistanceStack } from './persistanceStack';
+import { environment } from '../environments/environment.local';
 
 describe('PersistanceStack', () => {
   const stackId = 'PersistanceStack';
@@ -14,8 +14,10 @@ describe('PersistanceStack', () => {
 
     const template = Template.fromStack(stack);
 
-    template.hasResourceProperties('AWS::S3::Bucket', {
-      BucketName: 'test-bucket-local',
+    template.hasResource('AWS::S3::Bucket', {
+      DeletionPolicy: 'Delete',
+      Properties: { BucketName: '<%= workspaceName %>-bucket-local' },
+      UpdateReplacePolicy: 'Delete',
     });
   });
 });

@@ -7,6 +7,7 @@ import {
   getWorkspaceLayout,
   names,
   offsetFromRoot,
+  readNxJson,
   readProjectConfiguration,
   runTasksInSerial,
   updateJson,
@@ -17,7 +18,7 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 import { join } from 'path'
 
 import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
-import { addGitIgnoreEntries } from '../../utils/workspace'
+import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends CdkApplicationGeneratorSchema {
@@ -37,42 +38,16 @@ const normalizeOptions = (tree: Tree, options: CdkApplicationGeneratorSchema): N
   }
 }
 
-const addDependencies = (host: Tree): GeneratorCallback => {
-  return addDependenciesToPackageJson(
-    host,
-    {
-      'aws-cdk-lib': CDK_VERSION,
-      constructs: CDK_CONSTRUCTS_VERSION,
-    },
-    {
-      'aws-cdk-local': CDK_LOCAL_VERSION,
-      'aws-cdk': CDK_VERSION,
-      'eslint-plugin-cdk': CDK_ESLINT_VERSION,
-    },
-  )
-}
-
 const addFiles = (tree: Tree, options: NormalizedSchema, filesType: 'files' | 'jest-files' = 'files') => {
+  const nxJson = readNxJson(tree)
   const templateOptions = {
     ...options,
     ...names(options.name),
     offsetFromRoot: offsetFromRoot(options.projectRoot),
+    workspaceName: nxJson?.npmScope || 'test',
     template: '',
   }
   generateFiles(tree, join(__dirname, filesType), options.projectRoot, templateOptions)
-}
-
-// delete redundant
-const deleteNodeAppRedundantDirs = (tree: Tree, options: NormalizedSchema) => {
-  tree.delete(`${options.projectRoot}/src/app`)
-}
-
-const updateTsConfig = (tree: Tree) => {
-  updateJson(tree, `tsconfig.base.json`, (tsConfig) => {
-    const existingExclusions: string[] = tsConfig.exclude || []
-    tsConfig.exclude = [...existingExclusions, 'cdk.out']
-    return tsConfig
-  })
 }
 
 const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
@@ -109,6 +84,29 @@ const updateGitIgnore = (tree: Tree) => {
   addGitIgnoreEntries(tree, ['# CDK Context & Staging files', 'cdk.context.json', 'cdk.out/'])
 }
 
+const updateTsConfig = (tree: Tree) => {
+  updateJson(tree, `tsconfig.base.json`, (tsConfig) => {
+    const existingExclusions: string[] = tsConfig.exclude || []
+    tsConfig.exclude = [...existingExclusions, 'cdk.out']
+    return tsConfig
+  })
+}
+
+const addDependencies = (host: Tree): GeneratorCallback => {
+  return addDependenciesToPackageJson(
+    host,
+    {
+      'aws-cdk-lib': CDK_VERSION,
+      constructs: CDK_CONSTRUCTS_VERSION,
+    },
+    {
+      'aws-cdk-local': CDK_LOCAL_VERSION,
+      'aws-cdk': CDK_VERSION,
+      'eslint-plugin-cdk': CDK_ESLINT_VERSION,
+    },
+  )
+}
+
 export const cdkApplicationGenerator = async (
   tree: Tree,
   options: CdkApplicationGeneratorSchema,
@@ -137,7 +135,7 @@ export const cdkApplicationGenerator = async (
     updateLintConfig(tree, normalizedOptions)
   }
 
-  deleteNodeAppRedundantDirs(tree, normalizedOptions)
+  deleteNodeAppRedundantDirs(tree, normalizedOptions.projectRoot)
   updateGitIgnore(tree)
   updateInfraProjectConfiguration(tree, normalizedOptions)
 
