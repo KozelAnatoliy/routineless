@@ -20,15 +20,20 @@ describe('Bootstrap Executor', () => {
   let context: ExecutorContext
   const testCommand = 'testCommand'
   const testProcessExitInfo: ProcessExitInfo = { code: 0, signal: null }
+  const OLD_ENV = process.env
 
   beforeEach(async () => {
     jest.spyOn(logger, 'error')
     context = mockExecutorContext('bootstrap')
     mockedCreateCommand.mockReturnValue(testCommand)
     mockedRunCommandProcess.mockResolvedValue(testProcessExitInfo)
+    process.env = { ...OLD_ENV }
   })
 
-  afterEach(() => jest.clearAllMocks())
+  afterEach(() => {
+    jest.clearAllMocks()
+    process.env = OLD_ENV
+  })
 
   it('should run cdk bootstrap command', async () => {
     const executionPrommise = executor(options, context)
@@ -36,6 +41,23 @@ describe('Bootstrap Executor', () => {
 
     expect(mockedCreateCommand).toHaveBeenCalledWith({
       command: 'bootstrap',
+      env: 'local',
+      parsedArgs: {},
+      root: 'apps/proj',
+      sourceRoot: 'apps/proj/src',
+    })
+    expect(mockedRunCommandProcess).toHaveBeenCalledWith(testCommand, path.join(context.root, 'apps/proj'))
+    expect(executionResult).toEqual({ success: true })
+  })
+
+  it('should run cdk bootstrap command with provided env', async () => {
+    process.env['AWS_ENV'] = 'dev'
+    const executionPrommise = executor({ ...options }, context)
+    const executionResult = await executionPrommise
+
+    expect(mockedCreateCommand).toHaveBeenCalledWith({
+      command: 'bootstrap',
+      env: 'dev',
       parsedArgs: {},
       root: 'apps/proj',
       sourceRoot: 'apps/proj/src',
@@ -56,6 +78,7 @@ describe('Bootstrap Executor', () => {
       expect(mockedCreateCommand).toHaveBeenCalledWith({
         _: ['FirstStack', 'SecondStack'],
         command: 'bootstrap',
+        env: 'local',
         parsedArgs: {
           _: ['FirstStack', 'SecondStack'],
           profile: 'prod',
@@ -77,6 +100,7 @@ describe('Bootstrap Executor', () => {
       expect(mockedCreateCommand).toHaveBeenCalledWith({
         args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
         command: 'bootstrap',
+        env: 'local',
         parsedArgs: {
           _: ['FirstArgsStack', 'SecondArgsStack'],
           j: true,
@@ -101,6 +125,7 @@ describe('Bootstrap Executor', () => {
         _: ['FirstStack', 'SecondStack'],
         args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
         command: 'bootstrap',
+        env: 'local',
         parsedArgs: {
           _: ['FirstStack', 'SecondStack'],
           j: true,

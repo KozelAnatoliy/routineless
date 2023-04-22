@@ -1,0 +1,32 @@
+import * as cdk from 'aws-cdk-lib'
+import { Template } from 'aws-cdk-lib/assertions'
+
+import { <%= className %>Stack } from '.'
+
+jest.mock('aws-cdk-lib/aws-lambda', () => {
+  const originalModule = jest.requireActual('aws-cdk-lib/aws-lambda')
+
+  return {
+    ...originalModule,
+    Code: {
+      ...originalModule.Code,
+      fromAsset: jest.fn().mockReturnValue(originalModule.Code.fromInline('const message = "Hello world!"')),
+    },
+  }
+})
+
+describe('<%= className %>Stack', () => {
+  const stackId = '<%= className %>Stack'
+  it('should define lambda function', () => {
+    const app = new cdk.App()
+
+    const stack = new <%= className %>Stack(app, stackId, {})
+
+    const template = Template.fromStack(stack)
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Handler: 'main.handler',
+      Runtime: 'nodejs18.x',
+    })
+  })
+})

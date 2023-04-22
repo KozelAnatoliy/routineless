@@ -33,7 +33,7 @@ describe('generators', () => {
     it('should inject project properties', () => {
       const options = {
         name: 'testPackage',
-        directory: 'testDir',
+        directory: 'test-dir',
       }
 
       const result = injectProjectProperties(tree, options)
@@ -56,6 +56,21 @@ describe('generators', () => {
         projectName: 'test-package',
         projectRoot: 'apps/test-package',
         projectDirectory: 'test-package',
+      })
+    })
+
+    it('should inject project properties with apps directory', () => {
+      const options = {
+        name: 'testPackage',
+        directory: 'apps/test-dir',
+      }
+
+      const result = injectProjectProperties(tree, options)
+
+      expect(result).toMatchObject({
+        projectName: 'test-dir-test-package',
+        projectRoot: 'apps/test-dir/test-package',
+        projectDirectory: 'test-dir/test-package',
       })
     })
   })

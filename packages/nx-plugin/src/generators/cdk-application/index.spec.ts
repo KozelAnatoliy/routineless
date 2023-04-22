@@ -61,7 +61,6 @@ describe('cdk-application generator', () => {
     expect(jestConfig).toBeDefined()
 
     const jestConfigContent = jestConfig?.toString()
-    expect(jestConfigContent).toContain('!src/environments/**')
     expect(jestConfigContent).toContain('!src/main.ts')
   })
 

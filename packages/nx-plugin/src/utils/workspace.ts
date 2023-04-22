@@ -27,3 +27,7 @@ export const addGitIgnoreEntries = (host: Tree, entries: string[]) => {
 export const deleteNodeAppRedundantDirs = (tree: Tree, projectRoot: string) => {
   tree.delete(`${projectRoot}/src/app`)
 }
+
+export const deleteNodeLibRedundantDirs = (tree: Tree, projectRoot: string) => {
+  tree.delete(`${projectRoot}/src/lib`)
+}

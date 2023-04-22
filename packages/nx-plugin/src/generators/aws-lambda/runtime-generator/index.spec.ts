@@ -1,4 +1,4 @@
-import { Tree } from '@nrwl/devkit'
+import { Tree, readProjectConfiguration } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
 
 import awsLambdaRuntimeApplicationGenerator from '.'
@@ -20,14 +20,25 @@ describe('awsLambdaRuntimeApplicationGenerator', () => {
   it('should run successfully', async () => {
     await awsLambdaRuntimeApplicationGenerator(tree, options)
 
-    expect(tree.exists('aws-lambda/runtime/src/index.ts')).toBeTruthy()
-    expect(tree.exists('aws-lambda/runtime/src/index.spec.ts')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/jest.config.ts')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/project.json')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/src/main.ts')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/src/main.spec.ts')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/src/app')).toBeFalsy()
   })
 
-  it('should run successfully with none', async () => {
+  it('should run successfully without unit test runner', async () => {
     await awsLambdaRuntimeApplicationGenerator(tree, { ...options, unitTestRunner: 'none' })
 
-    expect(tree.exists('aws-lambda/runtime/src/index.ts')).toBeTruthy()
-    expect(tree.exists('aws-lambda/runtime/src/index.spec.ts')).toBeFalsy()
+    expect(tree.exists('aws-lambda/runtime/src/main.ts')).toBeTruthy()
+    expect(tree.exists('aws-lambda/runtime/src/main.spec.ts')).toBeFalsy()
+    expect(tree.exists('aws-lambda/runtime/jest.config.ts')).toBeFalsy()
+  })
+
+  it('should update project configuration', async () => {
+    await awsLambdaRuntimeApplicationGenerator(tree, options)
+
+    const projectConfig = readProjectConfiguration(tree, 'aws-lambda-runtime')
+    expect(projectConfig.targets?.['build']?.options.bundle).toBeTruthy()
   })
 })

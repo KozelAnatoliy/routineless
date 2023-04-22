@@ -40,6 +40,11 @@
       "enum": ["jest", "none"],
       "description": "Test runner to use for unit tests.",
       "default": "jest"
+    },
+    "addLambdaToInfraApp": {
+      "type": "boolean",
+      "description": "Add lambda to infra app",
+      "default": true
     }
   },
   "required": ["name"]

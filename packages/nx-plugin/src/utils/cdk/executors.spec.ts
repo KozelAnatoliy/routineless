@@ -14,6 +14,7 @@ describe('executors', () => {
       command: 'diff',
       root: 'testRoot',
       sourceRoot: 'testSourceRoot',
+      env: 'dev',
       parsedArgs: {},
     }
 
@@ -104,6 +105,15 @@ describe('executors', () => {
           ' --app testApp --plugin testPlugin --ec2creds testEc2Creds --role-arn testRoleArn --output testOutput --help true' +
           ' --unknown unknown',
       )
+    })
+
+    it('should use cdk local for local env', () => {
+      const commandResult = createCommand({
+        ...testOptions,
+        env: 'local',
+      })
+
+      expect(commandResult).toEqual('node nxWorkspaceRoot/node_modules/aws-cdk-local/bin/cdklocal diff')
     })
   })
 

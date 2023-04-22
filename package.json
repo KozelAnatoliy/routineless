@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "nx run-many --target=build --all",
-    "e2e": "nx run-many --target=e2e --all",
-    "lint": "nx run nx-plugin:lint",
+    "build": "nx run-many --target=build",
+    "e2e": "nx run-many --target=e2e",
+    "lint": "nx run-many --target=lint",
     "publish:local": "nx build nx-plugin && cd dist/packages/nx-plugin && (npm unpublish @routineless/nx-plugin --force --registry http://localhost:4873 || true) && npm publish --tag=latest --access public --registry http://localhost:4873",
-    "test": "nx run-many --target=test --all",
-    "test:coverage": "nx run-many --target=test --all --codeCoverage=true --output-style=\"static\" --passWithNoTests=false --skip-nx-cache"
+    "test": "nx run-many --target=test",
+    "test:coverage": "nx run-many --target=test --codeCoverage=true --output-style=\"static\" --passWithNoTests=false --skip-nx-cache"
   },
   "private": true,
   "dependencies": {
@@ -31,6 +31,7 @@
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@tsconfig/node-lts": "^18.12.1",
     "@tsconfig/strictest": "^2.0.0",
+    "@types/fs-extra": "^11.0.1",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",

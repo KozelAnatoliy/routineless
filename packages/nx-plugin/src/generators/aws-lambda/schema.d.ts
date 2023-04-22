@@ -7,4 +7,5 @@ export interface AwsLambdaGeneratorSchema {
   unitTestRunner?: 'jest' | 'none'
   linter?: Linter
   directory?: string
+  addLambdaToInfraApp?: boolean
 }

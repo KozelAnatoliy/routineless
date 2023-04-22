@@ -12,6 +12,7 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 import { join } from 'path'
 
 import { injectProjectProperties } from '../../../utils/generators'
+import { AWS_LAMBDA_TYPES_VERSION } from '../../../utils/versions'
 import { deleteNodeAppRedundantDirs } from '../../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from '../schema'
 
@@ -27,6 +28,12 @@ const updateAwsLambdaRuntumeProjectConfiguration = (tree: Tree, options: AwsLamb
   } else {
     projectConfig.targets = {}
   }
+
+  const buildTarget = projectConfig.targets['build']
+  if (buildTarget) {
+    buildTarget.options.bundle = true
+  }
+
   projectConfig.targets = {
     ...projectConfig.targets,
   }
@@ -42,11 +49,17 @@ const addFiles = (
   const templateOptions = {
     template: '',
   }
-  generateFiles(tree, join(__dirname, filesType), options.projectRoot, templateOptions)
+  generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.projectRoot, templateOptions)
 }
 
 const addDependencies = (host: Tree): GeneratorCallback => {
-  return addDependenciesToPackageJson(host, {}, {})
+  return addDependenciesToPackageJson(
+    host,
+    {},
+    {
+      '@types/aws-lambda': AWS_LAMBDA_TYPES_VERSION,
+    },
+  )
 }
 
 const awsLambdaRuntimeApplicationGenerator = async (

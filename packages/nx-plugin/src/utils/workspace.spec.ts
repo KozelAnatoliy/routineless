@@ -1,7 +1,7 @@
 import type { Tree } from '@nrwl/devkit'
 import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
 
-import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from './workspace'
+import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, deleteNodeLibRedundantDirs } from './workspace'
 
 describe('workspace utils', () => {
   let tree: Tree
@@ -63,6 +63,17 @@ describe('workspace utils', () => {
       deleteNodeAppRedundantDirs(tree, projectRoot)
 
       expect(deleteSpy).toHaveBeenCalledWith(`${projectRoot}/src/app`)
+    })
+  })
+
+  describe('deleteNodeLibRedundantDirs', () => {
+    it('should delete redundant dirs', async () => {
+      const deleteSpy = jest.spyOn(tree, 'delete')
+      const projectRoot = 'libs/test-lib'
+
+      deleteNodeLibRedundantDirs(tree, projectRoot)
+
+      expect(deleteSpy).toHaveBeenCalledWith(`${projectRoot}/src/lib`)
     })
   })
 })

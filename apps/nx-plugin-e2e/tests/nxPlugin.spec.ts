@@ -1,14 +1,8 @@
-import { logger } from '@nrwl/devkit'
-import {
-  checkFilesExist,
-  ensureNxProject, // readJson,
-  runNxCommand,
-  runNxCommandAsync,
-  uniq,
-} from '@nrwl/nx-plugin/testing'
+import { checkFilesExist, ensureNxProject, runNxCommandAsync, uniq } from '@nrwl/nx-plugin/testing'
 
 describe('cdk application', () => {
   const infraProject = uniq('infra')
+  const lambdaProject = uniq('lambda')
 
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
@@ -18,7 +12,7 @@ describe('cdk application', () => {
   // are not dependant on one another.
   beforeAll(async () => {
     ensureNxProject('@routineless/nx-plugin', 'dist/packages/nx-plugin')
-    await runNxCommandAsync(`generate @routineless/nx-plugin:preset --infraAppName=${infraProject}`)
+    await runNxCommandAsync(`generate @routineless/nx-plugin:preset -i ${infraProject} -l ${lambdaProject}`)
   })
 
   afterAll(async () => {
@@ -27,11 +21,26 @@ describe('cdk application', () => {
     await runNxCommandAsync('reset')
   })
 
+  describe('routineless preset', () => {
+    it('should create infra application', () => {
+      expect(() => checkFilesExist(`apps/${infraProject}`)).not.toThrow()
+    })
+
+    it('should create lambda application', () => {
+      expect(() => checkFilesExist(`apps/${lambdaProject}/runtime`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${lambdaProject}/infra`)).not.toThrow()
+    })
+
+    it('should remove redundant files', () => {
+      expect(() => checkFilesExist('apps/.gitkeep')).toThrow()
+    })
+  })
+
   describe('cdk application generator', () => {
     const project = uniq('cdk')
 
     beforeAll(async () => {
-      logger.debug(runNxCommand(`generate @routineless/nx-plugin:cdk-application ${project} --verbose`))
+      await runNxCommandAsync(`generate @routineless/nx-plugin:cdk-application ${project}`)
     })
 
     it('should generate cdk files', () => {
@@ -43,29 +52,70 @@ describe('cdk application', () => {
     })
 
     it('should run cdk diff', async () => {
-      const result = await runNxCommandAsync(`run ${project}:cdk --command diff --skip-nx-cache`)
+      const result = await runNxCommandAsync(`run ${project}:cdk --command diff`)
 
       // CDK outputs to stderr by default https://github.com/aws/aws-cdk/issues/7717
       // it was done to make logs colorized. It might be swithed off by setting CI env variable
-      expect(result.stderr).toContain('[+] AWS::S3::Bucket Bucket')
+      expect(process.env['CI'] ? result.stdout : result.stderr).toContain('[+] AWS::S3::Bucket Bucket')
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${project}`)
     })
 
     it('should run cdk tests', async () => {
-      const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --output-style=\"static\"`)
+      const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --coverageReporters=text-summary`)
 
-      expect(result.stdout).toContain('All files            |     100 |      100 |     100 |     100')
+      expect(result.stdout).toContain('Statements   : 100%')
+      expect(result.stdout).toContain('Branches     : 100%')
+      expect(result.stdout).toContain('Functions    : 100%')
+      expect(result.stdout).toContain('Lines        : 100%')
       expect(result.stdout).toContain(`Successfully ran target test for project ${project}`)
     })
   })
 
-  describe('routineless preset', () => {
-    it('should create infra application', () => {
-      expect(() => checkFilesExist(`apps/${infraProject}`)).not.toThrow()
+  describe('aws-lambda generator', () => {
+    const project = uniq('aws-lambda')
+
+    beforeAll(async () => {
+      await runNxCommandAsync(`generate @routineless/nx-plugin:aws-lambda ${project}`)
     })
 
-    it('should remove redundant files', () => {
-      expect(() => checkFilesExist('apps/.gitkeep')).toThrow()
+    describe('lambda runtime', () => {
+      it('should generate files', () => {
+        expect(() => checkFilesExist(`apps/${project}/runtime/project.json`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.ts`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.spec.ts`)).not.toThrow()
+      })
+
+      it('should tests', async () => {
+        const result = await runNxCommandAsync(
+          `test ${project}-runtime -- --codeCoverage=true --coverageReporters=text-summary`,
+        )
+
+        expect(result.stdout).toContain('Statements   : 100%')
+        expect(result.stdout).toContain('Branches     : 100%')
+        expect(result.stdout).toContain('Functions    : 100%')
+        expect(result.stdout).toContain('Lines        : 100%')
+        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-runtime`)
+      })
+    })
+
+    describe('lambda infra', () => {
+      it('should generate files', () => {
+        expect(() => checkFilesExist(`apps/${project}/infra/project.json`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/infra/src/index.ts`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/infra/src/index.spec.ts`)).not.toThrow()
+      })
+
+      it('should tests', async () => {
+        const result = await runNxCommandAsync(
+          `test ${project}-infra -- --codeCoverage=true --coverageReporters=text-summary`,
+        )
+
+        expect(result.stdout).toContain('Statements   : 100%')
+        expect(result.stdout).toContain('Branches     : 100%')
+        expect(result.stdout).toContain('Functions    : 100%')
+        expect(result.stdout).toContain('Lines        : 100%')
+        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-infra`)
+      })
     })
   })
 })

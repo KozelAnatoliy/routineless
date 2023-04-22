@@ -17,6 +17,7 @@ import { Linter } from '@nrwl/linter'
 import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
 import { join } from 'path'
 
+import { updateRoutinelessConfig } from '../../utils/routineless'
 import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
 import type { CdkApplicationGeneratorSchema } from './schema'
@@ -47,7 +48,7 @@ const addFiles = (tree: Tree, options: NormalizedSchema, filesType: 'files' | 'j
     workspaceName: nxJson?.npmScope || 'test',
     template: '',
   }
-  generateFiles(tree, join(__dirname, filesType), options.projectRoot, templateOptions)
+  generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.projectRoot, templateOptions)
 }
 
 const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
@@ -74,7 +75,13 @@ const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) 
     ...projectConfig.targets,
     cdk: {
       executor: '@routineless/nx-plugin:cdk',
+      dependsOn: ['build'],
     },
+  }
+  const buildTarget = projectConfig.targets['build']
+  if (buildTarget) {
+    delete buildTarget.defaultConfiguration
+    delete buildTarget.configurations
   }
 
   updateProjectConfiguration(tree, options.projectName, projectConfig)
@@ -115,6 +122,12 @@ export const cdkApplicationGenerator = async (
 
   const tasks: GeneratorCallback[] = []
 
+  if (normalizedOptions.setAsRoutinelessInfraApp) {
+    updateRoutinelessConfig(tree, (config) => {
+      config.infraApp = normalizedOptions.projectName
+      return config
+    })
+  }
   tasks.push(addDependencies(tree))
   tasks.push(
     await nodeApplicationGenerator(tree, {

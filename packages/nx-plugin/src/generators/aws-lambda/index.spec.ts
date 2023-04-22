@@ -33,14 +33,14 @@ describe('aws-lambda generator', () => {
     expect(mockedRuntimeGenerator).toHaveBeenCalledWith(
       appTree,
       expect.objectContaining({
-        directory: 'test-aws-lambda',
+        directory: 'apps/test-aws-lambda',
         name: 'runtime',
       }),
     )
     expect(mockedInfraGenerator).toHaveBeenCalledWith(
       appTree,
       expect.objectContaining({
-        directory: 'test-aws-lambda',
+        directory: 'apps/test-aws-lambda',
         name: 'infra',
       }),
     )

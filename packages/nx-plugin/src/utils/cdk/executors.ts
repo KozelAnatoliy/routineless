@@ -21,7 +21,10 @@ export const createCommand = (options: ParsedCdkExecutorOption): string => {
   if (!NX_WORKSPACE_ROOT) {
     throw new Error('CDK not Found')
   }
-  const baseExecutionCommand = `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
+  const baseExecutionCommand =
+    options.env !== 'local'
+      ? `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
+      : `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk-local/bin/cdklocal ${options.command}`
   const commandOptions = getCommandOptions(options)
 
   const resultCommand = [baseExecutionCommand, ...commandOptions].join(' ')

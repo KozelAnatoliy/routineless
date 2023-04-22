@@ -1,18 +1,24 @@
-import { Tree, getWorkspaceLayout, names } from '@nrwl/devkit'
+import { Tree, extractLayoutDirectory, getWorkspaceLayout, joinPathFragments, names } from '@nrwl/devkit'
 
-type ProjectProperties = { projectName: string; projectRoot: string; projectDirectory: string }
+type ProjectProperties = { projectName: string; projectRoot: string; projectDirectory: string; appsDir: string }
 type PackageProperties = { name: string; directory?: string }
 
 export const injectProjectProperties = <T extends PackageProperties>(tree: Tree, options: T): T & ProjectProperties => {
-  const name = names(options.name).fileName
-  const projectDirectory = options.directory ? `${names(options.directory).fileName}/${name}` : name
-  const projectName = projectDirectory.replace(new RegExp('/', 'g'), '-')
-  const projectRoot = `${getWorkspaceLayout(tree).appsDir}/${projectDirectory}`
+  const { layoutDirectory, projectDirectory } = extractLayoutDirectory(options.directory || '')
+  const appsDir = layoutDirectory ?? getWorkspaceLayout(tree).appsDir
+
+  const appDirectory = projectDirectory
+    ? `${names(projectDirectory).fileName}/${names(options.name).fileName}`
+    : names(options.name).fileName
+
+  const projectName = appDirectory.replace(new RegExp('/', 'g'), '-')
+  const projectRoot = joinPathFragments(appsDir, appDirectory)
 
   return {
     ...options,
+    appsDir,
     projectName,
     projectRoot,
-    projectDirectory,
+    projectDirectory: appDirectory,
   }
 }
