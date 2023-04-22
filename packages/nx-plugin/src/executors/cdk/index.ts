@@ -10,9 +10,10 @@ export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
   parsedArgs: { [k: string]: string | string[] | boolean }
   root: string
   sourceRoot: string
+  env: string
 }
 
-const executorPropKeys = ['args', 'command', 'cwd']
+const executorPropKeys = ['args', 'command', 'cwd', 'env']
 
 const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext): ParsedCdkExecutorOption => {
   if (!context.projectName) {
@@ -29,6 +30,7 @@ const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext)
   const parsedArgs = parseArgs(options)
   return {
     ...options,
+    env: process.env['AWS_ENV'] || 'local',
     sourceRoot,
     root,
     parsedArgs,

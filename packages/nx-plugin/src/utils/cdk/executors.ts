@@ -21,11 +21,13 @@ export const createCommand = (options: ParsedCdkExecutorOption): string => {
   if (!NX_WORKSPACE_ROOT) {
     throw new Error('CDK not Found')
   }
-  const baseExecutionCommand = `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
+  const baseExecutionCommand =
+    options.env !== 'local'
+      ? `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
+      : `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk-local/bin/cdklocal ${options.command}`
   const commandOptions = getCommandOptions(options)
 
   const resultCommand = [baseExecutionCommand, ...commandOptions].join(' ')
-  logger.debug('Cdk executor command %s', resultCommand)
 
   return resultCommand
 }
@@ -64,19 +66,30 @@ export const runCommandProcess = async (command: string, cwd: string): Promise<P
     stdio: [process.stdin, process.stdout, process.stderr],
   })
 
-  return onExit(childProcess)
+  const processExitListener = () => childProcess.kill()
+  process.on('exit', processExitListener)
+  process.on('SIGTERM', processExitListener)
+
+  return onExit(childProcess, processExitListener)
 }
 
-const onExit = (childProcess: ChildProcess): Promise<ProcessExitInfo> => {
+const onExit = (childProcess: ChildProcess, processExitListener: () => boolean): Promise<ProcessExitInfo> => {
   return new Promise((resolve, reject) => {
-    childProcess.once('exit', (code, signal) => {
+    const exitHandler = (code: number, signal: NodeJS.Signals | null) => {
+      logger.debug(`Finished command execution: ${code}, ${signal}`)
+      process.removeListener('exit', processExitListener)
+
       if (code === 0) {
         resolve({ code, signal })
+      } else if (!code) {
+        reject(new Error(`Exit with signal: ${signal}`))
       } else {
         reject(new Error(`Exit with error code: ${code}`))
       }
-    })
+    }
+    childProcess.once('close', exitHandler)
     childProcess.once('error', (err: Error) => {
+      process.removeListener('exit', processExitListener)
       reject(err)
     })
   })
