@@ -14,8 +14,16 @@ jobs:
       number-of-agents: 3
       init-commands: |
         npx nx-cloud start-ci-run --stop-agents-after="build" --agent-count=3
+        pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
+        docker pull localstack/localstack         # Make sure to pull the latest version of the image
+        localstack start -d                       # Start LocalStack in the background
+
+        echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
+        localstack wait -t 30                     # to become ready before timing out
+        echo "Startup complete"
       parallel-commands: |
         npx nx-cloud record -- npx nx format:check
+        npx nx affected --target=e2e
       parallel-commands-on-agents: |
         npx nx affected --target=lint --parallel=3
         npx nx affected --target=test --parallel=3 --ci --code-coverage

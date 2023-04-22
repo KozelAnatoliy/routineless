@@ -21,7 +21,19 @@
       "description": "Infrastructure management application name.",
       "type": "string",
       "default": "infra",
-      "x-prompt": "Enter infra application name"
+      "x-prompt": "Enter infra application name",
+      "alias": "i"
+    },
+    "lambdaAppName": {
+      "description": "Initial aws lambda app name",
+      "type": "string",
+      "x-prompt": "Enter initial aws lambda name (you can skip it and lambda will note be generated)",
+      "alias": "l"
+    },
+    "skipFormat": {
+      "description": "Skip formatting files",
+      "type": "boolean",
+      "default": false
     }
   },
   "required": []

@@ -1,3 +1,5 @@
 import { DefaultAppSchema } from '../../types/schema'
 
-export type CdkApplicationGeneratorSchema = DefaultAppSchema
+export interface CdkApplicationGeneratorSchema extends DefaultAppSchema {
+  setAsRoutinelessInfraApp?: boolean
+}
