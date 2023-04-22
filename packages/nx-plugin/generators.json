@@ -13,6 +13,11 @@
       "factory": "./src/generators/cdk-application",
       "schema": "./src/generators/cdk-application/schema.json",
       "description": "cdk-application generator"
+    },
+    "aws-lambda": {
+      "factory": "./src/generators/aws-lambda",
+      "schema": "./src/generators/aws-lambda/schema.json",
+      "description": "aws lambda generator"
     }
   }
 }

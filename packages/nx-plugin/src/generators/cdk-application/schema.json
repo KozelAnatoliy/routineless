@@ -30,6 +30,16 @@
       "enum": ["jest", "none"],
       "description": "Test runner to use for unit tests.",
       "default": "jest"
+    },
+    "tags": {
+      "type": "string",
+      "description": "Add tags to the application (used for linting)."
+    },
+    "setAsRoutinelessInfraApp": {
+      "type": "boolean",
+      "description": "Set as routineless infra app at routineless config",
+      "default": false,
+      "internal": true
     }
   },
   "required": ["name"]
