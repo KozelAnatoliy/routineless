@@ -1,32 +1,31 @@
 import type { ExecutorContext } from '@nrwl/devkit'
 import { logger } from '@nrwl/devkit'
-import * as path from 'path'
 
 import executor from '.'
-import { ProcessExitInfo, createCommand, runCommandProcess } from '../../utils/cdk/executors'
 import { mockExecutorContext } from '../../utils/testing/executor'
+import { ProcessExitInfo, createCommands, runCommandsInParralel } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
-jest.mock('../../../src/utils/cdk/executors')
+jest.mock('./executors')
 
-const mockedCreateCommand = jest.mocked(createCommand, { shallow: true })
-const mockedRunCommandProcess = jest.mocked(runCommandProcess, { shallow: true })
+const mockedCreateCommands = jest.mocked(createCommands, { shallow: true })
+const mockedRunCommandsInParralel = jest.mocked(runCommandsInParralel, { shallow: true })
 
 const options: CdkExecutorOptions = {
   command: 'bootstrap',
 }
 
-describe('Bootstrap Executor', () => {
+describe('Cdk Executor', () => {
   let context: ExecutorContext
-  const testCommand = 'testCommand'
+  const testCommands = [{ command: 'testCommand', cwd: 'testCwd' }]
   const testProcessExitInfo: ProcessExitInfo = { code: 0, signal: null }
   const OLD_ENV = process.env
 
   beforeEach(async () => {
     jest.spyOn(logger, 'error')
     context = mockExecutorContext('bootstrap')
-    mockedCreateCommand.mockReturnValue(testCommand)
-    mockedRunCommandProcess.mockResolvedValue(testProcessExitInfo)
+    mockedCreateCommands.mockReturnValue(testCommands)
+    mockedRunCommandsInParralel.mockResolvedValue([testProcessExitInfo])
     process.env = { ...OLD_ENV }
   })
 
@@ -39,14 +38,17 @@ describe('Bootstrap Executor', () => {
     const executionPrommise = executor(options, context)
     const executionResult = await executionPrommise
 
-    expect(mockedCreateCommand).toHaveBeenCalledWith({
-      command: 'bootstrap',
-      env: 'local',
-      parsedArgs: {},
-      root: 'apps/proj',
-      sourceRoot: 'apps/proj/src',
-    })
-    expect(mockedRunCommandProcess).toHaveBeenCalledWith(testCommand, path.join(context.root, 'apps/proj'))
+    expect(mockedCreateCommands).toHaveBeenCalledWith(
+      {
+        command: 'bootstrap',
+        env: 'local',
+        parsedArgs: {},
+        root: 'apps/proj',
+        sourceRoot: 'apps/proj/src',
+      },
+      context,
+    )
+    expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
     expect(executionResult).toEqual({ success: true })
   })
 
@@ -55,15 +57,52 @@ describe('Bootstrap Executor', () => {
     const executionPrommise = executor({ ...options }, context)
     const executionResult = await executionPrommise
 
-    expect(mockedCreateCommand).toHaveBeenCalledWith({
-      command: 'bootstrap',
-      env: 'dev',
-      parsedArgs: {},
-      root: 'apps/proj',
-      sourceRoot: 'apps/proj/src',
-    })
-    expect(mockedRunCommandProcess).toHaveBeenCalledWith(testCommand, path.join(context.root, 'apps/proj'))
+    expect(mockedCreateCommands).toHaveBeenCalledWith(
+      {
+        command: 'bootstrap',
+        env: 'dev',
+        parsedArgs: {},
+        root: 'apps/proj',
+        sourceRoot: 'apps/proj/src',
+      },
+      context,
+    )
+    expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
     expect(executionResult).toEqual({ success: true })
+  })
+
+  it('should unwrap watch command', async () => {
+    await executor({ ...options, command: 'watch' }, context)
+
+    expect(mockedCreateCommands).toHaveBeenCalledWith(
+      {
+        command: 'deploy',
+        env: 'local',
+        parsedArgs: {
+          watch: true,
+        },
+        root: 'apps/proj',
+        sourceRoot: 'apps/proj/src',
+        watch: true,
+      },
+      context,
+    )
+  })
+
+  it('should discard watch option for not deploy commands', async () => {
+    await executor({ ...options, watch: true }, context)
+
+    expect(mockedCreateCommands).toHaveBeenCalledWith(
+      {
+        command: 'bootstrap',
+        env: 'local',
+        parsedArgs: {},
+        root: 'apps/proj',
+        sourceRoot: 'apps/proj/src',
+        watch: false,
+      },
+      context,
+    )
   })
 
   describe('options parsing', () => {
@@ -75,20 +114,23 @@ describe('Bootstrap Executor', () => {
 
       await executor(unknownOptions, context)
 
-      expect(mockedCreateCommand).toHaveBeenCalledWith({
-        _: ['FirstStack', 'SecondStack'],
-        command: 'bootstrap',
-        env: 'local',
-        parsedArgs: {
+      expect(mockedCreateCommands).toHaveBeenCalledWith(
+        {
           _: ['FirstStack', 'SecondStack'],
+          command: 'bootstrap',
+          env: 'local',
+          parsedArgs: {
+            _: ['FirstStack', 'SecondStack'],
+            profile: 'prod',
+            v: true,
+          },
           profile: 'prod',
+          root: 'apps/proj',
+          sourceRoot: 'apps/proj/src',
           v: true,
         },
-        profile: 'prod',
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
-        v: true,
-      })
+        context,
+      )
     })
 
     it('should parse args option to parsedArgs', async () => {
@@ -97,19 +139,22 @@ describe('Bootstrap Executor', () => {
 
       await executor(testOptions, context)
 
-      expect(mockedCreateCommand).toHaveBeenCalledWith({
-        args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
-        command: 'bootstrap',
-        env: 'local',
-        parsedArgs: {
-          _: ['FirstArgsStack', 'SecondArgsStack'],
-          j: true,
-          profile: 'testProfile',
-          proxy: 'testProxy',
+      expect(mockedCreateCommands).toHaveBeenCalledWith(
+        {
+          args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
+          command: 'bootstrap',
+          env: 'local',
+          parsedArgs: {
+            _: ['FirstArgsStack', 'SecondArgsStack'],
+            j: true,
+            profile: 'testProfile',
+            proxy: 'testProxy',
+          },
+          root: 'apps/proj',
+          sourceRoot: 'apps/proj/src',
         },
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
-      })
+        context,
+      )
     })
 
     it('should override parsed args option with unknown options provided', async () => {
@@ -121,33 +166,38 @@ describe('Bootstrap Executor', () => {
 
       await executor(unknownOptions, context)
 
-      expect(mockedCreateCommand).toHaveBeenCalledWith({
-        _: ['FirstStack', 'SecondStack'],
-        args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
-        command: 'bootstrap',
-        env: 'local',
-        parsedArgs: {
+      expect(mockedCreateCommands).toHaveBeenCalledWith(
+        {
           _: ['FirstStack', 'SecondStack'],
-          j: true,
+          args: 'FirstArgsStack SecondArgsStack --profile testProfile -j --proxy testProxy',
+          command: 'bootstrap',
+          env: 'local',
+          parsedArgs: {
+            _: ['FirstStack', 'SecondStack'],
+            j: true,
+            profile: 'prod',
+            proxy: 'testProxy',
+            v: true,
+          },
           profile: 'prod',
-          proxy: 'testProxy',
+          root: 'apps/proj',
+          sourceRoot: 'apps/proj/src',
           v: true,
         },
-        profile: 'prod',
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
-        v: true,
-      })
+        context,
+      )
     })
   })
 
   it('should return unsuccessful execution on run command failure', async () => {
     const testError = new Error('Command execution error')
-    mockedRunCommandProcess.mockRejectedValue(testError)
+    mockedRunCommandsInParralel.mockRejectedValue(testError)
 
     const executionResult = await executor(options, context)
 
-    expect(logger.error).toHaveBeenLastCalledWith(`Failed to execute command ${testCommand}: ${testError}`)
+    expect(logger.error).toHaveBeenLastCalledWith(
+      `Failed to execute commands ${JSON.stringify(testCommands)}: ${testError}`,
+    )
     expect(executionResult).toEqual({ success: false })
   })
 

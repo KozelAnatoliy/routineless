@@ -61,7 +61,7 @@ describe('cdk-application generator', () => {
     expect(jestConfig).toBeDefined()
 
     const jestConfigContent = jestConfig?.toString()
-    expect(jestConfigContent).toContain('!src/main.ts')
+    expect(jestConfigContent).toContain("coveragePathIgnorePatterns: ['<rootDir>/src/main.ts']")
   })
 
   it('should update eslint', async () => {

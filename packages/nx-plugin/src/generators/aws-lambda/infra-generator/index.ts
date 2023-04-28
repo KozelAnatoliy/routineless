@@ -22,6 +22,7 @@ import { deleteNodeLibRedundantDirs } from '../../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from '../schema'
 
 interface AwsLambdaInfraGeneratorOptions extends AwsLambdaGeneratorSchema {
+  baseProjectName: string
   projectName: string
   projectRoot: string
   projectDirectory: string
@@ -43,7 +44,7 @@ const addStackToInfraApp = (tree: Tree, options: AwsLambdaInfraGeneratorOptions)
   const mainInfraAppFilePath = join(infraAppConfig.root, 'src/main.ts')
   const mainInfraAppFile = tree.read(mainInfraAppFilePath)
   if (mainInfraAppFile) {
-    const { className } = names(options.projectName)
+    const { className } = names(options.baseProjectName)
     const { projectDirectory } = options
     const nxJson = readNxJson(tree)
     const importStatement = Buffer.from(
@@ -70,7 +71,7 @@ const updateAwsLambdaInfraProjectConfiguration = (tree: Tree, options: AwsLambda
 const addFiles = (tree: Tree, options: AwsLambdaInfraGeneratorOptions, filesType: 'files' | 'jest-files' = 'files') => {
   const templateOptions = {
     ...options,
-    ...names(options.projectName.replace('infra', '')),
+    ...names(options.baseProjectName),
     offsetFromRoot: offsetFromRoot(options.projectRoot),
     runtimeProjectDirectory: options.projectDirectory.replace('infra', 'runtime'),
     template: '',
@@ -82,12 +83,20 @@ const addDependencies = (host: Tree): GeneratorCallback => {
   return addDependenciesToPackageJson(host, {}, {})
 }
 
+const normalizeOptions = (tree: Tree, options: AwsLambdaGeneratorSchema): AwsLambdaInfraGeneratorOptions => {
+  const projectAwareOptions = injectProjectProperties(tree, options)
+  return {
+    ...projectAwareOptions,
+    baseProjectName: projectAwareOptions.projectName.replace('infra', ''),
+  }
+}
+
 const awsLambdaInfraLibraryGenerator = async (
   tree: Tree,
   options: AwsLambdaGeneratorSchema,
 ): Promise<GeneratorCallback> => {
   const tasks: GeneratorCallback[] = []
-  const normalizedOptions = injectProjectProperties(tree, options)
+  const normalizedOptions = normalizeOptions(tree, options)
 
   tasks.push(addDependencies(tree))
   tasks.push(
