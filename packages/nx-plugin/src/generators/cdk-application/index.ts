@@ -82,6 +82,7 @@ const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) 
   if (buildTarget) {
     delete buildTarget.defaultConfiguration
     delete buildTarget.configurations
+    buildTarget.options.deleteOutputPath = false
   }
 
   updateProjectConfiguration(tree, options.projectName, projectConfig)

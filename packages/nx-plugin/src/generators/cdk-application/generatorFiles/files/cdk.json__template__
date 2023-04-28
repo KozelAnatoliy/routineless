@@ -1,20 +1,11 @@
 {
-    "app": "node <%= offsetFromRoot %>/dist/<%= projectRoot %>/main.js",
+    "app": "node <%= offsetFromRoot %>dist/<%= projectRoot %>/main.js",
     "output": "<%= offsetFromRoot %>cdk.out",
     "watch": {
-      "include": [
-        "**"
-      ],
+      "include": ["<%= offsetFromRoot %>dist/<%= projectRoot %>/**"],
       "exclude": [
-        "README.md",
-        "cdk*.json",
-        "**/*.d.ts",
-        "**/*.js",
-        "tsconfig.json",
-        "package*.json",
-        "yarn.lock",
-        "node_modules",
-        "test"
+       "<%= offsetFromRoot %>dist/<%= projectRoot %>/**/*.js.map",
+       "<%= offsetFromRoot %>dist/<%= projectRoot %>/package*.json"
       ]
     },
     "context": {

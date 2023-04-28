@@ -30,11 +30,12 @@ export const mockExecutorContext = (executorName: string, workspaceVersion = 2):
 }
 
 export const mockChildProcess = (): MockChildProcess => {
-  const proc = new EventEmitter() as child_process.ChildProcess
+  const proc = new EventEmitter() as MockChildProcess
 
   proc.stdout = new EventEmitter() as Readable
   proc.stderr = new EventEmitter() as Readable
   proc.stdin = new EventEmitter() as Writable
+  proc.spawnargs = ['/bin/sh', '-c', 'command']
 
   return proc as MockChildProcess
 }
@@ -43,4 +44,5 @@ export interface MockChildProcess extends child_process.ChildProcess {
   stdout: Readable
   stderr: Readable
   stdin: Writable
+  spawnargs: string[]
 }

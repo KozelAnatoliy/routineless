@@ -1,8 +1,10 @@
+import { names } from '@nrwl/devkit'
 import { checkFilesExist, ensureNxProject, runNxCommandAsync, uniq } from '@nrwl/nx-plugin/testing'
 
 describe('cdk application', () => {
   const infraProject = uniq('infra')
   const lambdaProject = uniq('lambda')
+  const OLD_ENV = process.env
 
   // Setting up individual workspaces per
   // test can cause e2e runs to take a long time.
@@ -21,6 +23,16 @@ describe('cdk application', () => {
     await runNxCommandAsync('reset')
   })
 
+  beforeEach(() => {
+    // CDK outputs to stderr by default https://github.com/aws/aws-cdk/issues/7717
+    // it was done to make logs colorized. It might be swithed off by setting CI env variable
+    process.env = { ...OLD_ENV, CI: 'true' }
+  })
+
+  afterEach(() => {
+    process.env = OLD_ENV
+  })
+
   describe('routineless preset', () => {
     it('should create infra application', () => {
       expect(() => checkFilesExist(`apps/${infraProject}`)).not.toThrow()
@@ -33,6 +45,13 @@ describe('cdk application', () => {
 
     it('should remove redundant files', () => {
       expect(() => checkFilesExist('apps/.gitkeep')).toThrow()
+    })
+
+    it('should add lambda function to infra app', async () => {
+      const result = await runNxCommandAsync(`run ${infraProject}:cdk --command diff`)
+
+      const { className } = names(lambdaProject)
+      expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
     })
   })
 
@@ -54,9 +73,7 @@ describe('cdk application', () => {
     it('should run cdk diff', async () => {
       const result = await runNxCommandAsync(`run ${project}:cdk --command diff`)
 
-      // CDK outputs to stderr by default https://github.com/aws/aws-cdk/issues/7717
-      // it was done to make logs colorized. It might be swithed off by setting CI env variable
-      expect(process.env['CI'] ? result.stdout : result.stderr).toContain('[+] AWS::S3::Bucket Bucket')
+      expect(result.stdout).toContain('[+] AWS::S3::Bucket Bucket')
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${project}`)
     })
 
