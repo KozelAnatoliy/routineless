@@ -4,4 +4,5 @@ export interface CdkExecutorOptions extends Json {
   args?: string
   command: string
   cwd?: string
+  watch?: boolean
 }

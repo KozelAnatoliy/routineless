@@ -7,4 +7,4 @@ import type { BaseStackPorps } from './types/baseStackProps'
 const baseStackProps: BaseStackPorps = { env: environment }
 const app = new cdk.App()
 
-new PersistanceStack(app, `Persistance`, { ...baseStackProps })
+new PersistanceStack(app, 'Persistance', { ...baseStackProps })

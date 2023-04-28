@@ -1,7 +1,8 @@
-import { logger } from '@nrwl/devkit'
+import { ExecutorContext, logger } from '@nrwl/devkit'
 import { ChildProcess, spawn } from 'child_process'
+import * as path from 'path'
 
-import type { ParsedCdkExecutorOption } from '../../executors/cdk'
+import type { ParsedCdkExecutorOption } from '.'
 
 const optionsShortNemingMapping: Record<string, string> = {
   a: 'app',
@@ -15,7 +16,12 @@ const optionsShortNemingMapping: Record<string, string> = {
   h: 'help',
 }
 
-export const createCommand = (options: ParsedCdkExecutorOption): string => {
+export interface Command {
+  command: string
+  cwd?: string
+}
+
+export const createCommands = (options: ParsedCdkExecutorOption, context: ExecutorContext): Command[] => {
   logger.debug('Cdk executor options %s', JSON.stringify(options))
   const NX_WORKSPACE_ROOT = process.env['NX_WORKSPACE_ROOT']
   if (!NX_WORKSPACE_ROOT) {
@@ -27,9 +33,21 @@ export const createCommand = (options: ParsedCdkExecutorOption): string => {
       : `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk-local/bin/cdklocal ${options.command}`
   const commandOptions = getCommandOptions(options)
 
-  const resultCommand = [baseExecutionCommand, ...commandOptions].join(' ')
+  const resultCommands: Command[] = [
+    {
+      command: [baseExecutionCommand, ...commandOptions].join(' '),
+      cwd: options.cwd || path.join(context.root, options.root),
+    },
+  ]
 
-  return resultCommand
+  if (options.watch) {
+    resultCommands.push(createProjectWatchCommand(context))
+  }
+  return resultCommands
+}
+
+const createProjectWatchCommand = (context: ExecutorContext): Command => {
+  return { command: `npx nx watch --projects=${context.projectName} -d -- "nx build ${context.projectName}"` }
 }
 
 const getCommandOptions = (options: ParsedCdkExecutorOption): string[] => {
@@ -56,7 +74,12 @@ const parsedArgToString = (key: string, value: string | boolean): string => {
   return `--${mappedKey} ${value}`
 }
 
-export const runCommandProcess = async (command: string, cwd: string): Promise<ProcessExitInfo> => {
+export const runCommandsInParralel = async (commands: Command[]): Promise<ProcessExitInfo[]> => {
+  const promises = commands.map(({ command, cwd }) => runCommand(command, cwd))
+  return Promise.all(promises)
+}
+
+export const runCommand = async (command: string, cwd?: string): Promise<ProcessExitInfo> => {
   logger.debug(`Executing command: ${command}`)
 
   const childProcess = spawn(command, {
@@ -75,8 +98,10 @@ export const runCommandProcess = async (command: string, cwd: string): Promise<P
 
 const onExit = (childProcess: ChildProcess, processExitListener: () => boolean): Promise<ProcessExitInfo> => {
   return new Promise((resolve, reject) => {
+    // I wanted to debug what command was finished here, maybe I can use childProcess to get this info
+    // othervise I will propagate command to this function
     const exitHandler = (code: number, signal: NodeJS.Signals | null) => {
-      logger.debug(`Finished command execution: ${code}, ${signal}`)
+      logger.debug(`Finished ${childProcess.spawnargs.join(' ')} command execution: ${code}, ${signal}`)
       process.removeListener('exit', processExitListener)
 
       if (code === 0) {

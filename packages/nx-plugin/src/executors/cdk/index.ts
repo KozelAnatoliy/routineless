@@ -1,9 +1,8 @@
 import type { ExecutorContext } from '@nrwl/devkit'
 import { logger } from '@nrwl/devkit'
-import * as path from 'path'
 import parser from 'yargs-parser'
 
-import { createCommand, runCommandProcess } from '../../utils/cdk/executors'
+import { createCommands, runCommandsInParralel } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
 export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
@@ -13,6 +12,7 @@ export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
   env: string
 }
 
+// Do not add watch argument to this list so it will be processed as command argument
 const executorPropKeys = ['args', 'command', 'cwd', 'env']
 
 const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext): ParsedCdkExecutorOption => {
@@ -27,6 +27,14 @@ const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext)
   if (!sourceRoot) {
     throw new Error(`Cdk bootstrap failed. Failed to read source root for ${context.projectName}`)
   }
+  // unwrap cdk watch alias to handle nx watch properly
+  if (options.watch && options.command != 'deploy') {
+    options.watch = false
+  }
+  if (options.command == 'watch') {
+    options.command = 'deploy'
+    options.watch = true
+  }
   const parsedArgs = parseArgs(options)
   return {
     ...options,
@@ -39,14 +47,14 @@ const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext)
 
 const runExecutor = async (options: CdkExecutorOptions, context: ExecutorContext): Promise<{ success: boolean }> => {
   const normalizedOptions = normalizeOptions(options, context)
-  const command = createCommand(normalizedOptions)
+  const commands = createCommands(normalizedOptions, context)
   try {
-    await runCommandProcess(command, normalizedOptions.cwd || path.join(context.root, normalizedOptions.root))
+    await runCommandsInParralel(commands)
     return {
       success: true,
     }
   } catch (e) {
-    logger.error(`Failed to execute command ${command}: ${e}`)
+    logger.error(`Failed to execute commands ${JSON.stringify(commands)}: ${e}`)
     return {
       success: false,
     }

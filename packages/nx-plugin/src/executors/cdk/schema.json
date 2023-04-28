@@ -25,6 +25,10 @@
         "docs",
         "doctor"
       ]
+    },
+    "watch": {
+      "description": "Watch mode. Will trigger the command when files changes.",
+      "type": "boolean"
     }
   },
   "required": ["command"]
