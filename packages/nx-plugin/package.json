@@ -5,6 +5,6 @@
   "generators": "./generators.json",
   "executors": "./executors.json",
   "dependencies": {
-    "@nrwl/node": "^15.2.4"
+    "@nx/node": "16.9.0"
   }
 }

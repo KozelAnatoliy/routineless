@@ -7,8 +7,8 @@ import {
   readProjectConfiguration,
   runTasksInSerial,
   updateProjectConfiguration,
-} from '@nrwl/devkit'
-import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
+} from '@nx/devkit'
+import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { injectProjectProperties } from '../../../utils/generators'

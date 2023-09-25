@@ -1,4 +1,4 @@
-import { Tree, extractLayoutDirectory, getWorkspaceLayout, joinPathFragments, names } from '@nrwl/devkit'
+import { Tree, extractLayoutDirectory, getWorkspaceLayout, joinPathFragments, names } from '@nx/devkit'
 
 type ProjectProperties = { projectName: string; projectRoot: string; projectDirectory: string; appsDir: string }
 type PackageProperties = { name: string; directory?: string }

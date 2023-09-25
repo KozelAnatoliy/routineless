@@ -1,5 +1,5 @@
-import { Tree, logger, readProjectConfiguration } from '@nrwl/devkit'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import { Tree, logger, readProjectConfiguration } from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import awsLambdaInfraLibraryGenerator from '.'
 import { getRoutinelessConfig } from '../../../utils/routineless'

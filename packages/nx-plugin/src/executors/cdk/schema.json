@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "cli": "nx",
   "title": "Cdk executor",
   "description": "Executor for aws cdk",
   "type": "object",
@@ -31,5 +30,7 @@
       "type": "boolean"
     }
   },
-  "required": ["command"]
+  "required": [
+    "command"
+  ]
 }

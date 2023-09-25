@@ -1,14 +1,14 @@
-export const CDK_VERSION = '^2.70.0'
-export const CDK_LOCAL_VERSION = '^2.17.0'
+export const CDK_VERSION = '^2.97.0'
+export const CDK_LOCAL_VERSION = '^2.18.0'
 export const CDK_ESLINT_VERSION = '^1.8.0'
-export const CDK_CONSTRUCTS_VERSION = '^10.1.288'
+export const CDK_CONSTRUCTS_VERSION = '^10.2.70'
 
-export const TSCONFIG_NODE_LTS_VERSION = '^18.12.1'
-export const TSCONFIG_STRICTEST_VERSION = '^2.0.0'
+export const TSCONFIG_NODE_LTS_VERSION = '^18.12.5'
+export const TSCONFIG_STRICTEST_VERSION = '^2.0.2'
 export const TSCONFIG_NODE_LTS_STRICTEST_VERSION = '^18.12.1'
 
-export const JSON_ESLINT_PARSER_VERSION = '^2.2.0'
-export const ESLINT_PLUGIN_PRETTIER_VERSION = '^4.2.1'
-export const PRETTIER_PLUGIN_SORT_IMPORTS_VERSION = '^4.1.1'
+export const JSON_ESLINT_PARSER_VERSION = '^2.3.0'
+export const ESLINT_PLUGIN_PRETTIER_VERSION = '^5.0.0'
+export const PRETTIER_PLUGIN_SORT_IMPORTS_VERSION = '^4.2.0'
 
-export const AWS_LAMBDA_TYPES_VERSION = '^8.10.114'
+export const AWS_LAMBDA_TYPES_VERSION = '^8.10.122'

@@ -12,9 +12,9 @@ import {
   runTasksInSerial,
   updateJson,
   updateProjectConfiguration,
-} from '@nrwl/devkit'
-import { Linter } from '@nrwl/linter'
-import { applicationGenerator as nodeApplicationGenerator } from '@nrwl/node'
+} from '@nx/devkit'
+import { Linter } from '@nx/linter'
+import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { updateRoutinelessConfig } from '../../utils/routineless'
