@@ -20,6 +20,7 @@ import { join } from 'path'
 import { updateRoutinelessConfig } from '../../utils/routineless'
 import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
+import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends CdkApplicationGeneratorSchema {
@@ -61,6 +62,24 @@ const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
       plugins.push('cdk')
     }
     return json
+  })
+  updateJson(tree, `.eslintrc.json`, (config) => {
+    config.plugins = config?.plugins || []
+    const plugins: string[] = config.plugins
+
+    const hasCdkPlugin = plugins.findIndex((row) => row === 'cdk') >= 0
+    if (!hasCdkPlugin) {
+      plugins.push('cdk')
+      if (config.overrides && config.overrides[0]) {
+        const baseConfigOverride = config.overrides[0]
+        baseConfigOverride.rules = {
+          ...baseConfigOverride.rules,
+          ...eslintCdkRules,
+        }
+      }
+    }
+
+    return config
   })
 }
 

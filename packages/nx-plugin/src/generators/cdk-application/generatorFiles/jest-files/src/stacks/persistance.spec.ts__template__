@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib'
 import { Template } from 'aws-cdk-lib/assertions'
 
 import { localEnv } from '../environment'
-import { PersistanceStack } from './persistanceStack'
+import { PersistanceStack } from './persistance'
 
 describe('PersistanceStack', () => {
   const stackId = 'PersistanceStack'

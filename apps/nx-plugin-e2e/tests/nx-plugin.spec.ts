@@ -65,8 +65,8 @@ describe('cdk application', () => {
     it('should generate cdk files', () => {
       expect(() => checkFilesExist(`apps/${project}/cdk.json`)).not.toThrow()
       expect(() => checkFilesExist(`apps/${project}/src/main.ts`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/stacks/persistanceStack.ts`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/stacks/persistanceStack.spec.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/stacks/persistance.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/stacks/persistance.spec.ts`)).not.toThrow()
       expect(() => checkFilesExist(`apps/${project}/src/app`)).toThrow()
     })
 
