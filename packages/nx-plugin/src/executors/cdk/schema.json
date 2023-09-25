@@ -30,7 +30,5 @@
       "type": "boolean"
     }
   },
-  "required": [
-    "command"
-  ]
+  "required": ["command"]
 }
