@@ -1,4 +1,4 @@
-import type { Tree } from '@nrwl/devkit'
+import type { Tree } from '@nx/devkit'
 import ignore from 'ignore'
 
 export const addGitIgnoreEntries = (host: Tree, entries: string[]) => {

@@ -1,5 +1,5 @@
-import { names } from '@nrwl/devkit'
-import { checkFilesExist, ensureNxProject, runNxCommandAsync, uniq } from '@nrwl/nx-plugin/testing'
+import { names } from '@nx/devkit'
+import { checkFilesExist, ensureNxProject, runNxCommandAsync, uniq } from '@nx/plugin/testing'
 
 describe('cdk application', () => {
   const infraProject = uniq('infra')

@@ -1,5 +1,5 @@
-import type { ExecutorContext } from '@nrwl/devkit'
-import { logger } from '@nrwl/devkit'
+import type { ExecutorContext } from '@nx/devkit'
+import { logger } from '@nx/devkit'
 import parser from 'yargs-parser'
 
 import { createCommands, runCommandsInParralel } from './executors'

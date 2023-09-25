@@ -1,10 +1,10 @@
-import { Tree, getWorkspaceLayout } from '@nrwl/devkit'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import { Tree, getWorkspaceLayout } from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import { injectProjectProperties } from './generators'
 
-jest.mock('@nrwl/devkit', () => {
-  const originalModule = jest.requireActual('@nrwl/devkit')
+jest.mock('@nx/devkit', () => {
+  const originalModule = jest.requireActual('@nx/devkit')
 
   return {
     ...originalModule,

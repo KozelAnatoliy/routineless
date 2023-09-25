@@ -1,4 +1,4 @@
-import { Tree, readJson, updateJson } from '@nrwl/devkit'
+import { Tree, readJson, updateJson } from '@nx/devkit'
 
 const routinelessConfigPath = '.routineless.json'
 

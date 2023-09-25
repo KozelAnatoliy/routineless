@@ -8,12 +8,12 @@ import {
   logger,
   names,
   offsetFromRoot,
-  readNxJson,
   readProjectConfiguration,
   runTasksInSerial,
   updateProjectConfiguration,
-} from '@nrwl/devkit'
-import { libraryGenerator } from '@nrwl/node'
+} from '@nx/devkit'
+import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
+import { libraryGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { injectProjectProperties } from '../../../utils/generators'
@@ -46,10 +46,8 @@ const addStackToInfraApp = (tree: Tree, options: AwsLambdaInfraGeneratorOptions)
   if (mainInfraAppFile) {
     const { className } = names(options.baseProjectName)
     const { projectDirectory } = options
-    const nxJson = readNxJson(tree)
-    const importStatement = Buffer.from(
-      `import { ${className}Stack } from '@${nxJson?.npmScope}/${projectDirectory}'\n`,
-    )
+    const scope = getNpmScope(tree)
+    const importStatement = Buffer.from(`import { ${className}Stack } from '@${scope}/${projectDirectory}'\n`)
     const stackCreationStatement = Buffer.from(
       `new ${className}Stack(app, '${className}Stack', { ...baseStackProps })\n`,
     )

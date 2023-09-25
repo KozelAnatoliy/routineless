@@ -1,5 +1,5 @@
-import { GeneratorCallback, Tree } from '@nrwl/devkit'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import { GeneratorCallback, Tree } from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import generator from '.'
 import infraGenerator from './infra-generator'

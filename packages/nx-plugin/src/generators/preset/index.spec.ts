@@ -1,5 +1,5 @@
-import { Tree, readJson, readProjectConfiguration } from '@nrwl/devkit'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
+import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import generator from '.'
 import type { PresetGeneratorSchema } from './schema'
@@ -18,7 +18,8 @@ describe('preset generator', () => {
     const packageJson = readJson(appTree, 'package.json')
     expect(packageJson.devDependencies['jsonc-eslint-parser']).toBeDefined()
     expect(packageJson.devDependencies['eslint-plugin-prettier']).toBeDefined()
-    expect(packageJson.devDependencies['@tsconfig/node-lts-strictest']).toBeDefined()
+    expect(packageJson.devDependencies['@tsconfig/node-lts']).toBeDefined()
+    expect(packageJson.devDependencies['@tsconfig/strictest']).toBeDefined()
     expect(packageJson.devDependencies['@trivago/prettier-plugin-sort-imports']).toBeDefined()
   })
 
@@ -60,7 +61,7 @@ describe('preset generator', () => {
     await generator(appTree, options)
 
     const tsConfig = readJson(appTree, 'tsconfig.base.json')
-    expect(tsConfig.extends).toBe('@tsconfig/node-lts-strictest/tsconfig.json')
+    expect(tsConfig.extends).toEqual(['@tsconfig/node-lts/tsconfig.json', '@tsconfig/strictest/tsconfig.json'])
     expect(tsConfig.compilerOptions.resolveJsonModule).toBe(true)
     expect(tsConfig.compilerOptions.lib).toBeUndefined()
     expect(tsConfig.compilerOptions.module).toBeUndefined()

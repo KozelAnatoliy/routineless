@@ -1,6 +1,6 @@
-import { Tree, readJson, readProjectConfiguration } from '@nrwl/devkit'
-import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing'
-import { Linter } from '@nrwl/linter'
+import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
+import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import { Linter } from '@nx/linter'
 
 import generator from '.'
 import type { CdkApplicationGeneratorSchema } from './schema'
