@@ -10,6 +10,7 @@
     "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "moduleResolution": "node",
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {

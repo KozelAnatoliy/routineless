@@ -1,10 +1,10 @@
 import * as cdk from 'aws-cdk-lib'
 
 import { environment } from './environment'
-import { PersistanceStack } from './stacks/persistanceStack'
-import type { BaseStackPorps } from './types/baseStackProps'
+import { PersistanceStack } from './stacks/persistance'
+import type { BaseStackProps } from './types/base-stack-props'
 
-const baseStackProps: BaseStackPorps = { env: environment }
+const baseStackProps: BaseStackProps = { env: environment }
 const app = new cdk.App()
 
 new PersistanceStack(app, 'Persistance', { ...baseStackProps })

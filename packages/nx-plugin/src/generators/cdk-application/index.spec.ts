@@ -3,6 +3,7 @@ import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { Linter } from '@nx/linter'
 
 import generator from '.'
+import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
 describe('cdk-application generator', () => {
@@ -33,8 +34,8 @@ describe('cdk-application generator', () => {
     expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'cdk'])
     expect(tree.exists('cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('cdk/src/main.ts')).toBeTruthy()
-    expect(tree.exists('cdk/src/stacks/persistanceStack.ts')).toBeTruthy()
-    expect(tree.exists('cdk/src/stacks/persistanceStack.spec.ts')).toBeFalsy()
+    expect(tree.exists('cdk/src/stacks/persistance.ts')).toBeTruthy()
+    expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeFalsy()
   })
 
   it('should generate cdk app with tests', async () => {
@@ -43,7 +44,7 @@ describe('cdk-application generator', () => {
     const config = readProjectConfiguration(tree, 'cdk')
 
     expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test', 'cdk'])
-    expect(tree.exists('cdk/src/stacks/persistanceStack.spec.ts')).toBeTruthy()
+    expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
   })
 
   it('should update tsconfig', async () => {
@@ -67,7 +68,12 @@ describe('cdk-application generator', () => {
   it('should update eslint', async () => {
     await generator(tree, { ...options, linter: Linter.EsLint })
 
-    const eslintConfig = readJson(tree, 'cdk/.eslintrc.json')
+    const eslintConfig = readJson(tree, '.eslintrc.json')
     expect(eslintConfig.plugins).toContain('cdk')
+    expect(eslintConfig.overrides.length).toBeGreaterThan(0)
+    const firstOverride = eslintConfig.overrides[0]
+    for (const rule in eslintCdkRules) {
+      expect((eslintCdkRules as Record<string, unknown>)[rule]).toEqual(firstOverride.rules[rule])
+    }
   })
 })
