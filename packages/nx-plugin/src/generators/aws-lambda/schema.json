@@ -1,6 +1,5 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "cli": "nx",
   "$id": "AwsLambda",
   "title": "",
   "type": "object",
@@ -32,12 +31,17 @@
     "linter": {
       "description": "The tool to use for running lint checks.",
       "type": "string",
-      "enum": ["eslint"],
+      "enum": [
+        "eslint"
+      ],
       "default": "eslint"
     },
     "unitTestRunner": {
       "type": "string",
-      "enum": ["jest", "none"],
+      "enum": [
+        "jest",
+        "none"
+      ],
       "description": "Test runner to use for unit tests.",
       "default": "jest"
     },
@@ -47,5 +51,7 @@
       "default": true
     }
   },
-  "required": ["name"]
+  "required": [
+    "name"
+  ]
 }

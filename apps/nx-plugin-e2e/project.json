@@ -5,12 +5,12 @@
   "sourceRoot": "apps/nx-plugin-e2e/src",
   "targets": {
     "e2e": {
-      "executor": "@nrwl/nx-plugin:e2e",
+      "executor": "@nx/jest:jest",
       "options": {
-        "target": "nx-plugin:build",
         "jestConfig": "apps/nx-plugin-e2e/jest.config.ts",
-        "runInBand": false
-      }
+        "runInBand": true
+      },
+      "dependsOn": ["nx-plugin:build"]
     }
   },
   "tags": [],

@@ -1,4 +1,4 @@
-import type { ExecutorContext } from '@nrwl/devkit'
+import type { ExecutorContext } from '@nx/devkit'
 import type * as child_process from 'child_process'
 import EventEmitter from 'events'
 import type { Readable, Writable } from 'stream'

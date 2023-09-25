@@ -6,8 +6,8 @@ import {
   generateFiles,
   runTasksInSerial,
   updateJson,
-} from '@nrwl/devkit'
-import { Linter } from '@nrwl/linter'
+} from '@nx/devkit'
+import { Linter } from '@nx/linter'
 import { removeSync } from 'fs-extra'
 import { join } from 'path'
 
@@ -17,7 +17,8 @@ import {
   ESLINT_PLUGIN_PRETTIER_VERSION,
   JSON_ESLINT_PARSER_VERSION,
   PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
-  TSCONFIG_NODE_LTS_STRICTEST_VERSION,
+  TSCONFIG_NODE_LTS_VERSION,
+  TSCONFIG_STRICTEST_VERSION,
 } from '../../utils/versions'
 import type { PresetGeneratorSchema } from './schema'
 
@@ -41,7 +42,8 @@ const addDependencies = (host: Tree): GeneratorCallback => {
     {
       'jsonc-eslint-parser': JSON_ESLINT_PARSER_VERSION,
       'eslint-plugin-prettier': ESLINT_PLUGIN_PRETTIER_VERSION,
-      '@tsconfig/node-lts-strictest': TSCONFIG_NODE_LTS_STRICTEST_VERSION,
+      '@tsconfig/node-lts': TSCONFIG_NODE_LTS_VERSION,
+      '@tsconfig/strictest': TSCONFIG_STRICTEST_VERSION,
       '@trivago/prettier-plugin-sort-imports': PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
     },
   )
@@ -71,18 +73,15 @@ const updatePackageJson = (tree: Tree) => {
 const updateTsConfig = (tree: Tree) => {
   updateJson(tree, `tsconfig.base.json`, (tsConfig) => {
     //TODO extend node-lts after nx typescript 5 support
-    // tsConfig.extends = ['@tsconfig/node-lts/tsconfig.json', '@tsconfig/strictest/tsconfig.json']
-    tsConfig.extends = '@tsconfig/node-lts-strictest/tsconfig.json'
+    tsConfig.extends = ['@tsconfig/node-lts/tsconfig.json', '@tsconfig/strictest/tsconfig.json']
     tsConfig.compilerOptions.resolveJsonModule = true
 
     // Remove properties provided by node-lts
-    // tsConfig.compilerOptions.verbatimModuleSyntax = false
-    // delete tsConfig.compilerOptions.strict
     delete tsConfig.compilerOptions.lib
     delete tsConfig.compilerOptions.module
     delete tsConfig.compilerOptions.target
     delete tsConfig.compilerOptions.skipLibCheck
-    delete tsConfig.compilerOptions.moduleResolution
+    // delete tsConfig.compilerOptions.moduleResolution
     return tsConfig
   })
 }

@@ -1,4 +1,4 @@
-import { logger } from '@nrwl/devkit'
+import { logger } from '@nx/devkit'
 import * as child_process from 'child_process'
 
 import type { ParsedCdkExecutorOption } from '../../executors/cdk'

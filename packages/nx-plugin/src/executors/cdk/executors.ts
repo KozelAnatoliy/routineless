@@ -1,4 +1,4 @@
-import { ExecutorContext, logger } from '@nrwl/devkit'
+import { ExecutorContext, logger } from '@nx/devkit'
 import { ChildProcess, spawn } from 'child_process'
 import * as path from 'path'
 

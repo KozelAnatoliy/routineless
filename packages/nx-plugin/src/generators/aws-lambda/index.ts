@@ -1,4 +1,4 @@
-import { GeneratorCallback, Tree, formatFiles, runTasksInSerial } from '@nrwl/devkit'
+import { GeneratorCallback, Tree, formatFiles, runTasksInSerial } from '@nx/devkit'
 
 import { injectProjectProperties } from '../../utils/generators'
 import infraGenerator from './infra-generator'
