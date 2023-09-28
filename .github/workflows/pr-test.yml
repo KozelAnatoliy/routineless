@@ -1,37 +1,102 @@
-name: Pull requiest test
+name: Pull requiest tests
 
 on:
   pull_request:
     branches:
       - develop
 
+env:
+  NX_BRANCH: ${{ github.head_ref || github.ref_name }}
+  NX_CLOUD_DISTRIBUTED_EXECUTION: false # this enables DTE
+  NX_CLOUD_DISTRIBUTED_EXECUTION_AGENT_COUNT: 0 # expected number of agents
+  NX_CLOUD_ACCESS_TOKEN: ${{ secrets.NX_CLOUD_ACCESS_TOKEN }}
+  NX_CLOUD_AUTH_TOKEN: ${{ secrets.NX_CLOUD_AUTH_TOKEN }}
+
 jobs:
   main:
-    name: Nx Cloud - Main Job
-    uses: nrwl/ci/.github/workflows/nx-cloud-main.yml@v0.13.0
-    with:
-      number-of-agents: 2
-      init-commands: |
-        npx nx-cloud start-ci-run --stop-agents-after="build" --agent-count=3
-        pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
-        docker pull localstack/localstack         # Make sure to pull the latest version of the image
-        localstack start -d                       # Start LocalStack in the background
+    name: Main Job
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # By default, PRs will be checked-out based on the Merge Commit, but we want the actual branch HEAD.
+          ref: ${{ github.event.pull_request.head.sha }}
+          # We need to fetch all branches and commits so that Nx affected has a base to compare against.
+          fetch-depth: 0
 
-        echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
-        localstack wait -t 30                     # to become ready before timing out
-        echo "Startup complete"
-      parallel-commands: |
-        npx nx-cloud record -- npx nx format:check
-        npx nx affected --target=e2e
-      parallel-commands-on-agents: |
-        npx nx affected --target=lint --parallel=3
-        npx nx affected --target=test --parallel=3 --ci --code-coverage
-        npx nx affected --target=build --parallel=3
-      final-commands: |
-        localstack stop
+      - name: Derive appropriate SHAs for base and head for `nx affected` commands
+        uses: nrwl/nx-set-shas@v3
+        with:
+          main-branch-name: 'main'
 
-  agents:
-    name: Nx Cloud - Agents
-    uses: nrwl/ci/.github/workflows/nx-cloud-agents.yml@v0.13.0
-    with:
-      number-of-agents: 2
+      # Set node/npm/yarn versions using volta
+      - uses: volta-cli/action@v4
+        with:
+          package-json-path: '${{ github.workspace }}/package.json'
+
+      - name: Print node/npm versions
+        id: versions
+        run: |
+          node_ver=$( node --version )
+
+          echo "Node: ${node_ver:1}"
+          echo "NPM: $( npm --version )"
+
+          echo "node_version=${node_ver:1}" >> $GITHUB_OUTPUT
+
+      - name: Use the package manager cache if available
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
+
+      - name: Print github context
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Setup environemnt
+        run: |
+          docker compose -f ./docker/docker-compose.yaml up --wait
+          echo "Startup complete"
+
+      - name: Run commands in parallel
+        run: |
+          pids=()
+          npx nx format:check &
+          pids+=($!)
+
+          npx nx affected -t lint --parallel=3 &
+          pids+=($!)
+
+          npx nx affected -t test --parallel=3 --ci --code-coverage &
+          pids+=($!)
+
+          npx nx affected -t build --parallel=3 &
+          pids+=($!)
+
+          npx nx affected -t e2e --parallel=3 &
+          pids+=($!)
+
+          # run all commands in parallel and bail if one of them fails
+          for pid in ${pids[*]}; do
+            if ! wait $pid; then
+              exit 1
+            fi
+          done
+
+          exit 0
+
+      - name: Cleanup environment
+        run: |
+          docker compose -f ./docker/docker-compose.yaml down

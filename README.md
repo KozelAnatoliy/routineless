@@ -13,4 +13,4 @@ Update npm config to reference local registry set registry http://localhost:4873
 
 run `npm run publish:local` to publish routineless to the local registry.
 
-run `npx create-nx-workspace@latest test-workspace --preset=@routineless/nx-plugin` to generate workspace with routineless preset.
+run `npx create-routineless-app test-workspace` to generate workspace with routineless preset.

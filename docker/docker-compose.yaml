@@ -1,9 +1,9 @@
-version: '3.1'
+version: '3.8'
 
 services:
   verdaccio:
     image: verdaccio/verdaccio
-    container_name: 'verdaccio'
+    container_name: 'routineless-verdaccio'
     networks:
       - node-network
     environment:
@@ -12,6 +12,18 @@ services:
       - '4873:4873'
     volumes:
       - './verdaccio/conf:/verdaccio/conf'
+  localstack:
+    container_name: 'routineless-localstack_main'
+    image: localstack/localstack
+    ports:
+      - '127.0.0.1:4566:4566' # LocalStack Gateway
+      - '127.0.0.1:4510-4559:4510-4559' # external services port range
+    environment:
+      - DEBUG=${DEBUG-}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    volumes:
+      # - '../tmp/localstack/volume:/var/lib/localstack'
+      - '/var/run/docker.sock:/var/run/docker.sock'
 networks:
   node-network:
     driver: bridge

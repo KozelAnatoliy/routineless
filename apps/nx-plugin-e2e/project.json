@@ -10,7 +10,7 @@
         "jestConfig": "apps/nx-plugin-e2e/jest.config.ts",
         "runInBand": true
       },
-      "dependsOn": ["nx-plugin:build"]
+      "dependsOn": ["create-routineless-app:publish", "nx-plugin:publish"]
     }
   },
   "tags": [],

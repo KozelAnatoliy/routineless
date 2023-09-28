@@ -1,0 +1,52 @@
+{
+  "name": "create-routineless-app",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/create-routineless-app/bin",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/create-routineless-app",
+        "main": "packages/create-routineless-app/bin/index.ts",
+        "tsConfig": "packages/create-routineless-app/tsconfig.lib.json",
+        "assets": ["packages/create-routineless-app/*.md"],
+        "updateBuildableProjectDepsInPackageJson": false
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs create-routineless-app {args.ver} {args.tag}",
+      "dependsOn": ["build"],
+      "configurations": {
+        "local": {
+          "tag": "local"
+        }
+      },
+      "defaultConfiguration": "local"
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["packages/create-routineless-app/**/*.ts", "packages/create-routineless-app/package.json"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/create-routineless-app/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["nx-plugin"]
+}

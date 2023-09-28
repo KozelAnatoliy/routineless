@@ -14,8 +14,7 @@
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {
-      "@routineless/nx-plugin/*": ["packages/nx-plugin/src/*"],
-      "@routineless/test-plugin": ["packages/test-plugin/src/index.ts"]
+      "@routineless/nx-plugin/*": ["packages/nx-plugin/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

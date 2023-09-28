@@ -47,6 +47,16 @@
         ]
       }
     },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs nx-plugin {args.ver} {args.tag}",
+      "dependsOn": ["build"],
+      "configurations": {
+        "local": {
+          "tag": "local"
+        }
+      },
+      "defaultConfiguration": "local"
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],

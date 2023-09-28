@@ -6,13 +6,15 @@
     "build": "nx run-many --target=build",
     "e2e": "nx run-many --target=e2e",
     "lint": "nx run-many --target=lint",
-    "publish:local": "nx build nx-plugin && cd dist/packages/nx-plugin && (npm unpublish @routineless/nx-plugin --force --registry http://localhost:4873 || true) && npm publish --tag=latest --access public --registry http://localhost:4873",
+    "publish:local": "npx nx run-many --target=publish --configuration=local",
     "test": "nx run-many --target=test",
     "test:coverage": "nx run-many --target=test --codeCoverage=true --output-style=\"static\" --passWithNoTests=false --skip-nx-cache"
   },
   "private": true,
   "dependencies": {
-    "tslib": "^2.6.2"
+    "create-nx-workspace": "16.9.0",
+    "tslib": "^2.6.2",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@nx/devkit": "16.9.0",
