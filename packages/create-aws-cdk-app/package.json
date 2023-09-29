@@ -11,5 +11,8 @@
   "typings": "./src/index.d.ts",
   "bin": {
     "create-aws-cdk-app": "./bin/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

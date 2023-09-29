@@ -11,8 +11,7 @@
         "outputPath": "dist/packages/create-aws-cdk-app",
         "main": "packages/create-aws-cdk-app/bin/index.ts",
         "tsConfig": "packages/create-aws-cdk-app/tsconfig.lib.json",
-        "assets": ["packages/create-aws-cdk-app/*.md"],
-        "updateBuildableProjectDepsInPackageJson": false
+        "assets": ["packages/create-aws-cdk-app/*.md"]
       }
     },
     "publish": {
@@ -28,7 +27,8 @@
     "semantic-release": {
       "executor": "@theunderscorer/nx-semantic-release:semantic-release",
       "options": {
-        "buildTarget": "create-routineless-app:build"
+        "buildTarget": "create-aws-cdk-app:build",
+        "outputPath": "dist/packages/create-aws-cdk-app"
       }
     },
     "lint": {

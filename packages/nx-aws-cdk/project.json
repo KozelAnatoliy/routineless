@@ -11,7 +11,6 @@
         "outputPath": "dist/packages/nx-aws-cdk",
         "main": "packages/nx-aws-cdk/src/index.ts",
         "tsConfig": "packages/nx-aws-cdk/tsconfig.lib.json",
-        "updateBuildableProjectDepsInPackageJson": false,
         "assets": [
           "packages/nx-aws-cdk/*.md",
           {
@@ -60,7 +59,8 @@
     "semantic-release": {
       "executor": "@theunderscorer/nx-semantic-release:semantic-release",
       "options": {
-        "buildTarget": "nx-aws-cdk:build"
+        "buildTarget": "nx-aws-cdk:build",
+        "outputPath": "dist/packages/nx-aws-cdk"
       }
     },
     "lint": {
