@@ -2,7 +2,7 @@ https://github.com/verdaccio/verdaccio
 
 ## Nx plugin
 
-Routinelex nx-plugin is a tool to generate boilerplate structure for cloud backend application.
+Routineless nx-aws-cdk is a tool to generate boilerplate structure for cloud backend application.
 
 ## Build
 
@@ -13,4 +13,4 @@ Update npm config to reference local registry set registry http://localhost:4873
 
 run `npm run publish:local` to publish routineless to the local registry.
 
-run `npx create-routineless-app test-workspace` to generate workspace with routineless preset.
+run `npx create-aws-cdk-app test-workspace` to generate workspace with routineless aws cdk preset.

@@ -25,11 +25,11 @@ async function main() {
 
   console.log(`Creating the workspace: ${name}`)
 
-  // This assumes "@routineless/nx-plugin" and "create-routineless-app" are at the same version
+  // This assumes "@routineless/nx-aws-cdk" and "create-aws-cdk-app" are at the same version
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const presetVersion = require('../package.json').version
 
-  const { directory } = await createWorkspace(`@routineless/nx-plugin@${presetVersion}`, {
+  const { directory } = await createWorkspace(`@routineless/nx-aws-cdk@${presetVersion}`, {
     i: argv['i'],
     l: argv['l'],
     nxCloud: argv.nxCloud,

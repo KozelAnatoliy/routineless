@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'nx-plugin-e2e',
+  displayName: 'nx-aws-cdk-e2e',
   preset: '../../jest.preset.js',
   transform: {
     '^.+\\.[tj]s$': [
@@ -11,6 +11,6 @@ export default {
     ],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/nx-plugin-e2e',
+  coverageDirectory: '../../coverage/packages/nx-aws-cdk-e2e',
   testTimeout: 120000,
 }

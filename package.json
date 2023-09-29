@@ -7,6 +7,7 @@
     "e2e": "nx run-many --target=e2e",
     "lint": "nx run-many --target=lint",
     "publish:local": "npx nx run-many --target=publish --configuration=local",
+    "semantic-release": "npx nx run-many --target=semantic-release --parallel=false",
     "test": "nx run-many --target=test",
     "test:coverage": "nx run-many --target=test --codeCoverage=true --output-style=\"static\" --passWithNoTests=false --skip-nx-cache",
     "prepare": "husky install"

@@ -1,5 +1,5 @@
 {
-  "name": "create-routineless-app",
+  "name": "create-aws-cdk-app",
   "version": "0.0.1",
   "dependencies": {
     "create-nx-workspace": "16.9.0",
@@ -10,6 +10,6 @@
   "main": "./src/index.js",
   "typings": "./src/index.d.ts",
   "bin": {
-    "create-routineless-app": "./bin/index.js"
+    "create-aws-cdk-app": "./bin/index.js"
   }
 }

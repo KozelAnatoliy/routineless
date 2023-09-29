@@ -1,22 +1,22 @@
 {
-  "name": "create-routineless-app",
+  "name": "create-aws-cdk-app",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/create-routineless-app/bin",
+  "sourceRoot": "packages/create-aws-cdk-app/bin",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/create-routineless-app",
-        "main": "packages/create-routineless-app/bin/index.ts",
-        "tsConfig": "packages/create-routineless-app/tsconfig.lib.json",
-        "assets": ["packages/create-routineless-app/*.md"],
+        "outputPath": "dist/packages/create-aws-cdk-app",
+        "main": "packages/create-aws-cdk-app/bin/index.ts",
+        "tsConfig": "packages/create-aws-cdk-app/tsconfig.lib.json",
+        "assets": ["packages/create-aws-cdk-app/*.md"],
         "updateBuildableProjectDepsInPackageJson": false
       }
     },
     "publish": {
-      "command": "node tools/scripts/publish.mjs create-routineless-app {args.ver} {args.tag}",
+      "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.ver} {args.tag}",
       "dependsOn": ["build"],
       "configurations": {
         "local": {
@@ -25,18 +25,24 @@
       },
       "defaultConfiguration": "local"
     },
+    "semantic-release": {
+      "executor": "@theunderscorer/nx-semantic-release:semantic-release",
+      "options": {
+        "buildTarget": "create-routineless-app:build"
+      }
+    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/create-routineless-app/**/*.ts", "packages/create-routineless-app/package.json"]
+        "lintFilePatterns": ["packages/create-aws-cdk-app/**/*.ts", "packages/create-aws-cdk-app/package.json"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/create-routineless-app/jest.config.ts",
+        "jestConfig": "packages/create-aws-cdk-app/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {
@@ -48,5 +54,5 @@
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-plugin"]
+  "implicitDependencies": ["nx-aws-cdk"]
 }

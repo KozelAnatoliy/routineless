@@ -13,8 +13,8 @@ describe('cdk application', () => {
   // on a unique project in the workspace, such that they
   // are not dependant on one another.
   beforeAll(async () => {
-    ensureNxProject('@routineless/nx-plugin', 'dist/packages/nx-plugin')
-    await runNxCommandAsync(`generate @routineless/nx-plugin:preset -i ${infraProject} -l ${lambdaProject}`)
+    ensureNxProject('@routineless/nx-aws-cdk', 'dist/packages/nx-aws-cdk')
+    await runNxCommandAsync(`generate @routineless/nx-aws-cdk:preset -i ${infraProject} -l ${lambdaProject}`)
   })
 
   afterAll(async () => {
@@ -33,7 +33,7 @@ describe('cdk application', () => {
     process.env = OLD_ENV
   })
 
-  describe('routineless preset', () => {
+  describe('nx-aws-cdk preset', () => {
     it('should create infra application', () => {
       expect(() => checkFilesExist(`apps/${infraProject}`)).not.toThrow()
     })
@@ -59,7 +59,7 @@ describe('cdk application', () => {
     const project = uniq('cdk')
 
     beforeAll(async () => {
-      await runNxCommandAsync(`generate @routineless/nx-plugin:cdk-application ${project}`)
+      await runNxCommandAsync(`generate @routineless/nx-aws-cdk:cdk-application ${project}`)
     })
 
     it('should generate cdk files', () => {
@@ -92,7 +92,7 @@ describe('cdk application', () => {
     const project = uniq('aws-lambda')
 
     beforeAll(async () => {
-      await runNxCommandAsync(`generate @routineless/nx-plugin:aws-lambda ${project}`)
+      await runNxCommandAsync(`generate @routineless/nx-aws-cdk:aws-lambda ${project}`)
     })
 
     describe('lambda runtime', () => {

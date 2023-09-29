@@ -14,7 +14,7 @@
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {
-      "@routineless/nx-plugin/*": ["packages/nx-plugin/src/*"]
+      "@routineless/nx-aws-cdk": ["packages/nx-aws-cdk/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

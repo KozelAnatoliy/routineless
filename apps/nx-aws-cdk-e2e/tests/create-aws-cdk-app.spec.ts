@@ -4,7 +4,7 @@ import { dirname, join } from 'path'
 
 const localRegistryPrefix = 'npm_config_registry=http://localhost:4873'
 
-describe('create-routineless-app', () => {
+describe('create-aws-cdk-app', () => {
   let projectDirectory: string
 
   afterAll(() => {
@@ -19,7 +19,7 @@ describe('create-routineless-app', () => {
     projectDirectory = createTestProject('-i infra -l lambda')
 
     // npm ls will fail if the package is not installed properly
-    execSync('npm ls @routineless/nx-plugin', {
+    execSync('npm ls @routineless/nx-aws-cdk', {
       cwd: projectDirectory,
       stdio: 'inherit',
     })
@@ -43,7 +43,7 @@ function createTestProject(extraArgs = '') {
     recursive: true,
   })
 
-  execSync(`${localRegistryPrefix} npx --yes create-routineless-app@local ${projectName} ${extraArgs}`, {
+  execSync(`${localRegistryPrefix} npx --yes create-aws-cdk-app@local ${projectName} ${extraArgs}`, {
     cwd: dirname(projectDirectory),
     stdio: 'inherit',
     env: process.env,

@@ -13,5 +13,5 @@ export default {
   testPathIgnorePatterns: ['/generatorFiles/'],
   collectCoverageFrom: ['src/**/*.ts', '!**/*.d.ts', '!**/generatorFiles/**'],
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/packages/nx-plugin',
+  coverageDirectory: '../../coverage/packages/nx-aws-cdk',
 }

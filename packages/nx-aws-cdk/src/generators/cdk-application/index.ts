@@ -93,7 +93,7 @@ const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) 
   projectConfig.targets = {
     ...projectConfig.targets,
     cdk: {
-      executor: '@routineless/nx-plugin:cdk',
+      executor: '@routineless/nx-aws-cdk:cdk',
       dependsOn: ['build'],
     },
   }

@@ -16,14 +16,14 @@ export const mockExecutorContext = (executorName: string, workspaceVersion = 2):
           sourceRoot: 'apps/proj/src',
           targets: {
             test: {
-              executor: `@routineless/nx-plugin:${executorName}`,
+              executor: `@routineless/nx-aws-cdk:${executorName}`,
             },
           },
         },
       },
     },
     target: {
-      executor: `@routineless/nx-plugin:${executorName}`,
+      executor: `@routineless/nx-aws-cdk:${executorName}`,
     },
     isVerbose: true,
   }
