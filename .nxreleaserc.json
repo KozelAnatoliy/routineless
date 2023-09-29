@@ -1,0 +1,7 @@
+{
+  "changelog": true,
+  "npm": true,
+  "github": true,
+  "repositoryUrl": "git@github.com:KozelAnatoliy/routineless.git",
+  "branches": ["main", "develop"]
+}

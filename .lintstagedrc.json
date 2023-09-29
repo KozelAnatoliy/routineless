@@ -1,0 +1,7 @@
+{
+  "{packages,tools,apps}/**/*.{ts,js,json,md}": [
+    "nx affected -t lint --uncommitted --fix true",
+    "nx affected -t test --uncommitted",
+    "nx format:write --uncommitted"
+  ]
+}

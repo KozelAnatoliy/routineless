@@ -27,8 +27,6 @@ jobs:
 
       - name: Derive appropriate SHAs for base and head for `nx affected` commands
         uses: nrwl/nx-set-shas@v3
-        with:
-          main-branch-name: 'main'
 
       # Set node/npm/yarn versions using volta
       - uses: volta-cli/action@v4
