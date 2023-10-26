@@ -1,17 +1,21 @@
 {
   "name": "@routineless/nx-aws-cdk",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.0",
   "main": "src/index.js",
   "generators": "./generators.json",
   "executors": "./executors.json",
   "dependencies": {
-    "@nx/node": "16.9.0",
-    "@nx/devkit": "16.9.0",
-    "yargs-parser": "21.1.1",
-    "@nx/linter": "16.9.0",
+    "@aws-sdk/client-sts": "^3.433.0",
+    "@aws-sdk/credential-providers": "^3.433.0",
+    "@nx/node": "17.0.2",
+    "@nx/devkit": "17.0.2",
+    "@nx/eslint": "17.0.2",
+    "@nx/js": "17.0.2",
+    "@smithy/shared-ini-file-loader": "^2.2.2",
     "fs-extra": "11.1.1",
     "ignore": "5.2.4",
-    "tslib": "^2.6.2"
+    "tslib": "^2.6.2",
+    "@nx/jest": "17.0.2"
   },
   "publishConfig": {
     "access": "public"

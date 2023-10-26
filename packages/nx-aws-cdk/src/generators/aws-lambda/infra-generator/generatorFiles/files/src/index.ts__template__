@@ -10,7 +10,7 @@ export class <%= className %>Stack extends Stack {
     new lambda.Function(this, '<%= className %>Function', {
       functionName: '<%= className %>',
       runtime: lambda.Runtime.NODEJS_18_X,
-      code: lambda.Code.fromAsset(path.join(__dirname, '<%= offsetFromRoot %><%= runtimeProjectDirectory %>/src')),
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../runtime/src')),
       handler: 'main.handler',
     })
   }

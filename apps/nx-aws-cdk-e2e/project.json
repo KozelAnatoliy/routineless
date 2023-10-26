@@ -10,9 +10,9 @@
         "jestConfig": "apps/nx-aws-cdk-e2e/jest.config.ts",
         "runInBand": true
       },
-      "dependsOn": ["create-aws-cdk-app:publish", "nx-aws-cdk:publish"]
+      "dependsOn": ["create-aws-cdk-app:publish-local", "nx-aws-cdk:publish-local"]
     }
   },
   "tags": [],
-  "implicitDependencies": ["nx-aws-cdk"]
+  "implicitDependencies": ["nx-aws-cdk", "create-aws-cdk-app"]
 }

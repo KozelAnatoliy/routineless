@@ -54,7 +54,7 @@ describe('executors', () => {
 
       expect(commandResult.length).toEqual(1)
       expect(commandResult[0]?.command).toEqual(
-        'node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
           ' --profile local --json true --context firstContext --context secondContext --verbose true' +
           ' --app testApp --plugin testPlugin --ec2creds testEc2Creds --role-arn testRoleArn --output testOutput --help true',
       )
@@ -84,7 +84,7 @@ describe('executors', () => {
 
       expect(commandResult.length).toEqual(1)
       expect(commandResult[0]?.command).toEqual(
-        'node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
           ' --profile local --json true --context firstContext --context secondContext --verbose true' +
           ' --app testApp --plugin testPlugin --ec2creds testEc2Creds --role-arn testRoleArn --output testOutput --help true',
       )
@@ -114,7 +114,7 @@ describe('executors', () => {
 
       expect(commandResult.length).toEqual(1)
       expect(commandResult[0]?.command).toEqual(
-        'node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff FirstStack SecondStack' +
           ' --profile local --json true --context firstContext --context secondContext --verbose true' +
           ' --app testApp --plugin testPlugin --ec2creds testEc2Creds --role-arn testRoleArn --output testOutput --help true' +
           ' --unknown unknown',
@@ -131,30 +131,118 @@ describe('executors', () => {
       )
 
       expect(commandResult.length).toEqual(1)
-      expect(commandResult[0]?.command).toEqual('node nxWorkspaceRoot/node_modules/aws-cdk-local/bin/cdklocal diff')
+      expect(commandResult[0]?.command).toEqual(
+        'AWS_ENV=local node nxWorkspaceRoot/node_modules/aws-cdk-local/bin/cdklocal diff',
+      )
     })
 
     it('should run proj watch task with watch arg provided', () => {
       const commandResult = createCommands(
         {
           ...testOptions,
-          parsedArgs: {
-            watch: true,
-          },
+          parsedArgs: {},
           watch: true,
+          cwd: 'cwd',
         },
         executorContext,
       )
 
       expect(commandResult.length).toEqual(2)
       expect(commandResult[0]?.command).toEqual(
-        'node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff --watch true',
+        `npx nx watch --projects=${executorContext.projectName} -d -- "nx build ${executorContext.projectName} && (cd ${executorContext.root}/${testOptions.root} && AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff)"`,
       )
-      expect(commandResult[0]?.cwd).toEqual('/root/testRoot')
-      expect(commandResult[1]?.command).toEqual(
+      expect(commandResult[0]?.cwd).toBeUndefined()
+      expect(commandResult[1]?.command).toEqual('AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff')
+      expect(commandResult[1]?.cwd).toEqual('cwd')
+    })
+
+    it('should provide watch option to deploy task and skip adding deploy task to nx watch command', () => {
+      const commandResult = createCommands(
+        {
+          ...testOptions,
+          command: 'deploy',
+          parsedArgs: {},
+          watch: true,
+          cwd: 'cwd',
+        },
+        executorContext,
+      )
+
+      expect(commandResult.length).toEqual(2)
+      expect(commandResult[0]?.command).toEqual(
         `npx nx watch --projects=${executorContext.projectName} -d -- "nx build ${executorContext.projectName}"`,
       )
-      expect(commandResult[1]?.cwd).toBeUndefined()
+      expect(commandResult[0]?.cwd).toBeUndefined()
+      expect(commandResult[1]?.command).toEqual(
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js deploy --watch --all',
+      )
+      expect(commandResult[1]?.cwd).toEqual('cwd')
+    })
+
+    it('should not add --all flag to deploy watch command if stacks were provided', () => {
+      const commandResult = createCommands(
+        {
+          ...testOptions,
+          command: 'deploy',
+          parsedArgs: {
+            _: ['FirstStack', 'SecondStack'],
+          },
+          watch: true,
+          cwd: 'cwd',
+        },
+        executorContext,
+      )
+
+      expect(commandResult.length).toEqual(2)
+      expect(commandResult[0]?.command).toEqual(
+        `npx nx watch --projects=${executorContext.projectName} -d -- "nx build ${executorContext.projectName}"`,
+      )
+      expect(commandResult[0]?.cwd).toBeUndefined()
+      expect(commandResult[1]?.command).toEqual(
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js deploy FirstStack SecondStack --watch',
+      )
+      expect(commandResult[1]?.cwd).toEqual('cwd')
+    })
+
+    it('should not append deploy watch flag if it was already provided in options', () => {
+      const commandResult = createCommands(
+        {
+          ...testOptions,
+          command: 'deploy',
+          parsedArgs: {
+            all: true,
+          },
+          watch: true,
+          cwd: 'cwd',
+        },
+        executorContext,
+      )
+
+      expect(commandResult.length).toEqual(2)
+      expect(commandResult[0]?.command).toEqual(
+        `npx nx watch --projects=${executorContext.projectName} -d -- "nx build ${executorContext.projectName}"`,
+      )
+      expect(commandResult[0]?.cwd).toBeUndefined()
+      expect(commandResult[1]?.command).toEqual(
+        'AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js deploy --all true --watch',
+      )
+      expect(commandResult[1]?.cwd).toEqual('cwd')
+    })
+
+    it('should append aws account details if provided', () => {
+      const commandResult = createCommands(
+        {
+          ...testOptions,
+          account: 'account',
+          region: 'region',
+        },
+        executorContext,
+      )
+
+      expect(commandResult.length).toEqual(1)
+      expect(commandResult[0]?.command).toEqual(
+        'AWS_REGION=region AWS_ACCOUNT=account AWS_ENV=dev node nxWorkspaceRoot/node_modules/aws-cdk/bin/cdk.js diff',
+      )
     })
   })
 

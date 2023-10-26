@@ -7,7 +7,8 @@ import {
   runTasksInSerial,
   updateJson,
 } from '@nx/devkit'
-import { Linter } from '@nx/linter'
+import { Linter } from '@nx/eslint'
+import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 import { removeSync } from 'fs-extra'
 import { join } from 'path'
 
@@ -50,11 +51,12 @@ const addDependencies = (host: Tree): GeneratorCallback => {
 }
 
 const addFiles = (tree: Tree) => {
+  const scope = getNpmScope(tree)
   const templateOptions = {
     template: '',
+    workspaceName: scope || 'aws-cdk-app',
   }
   generateFiles(tree, join(__dirname, 'generatorFiles'), '.', templateOptions)
-  tree.changePermissions('bin/localstack.sh', '755')
 }
 
 const updatePackageJson = (tree: Tree) => {

@@ -18,10 +18,7 @@ async function main() {
     .default('nxCloud', false)
     .help('h')
     .alias('h', 'help').argv
-  const name = argv._?.length ? (argv._[0] as string) : undefined
-  if (!name) {
-    throw new Error('Please provide a name for the workspace')
-  }
+  const name = argv._[0] as string
 
   console.log(`Creating the workspace: ${name}`)
 

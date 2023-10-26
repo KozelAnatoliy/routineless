@@ -46,15 +46,12 @@
         ]
       }
     },
-    "publish": {
+    "publish-local": {
       "command": "node tools/scripts/publish.mjs nx-aws-cdk {args.ver} {args.tag}",
       "dependsOn": ["build"],
-      "configurations": {
-        "local": {
-          "tag": "local"
-        }
-      },
-      "defaultConfiguration": "local"
+      "options": {
+        "tag": "local"
+      }
     },
     "semantic-release": {
       "executor": "@theunderscorer/nx-semantic-release:semantic-release",
@@ -64,7 +61,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [

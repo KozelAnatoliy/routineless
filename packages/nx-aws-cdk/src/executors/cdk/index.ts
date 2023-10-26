@@ -1,44 +1,92 @@
+import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
 import type { ExecutorContext } from '@nx/devkit'
 import { logger } from '@nx/devkit'
-import parser from 'yargs-parser'
+import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 
 import { createCommands, runCommandsInParralel } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
 export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
-  parsedArgs: { [k: string]: string | string[] | boolean }
+  parsedArgs: { [k: string]: string | string[] | boolean | undefined }
+  command: string
   root: string
   sourceRoot: string
   env: string
 }
 
 // Do not add watch argument to this list so it will be processed as command argument
-const executorPropKeys = ['args', 'command', 'cwd', 'env']
+const executorPropKeys = ['cwd', 'env', 'account', 'region', 'watch']
 
-const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext): ParsedCdkExecutorOption => {
+const normalizeOptions = async (
+  options: CdkExecutorOptions,
+  context: ExecutorContext,
+): Promise<ParsedCdkExecutorOption> => {
   if (!context.projectName) {
-    throw new Error('Cdk bootstrap executor should be executed on cdk project')
+    throw new Error(`Cdk executor should be executed on cdk project. Provided project name: ${context.projectName}`)
   }
   const projectConfig = context.projectsConfigurations?.projects[context.projectName]
   if (!projectConfig) {
-    throw new Error(`Cdk bootstrap failed. Failed to read project configuration for ${context.projectName}`)
+    throw new Error(`Cdk executor failed. Failed to read project configuration for ${context.projectName}`)
   }
   const { sourceRoot, root } = projectConfig
   if (!sourceRoot) {
-    throw new Error(`Cdk bootstrap failed. Failed to read source root for ${context.projectName}`)
+    throw new Error(`Cdk executor failed. Failed to read source root for ${context.projectName}`)
   }
-  // unwrap cdk watch alias to handle nx watch properly
-  if (options.watch && options.command != 'deploy') {
-    options.watch = false
+
+  const { command, parsedArgs } = parseArgs(options)
+  if (!command) {
+    throw new Error(`Cdk executor failed. Command is not provided`)
   }
-  if (options.command == 'watch') {
-    options.command = 'deploy'
+  let finalCommand = command
+
+  if (command == 'watch') {
+    finalCommand = 'deploy'
     options.watch = true
   }
-  const parsedArgs = parseArgs(options)
+
+  parsedArgs['profile'] = parsedArgs['profile'] || process.env['AWS_PROFILE']
+  const profile = parsedArgs['profile']
+  let resolvedAccount: string | undefined = options.account || process.env['AWS_ACCOUNT']
+  let resolvedRegion: string | undefined = options.region || process.env['AWS_REGION']
+  if (profile && typeof profile === 'string') {
+    if (!resolvedRegion) {
+      let regionResolutionError: unknown
+      try {
+        const awsConfig = await loadSharedConfigFiles()
+        resolvedRegion = awsConfig.configFile?.[profile]?.['region'] || awsConfig.configFile?.['default']?.['region']
+      } catch (e: unknown) {
+        regionResolutionError = e
+        logger.warn(`Cannot resolve region. Failed to load aws config for profile ${profile}: ${e}`)
+      } finally {
+        if (!resolvedRegion && !regionResolutionError) {
+          console.warn(`Failed to resolve region for profile ${profile}. Region is not configured in  aws config`)
+        }
+      }
+    }
+
+    if (!resolvedAccount) {
+      if (resolvedRegion) {
+        const awsCredentials = fromNodeProviderChain({ profile })
+        const stsClient = new STSClient({ credentials: awsCredentials, region: resolvedRegion })
+        try {
+          const callerIdentity = await stsClient.send(new GetCallerIdentityCommand({}))
+          resolvedAccount = callerIdentity.Account
+        } catch (e) {
+          logger.warn(`Cannot resolve account. Failed to get caller identity for profile ${profile}: ${e}`)
+        }
+      } else {
+        logger.warn('Cannot resolve account. Region is not provided and cannot be resolved from aws config')
+      }
+    }
+  }
+
   return {
     ...options,
-    env: process.env['AWS_ENV'] || 'local',
+    command: finalCommand,
+    env: options.env || process.env['AWS_ENV'] || 'local',
+    account: resolvedAccount,
+    region: resolvedRegion,
     sourceRoot,
     root,
     parsedArgs,
@@ -46,7 +94,7 @@ const normalizeOptions = (options: CdkExecutorOptions, context: ExecutorContext)
 }
 
 const runExecutor = async (options: CdkExecutorOptions, context: ExecutorContext): Promise<{ success: boolean }> => {
-  const normalizedOptions = normalizeOptions(options, context)
+  const normalizedOptions = await normalizeOptions(options, context)
   const commands = createCommands(normalizedOptions, context)
   try {
     await runCommandsInParralel(commands)
@@ -61,24 +109,27 @@ const runExecutor = async (options: CdkExecutorOptions, context: ExecutorContext
   }
 }
 
-const parseArgs = (options: CdkExecutorOptions): Record<string, string | string[] | boolean> => {
-  let parsedArgs = {}
-  if (options.args) {
-    parsedArgs = parser(options.args.replace(/(^"|"$)/g, ''), {
-      configuration: { 'camel-case-expansion': false },
-    })
-  }
+const parseArgs = (
+  options: CdkExecutorOptions,
+): { command: string | undefined; parsedArgs: Record<string, string | string[] | boolean | undefined> } => {
+  let command: string | undefined
+
   const keys = Object.keys(options)
-  const unknownOptionsTreatedAsArgs = keys
+  const parsedArgs = keys
     .filter((p) => executorPropKeys.indexOf(p) === -1)
     .reduce((acc, key) => {
       const optionValue = options[key]
       if ((optionValue && typeof optionValue !== 'object') || Array.isArray(optionValue)) {
-        acc[key] = optionValue
+        if (key === '_' && Array.isArray(optionValue) && optionValue.length) {
+          command = optionValue[0]
+          acc[key] = optionValue.slice(1)
+        } else {
+          acc[key] = optionValue
+        }
       }
       return acc
     }, {} as Record<string, string | string[] | boolean>)
-  return { ...parsedArgs, ...unknownOptionsTreatedAsArgs }
+  return { command, parsedArgs }
 }
 
 export default runExecutor

@@ -47,14 +47,14 @@ describe('preset generator', () => {
     expect(prettierRcContent).toContain(`"printWidth": 120`)
   })
 
-  it('should add localstack.sh script', async () => {
+  it('should add localstack docker compose', async () => {
     await generator(appTree, options)
 
-    const localstackSh = appTree.read('bin/localstack.sh')
-    expect(localstackSh).toBeDefined()
-    const localstackShContent = localstackSh?.toString()
-    expect(localstackShContent).toContain(`localstack start -d`)
-    expect(localstackShContent).toContain(`localstack wait -t 30`)
+    const dockerCompose = appTree.read('docker/docker-compose.yaml')
+    expect(dockerCompose).toBeDefined()
+    const dockerComposeContent = dockerCompose?.toString()
+    expect(dockerComposeContent).toContain('localstack')
+    expect(dockerComposeContent).toContain(`container_name: 'proj-localstack_main'`)
   })
 
   it('should update tsconfig.base.json', async () => {
