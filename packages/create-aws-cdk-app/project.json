@@ -14,15 +14,12 @@
         "assets": ["packages/create-aws-cdk-app/*.md"]
       }
     },
-    "publish": {
-      "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.ver} {args.tag}",
+    "publish-local": {
+      "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.tag} {args.ver}",
       "dependsOn": ["build"],
-      "configurations": {
-        "local": {
-          "tag": "local"
-        }
-      },
-      "defaultConfiguration": "local"
+      "options": {
+        "tag": "local"
+      }
     },
     "semantic-release": {
       "executor": "@theunderscorer/nx-semantic-release:semantic-release",
@@ -32,7 +29,7 @@
       }
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": ["packages/create-aws-cdk-app/**/*.ts", "packages/create-aws-cdk-app/package.json"]

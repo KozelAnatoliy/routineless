@@ -7,18 +7,25 @@ import {
   getWorkspaceLayout,
   names,
   offsetFromRoot,
-  readNxJson,
   readProjectConfiguration,
   runTasksInSerial,
   updateJson,
   updateProjectConfiguration,
 } from '@nx/devkit'
-import { Linter } from '@nx/linter'
+import { Linter } from '@nx/eslint'
+import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { updateRoutinelessConfig } from '../../utils/routineless'
-import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
+import {
+  AWS_SDK_VERSION,
+  CDK_CONSTRUCTS_VERSION,
+  CDK_ESLINT_VERSION,
+  CDK_LOCAL_VERSION,
+  CDK_VERSION,
+  SMITHY_SHARED_INI_FILE_LOADER_VERSION,
+} from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
@@ -41,12 +48,12 @@ const normalizeOptions = (tree: Tree, options: CdkApplicationGeneratorSchema): N
 }
 
 const addFiles = (tree: Tree, options: NormalizedSchema, filesType: 'files' | 'jest-files' = 'files') => {
-  const nxJson = readNxJson(tree)
+  const scope = getNpmScope(tree)
   const templateOptions = {
     ...options,
     ...names(options.name),
     offsetFromRoot: offsetFromRoot(options.projectRoot),
-    workspaceName: nxJson?.npmScope || 'test',
+    workspaceName: scope || 'aws-cdk-app',
     template: '',
   }
   generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.projectRoot, templateOptions)
@@ -119,18 +126,24 @@ const updateTsConfig = (tree: Tree) => {
   })
 }
 
-const addDependencies = (host: Tree): GeneratorCallback => {
+const addDependencies = (host: Tree, options: NormalizedSchema): GeneratorCallback => {
+  const devDependencies: Record<string, string> = {
+    '@aws-sdk/client-sts': AWS_SDK_VERSION,
+    '@aws-sdk/credential-providers': AWS_SDK_VERSION,
+    '@smithy/shared-ini-file-loader': SMITHY_SHARED_INI_FILE_LOADER_VERSION,
+    'aws-cdk-local': CDK_LOCAL_VERSION,
+    'aws-cdk': CDK_VERSION,
+  }
+  if (options.linter === Linter.EsLint) {
+    devDependencies['eslint-plugin-cdk'] = CDK_ESLINT_VERSION
+  }
   return addDependenciesToPackageJson(
     host,
     {
       'aws-cdk-lib': CDK_VERSION,
       constructs: CDK_CONSTRUCTS_VERSION,
     },
-    {
-      'aws-cdk-local': CDK_LOCAL_VERSION,
-      'aws-cdk': CDK_VERSION,
-      'eslint-plugin-cdk': CDK_ESLINT_VERSION,
-    },
+    devDependencies,
   )
 }
 
@@ -148,7 +161,7 @@ export const cdkApplicationGenerator = async (
       return config
     })
   }
-  tasks.push(addDependencies(tree))
+  tasks.push(addDependencies(tree, normalizedOptions))
   tasks.push(
     await nodeApplicationGenerator(tree, {
       ...normalizedOptions,

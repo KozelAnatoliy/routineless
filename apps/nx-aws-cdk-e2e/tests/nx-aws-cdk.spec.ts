@@ -48,7 +48,7 @@ describe('cdk application', () => {
     })
 
     it('should add lambda function to infra app', async () => {
-      const result = await runNxCommandAsync(`run ${infraProject}:cdk --command diff`)
+      const result = await runNxCommandAsync(`run ${infraProject}:cdk diff`)
 
       const { className } = names(lambdaProject)
       expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
@@ -59,7 +59,7 @@ describe('cdk application', () => {
     const project = uniq('cdk')
 
     beforeAll(async () => {
-      await runNxCommandAsync(`generate @routineless/nx-aws-cdk:cdk-application ${project}`)
+      await runNxCommandAsync(`generate cdk-application ${project}`)
     })
 
     it('should generate cdk files', () => {
@@ -71,7 +71,7 @@ describe('cdk application', () => {
     })
 
     it('should run cdk diff', async () => {
-      const result = await runNxCommandAsync(`run ${project}:cdk --command diff`)
+      const result = await runNxCommandAsync(`run ${project}:cdk diff`)
 
       expect(result.stdout).toContain('[+] AWS::S3::Bucket Bucket')
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${project}`)
@@ -92,7 +92,7 @@ describe('cdk application', () => {
     const project = uniq('aws-lambda')
 
     beforeAll(async () => {
-      await runNxCommandAsync(`generate @routineless/nx-aws-cdk:aws-lambda ${project}`)
+      await runNxCommandAsync(`generate aws-lambda ${project}`)
     })
 
     describe('lambda runtime', () => {

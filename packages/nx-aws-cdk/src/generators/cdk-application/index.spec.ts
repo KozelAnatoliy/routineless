@@ -1,8 +1,9 @@
 import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
-import { Linter } from '@nx/linter'
+import { Linter } from '@nx/eslint'
 
 import generator from '.'
+import { getRoutinelessConfig } from '../../utils/routineless'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
@@ -14,8 +15,32 @@ describe('cdk-application generator', () => {
     tree = createTreeWithEmptyWorkspace()
   })
 
-  it('should add cdk dependencies', async () => {
+  it('should generate cdk app without routineless config', async () => {
     await generator(tree, options)
+
+    const config = getRoutinelessConfig(tree)
+
+    expect(config).toBeUndefined()
+  })
+
+  it('should add cdk dependencies without eslint', async () => {
+    await generator(tree, options)
+
+    const packageJson = readJson(tree, 'package.json')
+
+    expect(packageJson.dependencies['aws-cdk-lib']).toBeDefined()
+    expect(packageJson.dependencies['constructs']).toBeDefined()
+    expect(packageJson.devDependencies['@aws-sdk/client-sts']).toBeDefined()
+    expect(packageJson.devDependencies['@aws-sdk/credential-providers']).toBeDefined()
+    expect(packageJson.devDependencies['@smithy/shared-ini-file-loader']).toBeDefined()
+    expect(packageJson.devDependencies['aws-cdk-local']).toBeDefined()
+    expect(packageJson.devDependencies['aws-cdk']).toBeDefined()
+
+    expect(packageJson.devDependencies['eslint-plugin-cdk']).toBeUndefined()
+  })
+
+  it('should add cdk dependencies with eslint', async () => {
+    await generator(tree, { ...options, linter: Linter.EsLint })
 
     const packageJson = readJson(tree, 'package.json')
 
@@ -75,5 +100,13 @@ describe('cdk-application generator', () => {
     for (const rule in eslintCdkRules) {
       expect((eslintCdkRules as Record<string, unknown>)[rule]).toEqual(firstOverride.rules[rule])
     }
+  })
+
+  it('should set as routineless infra app', async () => {
+    await generator(tree, { ...options, setAsRoutinelessInfraApp: true })
+
+    const config = getRoutinelessConfig(tree)
+
+    expect(config?.infraApp).toEqual('cdk')
   })
 })

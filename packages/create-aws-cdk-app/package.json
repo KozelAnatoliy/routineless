@@ -1,14 +1,14 @@
 {
   "name": "create-aws-cdk-app",
-  "version": "0.0.1",
+  "version": "0.0.1-beta.0",
   "dependencies": {
     "create-nx-workspace": "16.9.0",
     "tslib": "^2.6.2",
     "yargs": "^17.7.2"
   },
   "type": "commonjs",
-  "main": "./src/index.js",
-  "typings": "./src/index.d.ts",
+  "main": "./bin/index.js",
+  "typings": "./bin/index.d.ts",
   "bin": {
     "create-aws-cdk-app": "./bin/index.js"
   },

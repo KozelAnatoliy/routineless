@@ -23,7 +23,7 @@ function invariant(condition, message) {
 
 // Executing publish script: node path/to/publish.mjs {name} --version {version} --tag {tag}
 // Default "tag" to "next" so we won't publish the "latest" tag by accident.
-const [, , name, version, tag = 'next'] = process.argv
+const [, , name, tag = 'next', version] = process.argv
 
 if (tag !== 'local') {
   // A simple SemVer validation to validate the version

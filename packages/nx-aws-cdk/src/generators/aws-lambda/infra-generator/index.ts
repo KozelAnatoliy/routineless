@@ -47,7 +47,9 @@ const addStackToInfraApp = (tree: Tree, options: AwsLambdaInfraGeneratorOptions)
     const { className } = names(options.baseProjectName)
     const { projectDirectory } = options
     const scope = getNpmScope(tree)
-    const importStatement = Buffer.from(`import { ${className}Stack } from '@${scope}/${projectDirectory}'\n`)
+    const importStatement = Buffer.from(
+      `import { ${className}Stack } from '${scope ? `@${scope}/` : ''}${projectDirectory}'\n`,
+    )
     const stackCreationStatement = Buffer.from(
       `new ${className}Stack(app, '${className}Stack', { ...baseStackProps })\n`,
     )

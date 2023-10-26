@@ -4,31 +4,17 @@
   "description": "Executor for aws cdk",
   "type": "object",
   "properties": {
-    "command": {
-      "description": "Cdk command",
-      "type": "string",
-      "enum": [
-        "list",
-        "synthesize",
-        "bootstrap",
-        "deploy",
-        "import",
-        "watch",
-        "destroy",
-        "diff",
-        "metadata",
-        " acknowledge",
-        "notice",
-        "init",
-        "context",
-        "docs",
-        "doctor"
-      ]
+    "account": {
+      "description": "AWS account id",
+      "type": "number"
+    },
+    "region": {
+      "description": "AWS region",
+      "type": "string"
     },
     "watch": {
       "description": "Watch mode. Will trigger the command when files changes.",
       "type": "boolean"
     }
-  },
-  "required": ["command"]
+  }
 }

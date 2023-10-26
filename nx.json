@@ -1,28 +1,31 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "npmScope": "routineless",
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx-cloud",
-      "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"],
-        "accessToken": "YzZjNDU3OGUtNDk1OC00ZGYyLWE4ZWUtNjlhM2FhZWU3OGZmfHJlYWQtd3JpdGU="
-      }
-    }
-  },
   "targetDefaults": {
+    "nx-release-publish": {
+      "dependsOn": ["^nx-release-publish"],
+      "configurations": {
+        "local": {
+          "registry": "http://localhost:4873",
+          "tag": "e2e"
+        }
+      }
+    },
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "cache": true
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"]
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
+      "cache": true
     },
     "test": {
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
+      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
+      "cache": true
     },
     "e2e": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": true
     }
   },
   "namedInputs": {
@@ -37,8 +40,19 @@
     ],
     "sharedGlobals": []
   },
+  "release": {
+    "groups": {
+      "default": {
+        "projects": ["nx-aws-cdk", "create-aws-cdk-app"],
+        "changelog": {
+          "createRelease": "github"
+        }
+      }
+    }
+  },
   "workspaceLayout": {
     "appsDir": "apps",
     "libsDir": "packages"
-  }
+  },
+  "nxCloudAccessToken": "YzZjNDU3OGUtNDk1OC00ZGYyLWE4ZWUtNjlhM2FhZWU3OGZmfHJlYWQtd3JpdGU="
 }

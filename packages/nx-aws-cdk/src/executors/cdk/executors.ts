@@ -21,33 +21,67 @@ export interface Command {
   cwd?: string
 }
 
+interface CdkCommand extends Command {
+  cdkCommand: string
+}
+
 export const createCommands = (options: ParsedCdkExecutorOption, context: ExecutorContext): Command[] => {
   logger.debug('Cdk executor options %s', JSON.stringify(options))
   const NX_WORKSPACE_ROOT = process.env['NX_WORKSPACE_ROOT']
   if (!NX_WORKSPACE_ROOT) {
     throw new Error('CDK not Found')
   }
-  const baseExecutionCommand =
+  let baseExecutionCommand =
     options.env !== 'local'
-      ? `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
-      : `node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk-local/bin/cdklocal ${options.command}`
+      ? `AWS_ENV=${options.env} node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk/bin/cdk.js ${options.command}`
+      : `AWS_ENV=${options.env} node ${NX_WORKSPACE_ROOT}/node_modules/aws-cdk-local/bin/cdklocal ${options.command}`
+
+  if (options.account) {
+    baseExecutionCommand = `AWS_ACCOUNT=${options.account} ${baseExecutionCommand}`
+  }
+  if (options.region) {
+    baseExecutionCommand = `AWS_REGION=${options.region} ${baseExecutionCommand}`
+  }
+
   const commandOptions = getCommandOptions(options)
 
-  const resultCommands: Command[] = [
-    {
-      command: [baseExecutionCommand, ...commandOptions].join(' '),
-      cwd: options.cwd || path.join(context.root, options.root),
-    },
-  ]
+  const executionCommand: CdkCommand = {
+    cdkCommand: options.command,
+    command: [baseExecutionCommand, ...commandOptions].join(' '),
+    cwd: options.cwd || path.join(context.root, options.root),
+  }
+  const resultCommands: Command[] = []
 
   if (options.watch) {
-    resultCommands.push(createProjectWatchCommand(context))
+    if (executionCommand.cdkCommand === 'deploy') {
+      executionCommand.command = `${executionCommand.command} --watch`
+      let providedStacks = options.parsedArgs['_']
+      providedStacks = Array.isArray(providedStacks) ? providedStacks : []
+      //Watch command will just hang without warnings if no stacks provided and --all flag is not provided
+      //so setting --all flag by default in this case
+      if (!providedStacks.length && !options.parsedArgs['all']) {
+        executionCommand.command = `${executionCommand.command} --all`
+      }
+    }
+    resultCommands.push(createProjectWatchCommand(context, options, executionCommand))
   }
+  resultCommands.push(executionCommand)
+
   return resultCommands
 }
 
-const createProjectWatchCommand = (context: ExecutorContext): Command => {
-  return { command: `npx nx watch --projects=${context.projectName} -d -- "nx build ${context.projectName}"` }
+const createProjectWatchCommand = (
+  context: ExecutorContext,
+  options: ParsedCdkExecutorOption,
+  executionCommand: CdkCommand,
+): Command => {
+  return {
+    command: `npx nx watch --projects=${context.projectName} -d -- "nx build ${context.projectName}${
+      executionCommand.cdkCommand !== 'deploy'
+        ? ` && (cd ${context.root}/${options.root} && ${executionCommand.command})`
+        : ''
+    }"`,
+  }
 }
 
 const getCommandOptions = (options: ParsedCdkExecutorOption): string[] => {
@@ -81,6 +115,7 @@ export const runCommandsInParralel = async (commands: Command[]): Promise<Proces
 
 export const runCommand = async (command: string, cwd?: string): Promise<ProcessExitInfo> => {
   logger.debug(`Executing command: ${command}`)
+  logger.debug(`Working directory: ${cwd}`)
 
   const childProcess = spawn(command, {
     shell: true,
