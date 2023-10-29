@@ -1,23 +1,20 @@
-import type { Environment } from 'aws-cdk-lib'
+import type { CdkEnvironment, Mutable } from '@routineless/cdk'
 
-export const DEFAULT_REGION = 'us-east-1'
-export const DEFAULT_ACCOUNT = '000000000000'
 export const DEFAULT_ENV = 'local'
 
-export interface CdkEnvironment extends Environment {
-  readonly account: string
-  readonly region: string
-  readonly envName: string
+const mutableEnvironment: Mutable<CdkEnvironment> = {
+  envName: process.env['AWS_ENV'] || DEFAULT_ENV,
 }
 
-export const environment: CdkEnvironment = {
-  envName: process.env['AWS_ENV'] || DEFAULT_ENV,
-  account: process.env['AWS_ACCOUNT'] || DEFAULT_ACCOUNT,
-  region: process.env['AWS_REGION'] || DEFAULT_REGION,
+if (process.env['AWS_ACCOUNT']) {
+  mutableEnvironment.account = process.env['AWS_ACCOUNT']
 }
+if (process.env['AWS_REGION']) {
+  mutableEnvironment.region = process.env['AWS_REGION']
+}
+
+export const environment = mutableEnvironment
 
 export const localEnv: CdkEnvironment = {
   envName: DEFAULT_ENV,
-  account: DEFAULT_ACCOUNT,
-  region: DEFAULT_REGION,
 }

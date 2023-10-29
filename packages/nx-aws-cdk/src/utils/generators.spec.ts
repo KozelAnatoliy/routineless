@@ -21,56 +21,82 @@ describe('generators', () => {
     tree = createTreeWithEmptyWorkspace()
   })
   describe('injectProjectProperties', () => {
+    const options = {
+      name: 'testPackage',
+    }
+
     beforeEach(() => {
       mockedGetWorkspaceLayout.mockReturnValue({
         appsDir: 'apps',
         libsDir: 'libs',
-        npmScope: 'test',
         standaloneAsDefault: false,
       })
     })
 
     it('should inject project properties', () => {
-      const options = {
-        name: 'testPackage',
-        directory: 'test-dir',
-      }
-
-      const result = injectProjectProperties(tree, options)
+      const result = injectProjectProperties(tree, { ...options, directory: 'test-dir' })
 
       expect(result).toMatchObject({
+        appDirectory: 'test-dir/test-package',
         projectName: 'test-dir-test-package',
         projectRoot: 'apps/test-dir/test-package',
-        projectDirectory: 'test-dir/test-package',
+        projectDirectory: 'apps/test-dir',
       })
     })
 
     it('should inject project properties without directory', () => {
-      const options = {
-        name: 'testPackage',
-      }
-
       const result = injectProjectProperties(tree, options)
 
       expect(result).toMatchObject({
+        appDirectory: 'test-package',
         projectName: 'test-package',
         projectRoot: 'apps/test-package',
-        projectDirectory: 'test-package',
+        projectDirectory: 'apps',
       })
     })
 
     it('should inject project properties with apps directory', () => {
-      const options = {
-        name: 'testPackage',
-        directory: 'apps/test-dir',
-      }
+      const result = injectProjectProperties(tree, { ...options, directory: 'apps/test-dir' })
+
+      expect(result).toMatchObject({
+        appDirectory: 'test-dir/test-package',
+        projectName: 'test-dir-test-package',
+        projectRoot: 'apps/test-dir/test-package',
+        projectDirectory: 'apps/test-dir',
+      })
+    })
+
+    it('should resolve project directory without apps directory', () => {
+      mockedGetWorkspaceLayout.mockReturnValue({
+        appsDir: '',
+        libsDir: '',
+        standaloneAsDefault: false,
+      })
 
       const result = injectProjectProperties(tree, options)
 
       expect(result).toMatchObject({
+        appDirectory: 'test-package',
+        projectName: 'test-package',
+        projectRoot: 'test-package',
+        projectDirectory: '.',
+      })
+    })
+
+    it('should resolve project directory with directory provided but without apps directory', () => {
+      mockedGetWorkspaceLayout.mockReturnValue({
+        appsDir: '',
+        libsDir: '',
+        standaloneAsDefault: false,
+      })
+
+      const result = injectProjectProperties(tree, { ...options, directory: 'test-dir' })
+
+      expect(result).toMatchObject({
+        appDirectory: 'test-dir/test-package',
         projectName: 'test-dir-test-package',
-        projectRoot: 'apps/test-dir/test-package',
-        projectDirectory: 'test-dir/test-package',
+        projectRoot: 'test-dir/test-package',
+        projectDirectory: 'test-dir',
       })
     })
   })

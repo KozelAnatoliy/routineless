@@ -28,11 +28,9 @@ describe('cdk-application generator', () => {
 
     const packageJson = readJson(tree, 'package.json')
 
+    expect(packageJson.dependencies['@routineless/cdk']).toEqual('latest')
     expect(packageJson.dependencies['aws-cdk-lib']).toBeDefined()
     expect(packageJson.dependencies['constructs']).toBeDefined()
-    expect(packageJson.devDependencies['@aws-sdk/client-sts']).toBeDefined()
-    expect(packageJson.devDependencies['@aws-sdk/credential-providers']).toBeDefined()
-    expect(packageJson.devDependencies['@smithy/shared-ini-file-loader']).toBeDefined()
     expect(packageJson.devDependencies['aws-cdk-local']).toBeDefined()
     expect(packageJson.devDependencies['aws-cdk']).toBeDefined()
 
@@ -58,6 +56,7 @@ describe('cdk-application generator', () => {
 
     expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'cdk'])
     expect(tree.exists('cdk/cdk.json')).toBeTruthy()
+    expect(tree.exists('cdk/jest.config.ts')).toBeFalsy()
     expect(tree.exists('cdk/src/main.ts')).toBeTruthy()
     expect(tree.exists('cdk/src/stacks/persistance.ts')).toBeTruthy()
     expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeFalsy()

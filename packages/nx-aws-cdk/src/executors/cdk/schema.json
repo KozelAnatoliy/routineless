@@ -6,15 +6,28 @@
   "properties": {
     "account": {
       "description": "AWS account id",
-      "type": "number"
+      "type": "number",
+      "alias": "a"
     },
     "region": {
       "description": "AWS region",
-      "type": "string"
+      "type": "string",
+      "alias": "r"
     },
     "watch": {
       "description": "Watch mode. Will trigger the command when files changes.",
-      "type": "boolean"
+      "type": "boolean",
+      "alias": "w"
+    },
+    "resolve": {
+      "description": "Resolve mode. Will try to resolve aws region and account from the context.",
+      "type": "boolean",
+      "alias": "R"
+    },
+    "env": {
+      "description": "Deployment environment name.",
+      "type": "string",
+      "alias": "e"
     }
   }
 }

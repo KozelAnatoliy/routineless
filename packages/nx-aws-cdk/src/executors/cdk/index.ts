@@ -1,5 +1,5 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
-import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
+import { fromNodeProviderChain, fromNodeProviderChainInit } from '@aws-sdk/credential-providers'
 import type { ExecutorContext } from '@nx/devkit'
 import { logger } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
@@ -15,8 +15,7 @@ export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
   env: string
 }
 
-// Do not add watch argument to this list so it will be processed as command argument
-const executorPropKeys = ['cwd', 'env', 'account', 'region', 'watch']
+const executorPropKeys = ['cwd', 'env', 'account', 'region', 'watch', 'resolve']
 
 const normalizeOptions = async (
   options: CdkExecutorOptions,
@@ -46,15 +45,19 @@ const normalizeOptions = async (
   }
 
   parsedArgs['profile'] = parsedArgs['profile'] || process.env['AWS_PROFILE']
-  const profile = parsedArgs['profile']
   let resolvedAccount: string | undefined = options.account || process.env['AWS_ACCOUNT']
   let resolvedRegion: string | undefined = options.region || process.env['AWS_REGION']
-  if (profile && typeof profile === 'string') {
+  if (options.resolve) {
+    const profile = parsedArgs['profile']
+
     if (!resolvedRegion) {
       let regionResolutionError: unknown
       try {
         const awsConfig = await loadSharedConfigFiles()
-        resolvedRegion = awsConfig.configFile?.[profile]?.['region'] || awsConfig.configFile?.['default']?.['region']
+        resolvedRegion =
+          profile && typeof profile === 'string'
+            ? awsConfig.configFile?.[profile]?.['region'] || awsConfig.configFile?.['default']?.['region']
+            : awsConfig.configFile?.['default']?.['region']
       } catch (e: unknown) {
         regionResolutionError = e
         logger.warn(`Cannot resolve region. Failed to load aws config for profile ${profile}: ${e}`)
@@ -67,7 +70,11 @@ const normalizeOptions = async (
 
     if (!resolvedAccount) {
       if (resolvedRegion) {
-        const awsCredentials = fromNodeProviderChain({ profile })
+        const init: fromNodeProviderChainInit = {}
+        if (profile && typeof profile === 'string') {
+          init.profile = profile
+        }
+        const awsCredentials = fromNodeProviderChain(init)
         const stsClient = new STSClient({ credentials: awsCredentials, region: resolvedRegion })
         try {
           const callerIdentity = await stsClient.send(new GetCallerIdentityCommand({}))

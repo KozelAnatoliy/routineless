@@ -48,7 +48,7 @@
     },
     "publish-local": {
       "command": "node tools/scripts/publish.mjs nx-aws-cdk {args.ver} {args.tag}",
-      "dependsOn": ["build"],
+      "dependsOn": ["build", "^publish-local"],
       "options": {
         "tag": "local"
       }
@@ -81,5 +81,6 @@
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "implicitDependencies": ["cdk"]
 }

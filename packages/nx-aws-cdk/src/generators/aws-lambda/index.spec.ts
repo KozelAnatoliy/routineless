@@ -1,55 +1,96 @@
-import { GeneratorCallback, Tree } from '@nx/devkit'
+import { Tree, logger, readJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import generator from '.'
-import infraGenerator from './infra-generator'
-import runtimeGenerator from './runtime-generator'
+import { getRoutinelessConfig } from '../../utils/routineless'
 import { AwsLambdaGeneratorSchema } from './schema'
 
-jest.mock('./infra-generator')
-jest.mock('./runtime-generator')
+jest.mock('../../utils/routineless')
 
-const mockedInfraGenerator = jest.mocked(infraGenerator, { shallow: true })
-const mockedRuntimeGenerator = jest.mocked(runtimeGenerator, { shallow: true })
+const mockedGetRoutinelessConfig = jest.mocked(getRoutinelessConfig, { shallow: true })
 
 describe('aws-lambda generator', () => {
-  let appTree: Tree
-  const options: AwsLambdaGeneratorSchema = { name: 'test-aws-lambda' }
-  const testGeneratorCallback: GeneratorCallback = () => {
-    return new Promise<void>((resolve) => resolve())
+  let tree: Tree
+  const options: AwsLambdaGeneratorSchema = {
+    name: 'test-aws-lambda',
+    addLambdaToInfraApp: false,
+    unitTestRunner: 'jest',
   }
 
   beforeEach(() => {
-    appTree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
-    mockedRuntimeGenerator.mockResolvedValue(testGeneratorCallback)
-    mockedInfraGenerator.mockResolvedValue(testGeneratorCallback)
+    tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
+    mockedGetRoutinelessConfig.mockReturnValue({ infraApp: 'infra' })
   })
 
   afterEach(() => jest.clearAllMocks())
 
-  it('should run infra and runtime generator', async () => {
-    await generator(appTree, options)
+  it('should run successfully with jest', async () => {
+    await generator(tree, options)
 
-    expect(mockedRuntimeGenerator).toHaveBeenCalledWith(
-      appTree,
-      expect.objectContaining({
-        directory: 'apps/test-aws-lambda',
-        name: 'runtime',
-      }),
-    )
-    expect(mockedInfraGenerator).toHaveBeenCalledWith(
-      appTree,
-      expect.objectContaining({
-        directory: 'apps/test-aws-lambda',
-        name: 'infra',
-      }),
+    expect(tree.exists('apps/test-aws-lambda/jest.config.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/project.json')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/runtime/main.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/runtime/main.spec.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/infra/index.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/infra/index.spec.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/lib')).toBeFalsy()
+
+    const jestConfigContent = tree.read('apps/test-aws-lambda/jest.config.ts')?.toString()
+    expect(jestConfigContent).toContain("collectCoverageFrom: ['src/**/*.ts', '!**/*.d.ts', '!src/index.ts'],")
+  })
+
+  it('should run successfully with directory provided', async () => {
+    await generator(tree, { ...options, directory: 'lambdas' })
+
+    expect(tree.exists('apps/lambdas/test-aws-lambda/jest.config.ts')).toBeTruthy()
+    expect(tree.exists('apps/lambdas/test-aws-lambda/project.json')).toBeTruthy()
+    expect(tree.exists('apps/lambdas/test-aws-lambda/src/runtime/main.ts')).toBeTruthy()
+    expect(tree.exists('apps/lambdas/test-aws-lambda/src/runtime/main.spec.ts')).toBeTruthy()
+    expect(tree.exists('apps/lambdas/test-aws-lambda/src/infra/index.ts')).toBeTruthy()
+    expect(tree.exists('apps/lambdas/test-aws-lambda/src/infra/index.spec.ts')).toBeTruthy()
+  })
+
+  it('should run successfully without unit test runner', async () => {
+    await generator(tree, { ...options, unitTestRunner: 'none' })
+
+    expect(tree.exists('apps/test-aws-lambda/project.json')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/infra/index.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/infra/index.spec.ts')).toBeFalsy()
+    expect(tree.exists('apps/test-aws-lambda/src/runtime/main.ts')).toBeTruthy()
+    expect(tree.exists('apps/test-aws-lambda/src/runtime/main.spec.ts')).toBeFalsy()
+    expect(tree.exists('apps/test-aws-lambda/jest.config.ts')).toBeFalsy()
+  })
+
+  it('should update project configuration', async () => {
+    await generator(tree, options)
+
+    const projectConfig = readProjectConfiguration(tree, 'test-aws-lambda')
+    expect(projectConfig.targets?.['build']?.options.bundle).toBeTruthy()
+  })
+
+  it('should add dependencies', async () => {
+    await generator(tree, options)
+
+    const packageJson = readJson(tree, 'package.json')
+
+    expect(packageJson.dependencies['@routineless/cdk']).toEqual('latest')
+    expect(packageJson.devDependencies['@types/aws-lambda']).toBeDefined()
+  })
+
+  it('should not add lambda to infra app if routineless config is not defined', async () => {
+    mockedGetRoutinelessConfig.mockReturnValue(undefined)
+    jest.spyOn(logger, 'warn')
+    await generator(tree, { ...options, addLambdaToInfraApp: true })
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Could not find infra app name at .routineless.json config. Can't add stack to infra app",
     )
   })
 
-  it('should fail on generator failure', async () => {
-    const errorMessage = 'Runtime lambda generator error'
-    mockedRuntimeGenerator.mockRejectedValue(new Error(errorMessage))
+  it('should logg error if lambda can not be added without infra project', async () => {
+    jest.spyOn(logger, 'error')
+    await generator(tree, { ...options, addLambdaToInfraApp: true })
 
-    await expect(generator(appTree, options)).rejects.toThrow(errorMessage)
+    expect(logger.error).toHaveBeenCalledWith('Could not find infra app')
   })
 })

@@ -16,11 +16,13 @@ jest.mock('aws-cdk-lib/aws-lambda', () => {
 })
 
 describe('<%= className %>Stack', () => {
+  const envName = 'local'
   const stackId = '<%= className %>Stack'
+
   it('should define lambda function', () => {
     const app = new cdk.App()
 
-    const stack = new <%= className %>Stack(app, stackId, {})
+    const stack = new <%= className %>Stack(app, stackId, {env: {envName}})
 
     const template = Template.fromStack(stack)
 

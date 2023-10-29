@@ -21,24 +21,27 @@
     "linter": {
       "description": "The tool to use for running lint checks.",
       "type": "string",
-      "enum": ["eslint", "none"],
+      "enum": ["eslint"],
       "default": "eslint"
     },
     "unitTestRunner": {
       "type": "string",
       "enum": ["jest", "none"],
       "description": "Test runner to use for unit tests.",
-      "default": "jest"
+      "default": "jest",
+      "alias": "u"
     },
     "tags": {
       "type": "string",
-      "description": "Add tags to the application (used for linting)."
+      "description": "Add tags to the application (used for linting).",
+      "alias": "t"
     },
     "setAsRoutinelessInfraApp": {
       "type": "boolean",
       "description": "Set as routineless infra app at routineless config",
       "default": false,
-      "x-prompt": "Do you want to set this app as routineless infra app?"
+      "x-prompt": "Do you want to set this app as routineless infra app?",
+      "alias": "i"
     }
   },
   "required": ["name"]

@@ -6,4 +6,5 @@ export interface CdkExecutorOptions extends Json {
   env?: string
   account?: string | undefined
   region?: string | undefined
+  resolve?: boolean
 }

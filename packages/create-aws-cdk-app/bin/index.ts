@@ -16,6 +16,9 @@ async function main() {
     .boolean('nxCloud')
     .describe('nxCloud', 'Connect the workspace to the free tier of the distributed cache provided by Nx Cloud.')
     .default('nxCloud', false)
+    .alias('u', 'unitTestRunner')
+    .describe('u', 'Test runner to use for unit tests. Acceptable values: jest, none')
+    .default('u', 'jest')
     .help('h')
     .alias('h', 'help').argv
   const name = argv._[0] as string
@@ -29,6 +32,7 @@ async function main() {
   const { directory } = await createWorkspace(`@routineless/nx-aws-cdk@${presetVersion}`, {
     i: argv['i'],
     l: argv['l'],
+    unitTestRunner: argv['u'],
     nxCloud: argv.nxCloud,
     name,
     packageManager: 'npm',
