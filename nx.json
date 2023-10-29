@@ -43,7 +43,7 @@
   "release": {
     "groups": {
       "default": {
-        "projects": ["nx-aws-cdk", "create-aws-cdk-app"],
+        "projects": ["nx-aws-cdk", "create-aws-cdk-app", "cdk"],
         "changelog": {
           "createRelease": "github"
         }
