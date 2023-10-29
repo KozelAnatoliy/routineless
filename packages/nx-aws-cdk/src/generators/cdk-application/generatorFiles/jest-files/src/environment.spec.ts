@@ -1,4 +1,4 @@
-import { DEFAULT_ACCOUNT, DEFAULT_ENV, DEFAULT_REGION } from './environment'
+import { DEFAULT_ENV } from './environment'
 
 describe('environment', () => {
   const OLD_ENV = process.env
@@ -31,10 +31,8 @@ describe('environment', () => {
     delete process.env['AWS_REGION']
     const { environment } = await import('./environment')
 
-    expect(environment).toEqual({
-      envName: DEFAULT_ENV,
-      account: DEFAULT_ACCOUNT,
-      region: DEFAULT_REGION,
-    })
+    expect(environment.envName).toEqual(DEFAULT_ENV)
+    expect(environment.account).toBeUndefined()
+    expect(environment.region).toBeUndefined()
   })
 })

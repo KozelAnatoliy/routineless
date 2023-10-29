@@ -1,15 +1,27 @@
 import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import { Linter } from '@nx/eslint'
+import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 
 import generator from '.'
 import type { PresetGeneratorSchema } from './schema'
 
+jest.mock('@nx/js/src/utils/package-json/get-npm-scope')
+
+const mockedGetNpmScope = jest.mocked(getNpmScope)
+
 describe('preset generator', () => {
   let appTree: Tree
   const options: PresetGeneratorSchema = {}
+  const npmScope = 'proj'
 
   beforeEach(() => {
-    appTree = createTreeWithEmptyWorkspace()
+    appTree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
+    mockedGetNpmScope.mockReturnValue(npmScope)
+  })
+
+  afterEach(() => {
+    jest.clearAllMocks()
   })
 
   it('should add dependencied to package.json', async () => {
@@ -23,6 +35,14 @@ describe('preset generator', () => {
     expect(packageJson.devDependencies['@trivago/prettier-plugin-sort-imports']).toBeDefined()
   })
 
+  it('should not add eslint dependencied to package.json', async () => {
+    await generator(appTree, { linter: Linter.None })
+
+    const packageJson = readJson(appTree, 'package.json')
+    expect(packageJson.devDependencies['jsonc-eslint-parser']).toBeUndefined()
+    expect(packageJson.devDependencies['eslint-plugin-prettier']).toBeUndefined()
+  })
+
   it('should add jest preset', async () => {
     await generator(appTree, options)
 
@@ -33,6 +53,16 @@ describe('preset generator', () => {
     expect(jestPresetContent).toContain(`testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)']`)
     expect(jestPresetContent).toContain(`coverageReporters: ['html', 'text']`)
     expect(jestPresetContent).toContain(`collectCoverageFrom: ['src/**/*.ts', '!**/node_modules/**', '!**/*.d.ts']`)
+  })
+
+  it('should not add jest preset and scripts', async () => {
+    await generator(appTree, { unitTestRunner: 'none', linter: Linter.None })
+
+    const packageJson = readJson(appTree, 'package.json')
+    expect(packageJson.scripts['test']).toBeUndefined()
+    expect(packageJson.scripts['test:coverage']).toBeUndefined()
+    expect(packageJson.scripts['lint']).toBeUndefined()
+    expect(appTree.exists('jest.preset.js')).toBe(false)
   })
 
   it('should update .prettierrc', async () => {
@@ -54,7 +84,17 @@ describe('preset generator', () => {
     expect(dockerCompose).toBeDefined()
     const dockerComposeContent = dockerCompose?.toString()
     expect(dockerComposeContent).toContain('localstack')
-    expect(dockerComposeContent).toContain(`container_name: 'proj-localstack_main'`)
+    expect(dockerComposeContent).toContain(`container_name: '${npmScope}-localstack_main'`)
+  })
+
+  it('should default npm scope aws-cdk-app', async () => {
+    mockedGetNpmScope.mockReturnValue(undefined)
+    await generator(appTree, options)
+
+    const dockerCompose = appTree.read('docker/docker-compose.yaml')
+    expect(dockerCompose).toBeDefined()
+    const dockerComposeContent = dockerCompose?.toString()
+    expect(dockerComposeContent).toContain(`container_name: 'aws-cdk-app-localstack_main'`)
   })
 
   it('should update tsconfig.base.json', async () => {
@@ -74,7 +114,6 @@ describe('preset generator', () => {
     await generator(appTree, options)
 
     const packageJson = readJson(appTree, 'package.json')
-    expect(packageJson.scripts['localstack:start']).toBe('bin/localstack.sh')
     expect(packageJson.scripts['build']).toBe('nx run-many --target=build')
     expect(packageJson.scripts['test']).toBe('nx run-many --target=test')
     expect(packageJson.scripts['test:coverage']).toBe(
@@ -117,9 +156,7 @@ describe('preset generator', () => {
   it('should generate lambda app', async () => {
     await generator(appTree, { lambdaAppName: 'test-lambda' })
 
-    const lambdaRuntimeConfig = readProjectConfiguration(appTree, 'test-lambda-runtime')
-    const lambdaInfraConfig = readProjectConfiguration(appTree, 'test-lambda-infra')
-    expect(lambdaRuntimeConfig).toBeDefined()
-    expect(lambdaInfraConfig).toBeDefined()
+    const lambdaConfig = readProjectConfiguration(appTree, 'test-lambda')
+    expect(lambdaConfig).toBeDefined()
   })
 })

@@ -20,7 +20,8 @@
     },
     "directory": {
       "type": "string",
-      "description": "A directory where the project is placed"
+      "description": "A directory where the project is placed",
+      "alias": "c"
     },
     "skipFormat": {
       "description": "Skip formatting files",
@@ -38,12 +39,14 @@
       "type": "string",
       "enum": ["jest", "none"],
       "description": "Test runner to use for unit tests.",
-      "default": "jest"
+      "default": "jest",
+      "aslias": "u"
     },
     "addLambdaToInfraApp": {
       "type": "boolean",
       "description": "Add lambda to infra app",
-      "default": true
+      "default": true,
+      "alias": "a"
     }
   },
   "required": ["name"]

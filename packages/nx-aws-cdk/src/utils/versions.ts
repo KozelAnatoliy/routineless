@@ -21,7 +21,3 @@ export const PRETTIER_PLUGIN_SORT_IMPORTS_VERSION = '^4.2.1'
 
 //@types/aws-lambda
 export const AWS_LAMBDA_TYPES_VERSION = '^8.10.125'
-//aws-sdk
-export const AWS_SDK_VERSION = '^3.435.0'
-//@smithy/shared-ini-file-loader
-export const SMITHY_SHARED_INI_FILE_LOADER_VERSION = '^2.2.2'

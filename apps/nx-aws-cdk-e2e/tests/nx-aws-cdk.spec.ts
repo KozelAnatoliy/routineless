@@ -1,5 +1,12 @@
 import { names } from '@nx/devkit'
-import { checkFilesExist, ensureNxProject, runNxCommandAsync, uniq } from '@nx/plugin/testing'
+import {
+  checkFilesExist,
+  ensureNxProject,
+  patchPackageJsonForPlugin,
+  runNxCommandAsync,
+  runPackageManagerInstall,
+  uniq,
+} from '@nx/plugin/testing'
 
 describe('cdk application', () => {
   const infraProject = uniq('infra')
@@ -14,6 +21,8 @@ describe('cdk application', () => {
   // are not dependant on one another.
   beforeAll(async () => {
     ensureNxProject('@routineless/nx-aws-cdk', 'dist/packages/nx-aws-cdk')
+    patchPackageJsonForPlugin('@routineless/cdk', 'dist/packages/cdk')
+    runPackageManagerInstall()
     await runNxCommandAsync(`generate @routineless/nx-aws-cdk:preset -i ${infraProject} -l ${lambdaProject}`)
   })
 
@@ -39,8 +48,7 @@ describe('cdk application', () => {
     })
 
     it('should create lambda application', () => {
-      expect(() => checkFilesExist(`apps/${lambdaProject}/runtime`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${lambdaProject}/infra`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${lambdaProject}`)).not.toThrow()
     })
 
     it('should remove redundant files', () => {
@@ -77,7 +85,7 @@ describe('cdk application', () => {
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${project}`)
     })
 
-    it('should run cdk tests', async () => {
+    it('should have tests coverage', async () => {
       const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --coverageReporters=text-summary`)
 
       expect(result.stdout).toContain('Statements   : 100%')
@@ -95,44 +103,31 @@ describe('cdk application', () => {
       await runNxCommandAsync(`generate aws-lambda ${project}`)
     })
 
-    describe('lambda runtime', () => {
-      it('should generate files', () => {
-        expect(() => checkFilesExist(`apps/${project}/runtime/project.json`)).not.toThrow()
-        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.ts`)).not.toThrow()
-        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.spec.ts`)).not.toThrow()
-      })
-
-      it('should tests', async () => {
-        const result = await runNxCommandAsync(
-          `test ${project}-runtime -- --codeCoverage=true --coverageReporters=text-summary`,
-        )
-
-        expect(result.stdout).toContain('Statements   : 100%')
-        expect(result.stdout).toContain('Branches     : 100%')
-        expect(result.stdout).toContain('Functions    : 100%')
-        expect(result.stdout).toContain('Lines        : 100%')
-        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-runtime`)
-      })
+    it('should lambda generate files', () => {
+      expect(() => checkFilesExist(`apps/${project}/project.json`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/runtime/main.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/runtime/main.spec.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/infra/index.ts`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${project}/src/infra/index.spec.ts`)).not.toThrow()
     })
 
-    describe('lambda infra', () => {
-      it('should generate files', () => {
-        expect(() => checkFilesExist(`apps/${project}/infra/project.json`)).not.toThrow()
-        expect(() => checkFilesExist(`apps/${project}/infra/src/index.ts`)).not.toThrow()
-        expect(() => checkFilesExist(`apps/${project}/infra/src/index.spec.ts`)).not.toThrow()
-      })
+    it('should run cdk diff', async () => {
+      const { className } = names(project)
 
-      it('should tests', async () => {
-        const result = await runNxCommandAsync(
-          `test ${project}-infra -- --codeCoverage=true --coverageReporters=text-summary`,
-        )
+      const result = await runNxCommandAsync(`run ${infraProject}:cdk diff`)
 
-        expect(result.stdout).toContain('Statements   : 100%')
-        expect(result.stdout).toContain('Branches     : 100%')
-        expect(result.stdout).toContain('Functions    : 100%')
-        expect(result.stdout).toContain('Lines        : 100%')
-        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-infra`)
-      })
+      expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
+      expect(result.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+    })
+
+    it('should have tests coverage', async () => {
+      const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --coverageReporters=text-summary`)
+
+      expect(result.stdout).toContain('Statements   : 100%')
+      expect(result.stdout).toContain('Branches     : 100%')
+      expect(result.stdout).toContain('Functions    : 100%')
+      expect(result.stdout).toContain('Lines        : 100%')
+      expect(result.stdout).toContain(`Successfully ran target test for project ${project}`)
     })
   })
 })

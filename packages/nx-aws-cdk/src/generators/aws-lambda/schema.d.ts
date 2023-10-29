@@ -1,11 +1,6 @@
-import type { Linter } from '@nx/eslint'
+import { DefaultAppSchema } from '../../types/schema'
 
-export interface AwsLambdaGeneratorSchema {
-  name: string
-  tags?: string
-  skipFormat?: boolean
-  unitTestRunner?: 'jest' | 'none'
-  linter?: Linter
+export interface AwsLambdaGeneratorSchema extends DefaultAppSchema {
   directory?: string
   addLambdaToInfraApp?: boolean
 }

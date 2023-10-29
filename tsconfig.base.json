@@ -14,6 +14,7 @@
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {
+      "@routineless/cdk": ["packages/cdk/src/index.ts"],
       "@routineless/nx-aws-cdk": ["packages/nx-aws-cdk/src/*"]
     }
   },

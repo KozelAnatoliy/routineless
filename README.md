@@ -1,5 +1,6 @@
 [![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![License](https://img.shields.io/npm/l/nx.svg?style=flat-square)]()
+[![Typescript](https://badgen.net/badge/icon/typescript?icon=typescript&label)](https://www.typescriptlang.org/)
 [![Semantic Release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg?style=flat-square)]()
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
@@ -15,21 +16,18 @@ For detailed documentation navigate to the [package](packages/nx-plugin/README.m
 
 ## create-aws-cdk-app
 
-Executable package that utilizes @routineless/nx-aws-cdk plugin to generate initial project structure.
+Executable [package](packages/create-aws-cdk-app/README.md) that utilizes @routineless/nx-aws-cdk plugin to generate initial project structure.
 
 ### Usage
 
 ```shell
-npx create-aws-cdk-app
+npx create-aws-cdk-app <workspace-name>
 ```
-
-## Build
 
 ## Local testing
 
 In order to test plugin locally deploy local npm registry using docker-compose in docker dir.
-Update npm config to reference local registry set registry http://localhost:4873/ by appending ~/.npmrc with `registry=http://localhost:4873/`
 
 run `npm run publish:local` to publish routineless to the local registry.
 
-run `npx create-aws-cdk-app test-workspace` to generate workspace with routineless aws cdk preset.
+run `npm_config_registry=http://localhost:4873 npx create-aws-cdk-app@local test-workspace` to generate workspace with routineless aws cdk preset.

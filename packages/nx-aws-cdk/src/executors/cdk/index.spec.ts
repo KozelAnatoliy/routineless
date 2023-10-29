@@ -178,6 +178,7 @@ describe('Cdk Executor', () => {
   })
 
   describe('aws account and region resolution', () => {
+    const resolveOptions: CdkExecutorOptions = { ...options, resolve: true }
     const awsProfile = 'awsProfile'
     const awsRegion = 'awsRegion'
     const mockResolvedRegion = 'resolvedRegion'
@@ -212,7 +213,7 @@ describe('Cdk Executor', () => {
       process.env['AWS_REGION'] = 'envAwsRegion'
       process.env['AWS_PROFILE'] = 'envAwsProfile'
       const awsAccountAwareOptions: CdkExecutorOptions = {
-        ...options,
+        ...resolveOptions,
         account: 'awsAccount',
         region: awsRegion,
         profile: awsProfile,
@@ -236,6 +237,7 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -246,7 +248,7 @@ describe('Cdk Executor', () => {
       process.env['AWS_REGION'] = 'envAwsRegion'
       process.env['AWS_PROFILE'] = 'envAwsProfile'
 
-      await executor(options, context)
+      await executor(resolveOptions, context)
 
       expect(mockedLoadSharedConfigFiles).not.toHaveBeenCalled()
       expect(mockedFromNodeProviderChain).not.toHaveBeenCalled()
@@ -263,6 +265,7 @@ describe('Cdk Executor', () => {
           region: 'envAwsRegion',
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -271,7 +274,7 @@ describe('Cdk Executor', () => {
     it('should resolve aws account info from config and sts client', async () => {
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
         },
         context,
@@ -295,6 +298,49 @@ describe('Cdk Executor', () => {
           region: mockResolvedRegion,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
+        },
+        context,
+      )
+    })
+
+    it('should resolve aws account default region if profile has invalid type', async () => {
+      const defaultRegion = 'defaultRegion'
+      mockedLoadSharedConfigFiles.mockResolvedValue({
+        configFile: {
+          ['default']: {
+            region: defaultRegion,
+          },
+        },
+      } as unknown as SharedConfigFiles)
+
+      await executor(
+        {
+          ...resolveOptions,
+          profile: true,
+        },
+        context,
+      )
+
+      expect(mockedLoadSharedConfigFiles).toHaveBeenCalledTimes(1)
+      expect(mockedFromNodeProviderChain).toHaveBeenCalledWith({})
+      expect(mockedSTSClient).toHaveBeenCalledWith({ credentials: mockIdentityProvider, region: defaultRegion })
+      expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
+      expect(mockedCreateCommands).toHaveBeenCalledWith(
+        {
+          _: ['diff'],
+          command: 'diff',
+          env: 'local',
+          parsedArgs: {
+            _: [],
+            profile: true,
+          },
+          profile: true,
+          account: mockedResolvedAccount,
+          region: defaultRegion,
+          root: 'apps/proj',
+          sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -312,7 +358,7 @@ describe('Cdk Executor', () => {
 
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
         },
         context,
@@ -336,6 +382,7 @@ describe('Cdk Executor', () => {
           region: defaultRegion,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -344,7 +391,7 @@ describe('Cdk Executor', () => {
     it('should resolve aws account only from sts client if region provided', async () => {
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
           region: awsRegion,
         },
@@ -369,6 +416,7 @@ describe('Cdk Executor', () => {
           region: awsRegion,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -380,7 +428,7 @@ describe('Cdk Executor', () => {
       } as unknown as SharedConfigFiles)
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
         },
         context,
@@ -400,6 +448,7 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -409,7 +458,7 @@ describe('Cdk Executor', () => {
       mockedLoadSharedConfigFiles.mockRejectedValueOnce(new Error('Failed to load aws config'))
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
         },
         context,
@@ -429,6 +478,7 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )
@@ -438,7 +488,7 @@ describe('Cdk Executor', () => {
       mockedSTSClientSend.mockRejectedValueOnce(new Error('Failed to get caller identity'))
       await executor(
         {
-          ...options,
+          ...resolveOptions,
           profile: awsProfile,
           region: awsRegion,
         },
@@ -462,6 +512,7 @@ describe('Cdk Executor', () => {
           region: awsRegion,
           root: 'apps/proj',
           sourceRoot: 'apps/proj/src',
+          resolve: true,
         },
         context,
       )

@@ -1,0 +1,27 @@
+{
+  "name": "@routineless/cdk",
+  "version": "0.0.1-beta.0",
+  "description": "Cdk utilities",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KozelAnatoliy/routineless.git",
+    "directory": "packages/cdk"
+  },
+  "keywords": [
+    "Monorepo",
+    "Aws",
+    "Cdk",
+    "Nx",
+    "Node",
+    "Jest"
+  ],
+  "main": "src/index.js",
+  "author": "Anatoli Kozel",
+  "license": "MIT",
+  "dependencies": {
+    "aws-cdk-lib": "^2.103.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -18,14 +18,7 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { updateRoutinelessConfig } from '../../utils/routineless'
-import {
-  AWS_SDK_VERSION,
-  CDK_CONSTRUCTS_VERSION,
-  CDK_ESLINT_VERSION,
-  CDK_LOCAL_VERSION,
-  CDK_VERSION,
-  SMITHY_SHARED_INI_FILE_LOADER_VERSION,
-} from '../../utils/versions'
+import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
@@ -128,9 +121,6 @@ const updateTsConfig = (tree: Tree) => {
 
 const addDependencies = (host: Tree, options: NormalizedSchema): GeneratorCallback => {
   const devDependencies: Record<string, string> = {
-    '@aws-sdk/client-sts': AWS_SDK_VERSION,
-    '@aws-sdk/credential-providers': AWS_SDK_VERSION,
-    '@smithy/shared-ini-file-loader': SMITHY_SHARED_INI_FILE_LOADER_VERSION,
     'aws-cdk-local': CDK_LOCAL_VERSION,
     'aws-cdk': CDK_VERSION,
   }
@@ -140,6 +130,7 @@ const addDependencies = (host: Tree, options: NormalizedSchema): GeneratorCallba
   return addDependenciesToPackageJson(
     host,
     {
+      '@routineless/cdk': 'latest',
       'aws-cdk-lib': CDK_VERSION,
       constructs: CDK_CONSTRUCTS_VERSION,
     },

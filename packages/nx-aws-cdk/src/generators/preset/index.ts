@@ -36,38 +36,47 @@ const normalizeOptions = (_tree: Tree, options: PresetGeneratorSchema): Normaliz
   }
 }
 
-const addDependencies = (host: Tree): GeneratorCallback => {
-  return addDependenciesToPackageJson(
-    host,
-    {},
-    {
+const addDependencies = (host: Tree, normalizedOptions: NormalizedSchema): GeneratorCallback => {
+  let devDependencies: Record<string, string> = {
+    '@tsconfig/node-lts': TSCONFIG_NODE_LTS_VERSION,
+    '@tsconfig/strictest': TSCONFIG_STRICTEST_VERSION,
+    '@trivago/prettier-plugin-sort-imports': PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
+  }
+
+  if (normalizedOptions.linter === Linter.EsLint) {
+    devDependencies = {
+      ...devDependencies,
       'jsonc-eslint-parser': JSON_ESLINT_PARSER_VERSION,
       'eslint-plugin-prettier': ESLINT_PLUGIN_PRETTIER_VERSION,
-      '@tsconfig/node-lts': TSCONFIG_NODE_LTS_VERSION,
-      '@tsconfig/strictest': TSCONFIG_STRICTEST_VERSION,
-      '@trivago/prettier-plugin-sort-imports': PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
-    },
-  )
+    }
+  }
+  return addDependenciesToPackageJson(host, {}, devDependencies)
 }
 
-const addFiles = (tree: Tree) => {
+const addFiles = (tree: Tree, normalizedOptions: NormalizedSchema) => {
   const scope = getNpmScope(tree)
   const templateOptions = {
     template: '',
     workspaceName: scope || 'aws-cdk-app',
   }
-  generateFiles(tree, join(__dirname, 'generatorFiles'), '.', templateOptions)
+  generateFiles(tree, join(__dirname, 'generatorFiles', 'files'), '.', templateOptions)
+  if (normalizedOptions.unitTestRunner === 'jest') {
+    generateFiles(tree, join(__dirname, 'generatorFiles', 'jest-files'), '.', templateOptions)
+  }
 }
 
-const updatePackageJson = (tree: Tree) => {
+const updatePackageJson = (tree: Tree, normalizedOptions: NormalizedSchema) => {
   updateJson(tree, `package.json`, (json) => {
     json.scripts = json.scripts || {}
-    json.scripts['localstack:start'] = 'bin/localstack.sh'
     json.scripts['build'] = 'nx run-many --target=build'
-    json.scripts['test'] = 'nx run-many --target=test'
-    json.scripts['test:coverage'] =
-      'nx run-many --target=test --codeCoverage=true --output-style="static" --passWithNoTests=false --skip-nx-cache'
-    json.scripts['lint'] = 'nx run-many --target=lint'
+    if (normalizedOptions.unitTestRunner !== 'none') {
+      json.scripts['test'] = 'nx run-many --target=test'
+      json.scripts['test:coverage'] =
+        'nx run-many --target=test --codeCoverage=true --output-style="static" --passWithNoTests=false --skip-nx-cache'
+    }
+    if (normalizedOptions.linter !== Linter.None) {
+      json.scripts['lint'] = 'nx run-many --target=lint'
+    }
     return json
   })
 }
@@ -109,8 +118,10 @@ const updateLintConfig = (tree: Tree) => {
 }
 
 // delete redundant
-const deleteRedundantFiles = (tree: Tree) => {
-  tree.delete('apps/.gitkeep')
+const deleteRedundantFiles = (tree: Tree, normalizedOptions: NormalizedSchema) => {
+  if (normalizedOptions.lambdaAppName) {
+    tree.delete('apps/.gitkeep')
+  }
   // detelint .editorconfig using dirrect fs operation because it is used as formatting style source for prettier
   // it will be added after generator changes will be flushed
   removeSync(join(tree.root, '.editorconfig'))
@@ -120,7 +131,7 @@ const presetGenerator = async (tree: Tree, options: PresetGeneratorSchema) => {
   const normalizedOptions = normalizeOptions(tree, options)
   const tasks: GeneratorCallback[] = []
 
-  tasks.push(addDependencies(tree))
+  tasks.push(addDependencies(tree, normalizedOptions))
   tasks.push(
     await cdkApplicationGenerator(tree, {
       ...normalizedOptions,
@@ -146,9 +157,9 @@ const presetGenerator = async (tree: Tree, options: PresetGeneratorSchema) => {
   }
 
   updateTsConfig(tree)
-  updatePackageJson(tree)
-  addFiles(tree)
-  deleteRedundantFiles(tree)
+  updatePackageJson(tree, normalizedOptions)
+  addFiles(tree, normalizedOptions)
+  deleteRedundantFiles(tree, normalizedOptions)
 
   if (!normalizedOptions.skipFormat) {
     await formatFiles(tree)

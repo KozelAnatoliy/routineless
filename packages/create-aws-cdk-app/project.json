@@ -16,7 +16,7 @@
     },
     "publish-local": {
       "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.tag} {args.ver}",
-      "dependsOn": ["build"],
+      "dependsOn": ["build", "^publish-local"],
       "options": {
         "tag": "local"
       }

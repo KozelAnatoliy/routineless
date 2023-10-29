@@ -8,19 +8,20 @@
       "description": "Adds the specified unit test runner",
       "type": "string",
       "enum": ["jest", "none"],
-      "default": "jest"
+      "default": "jest",
+      "alias": "u"
     },
     "linter": {
       "description": "The tool to use for running lint checks.",
       "type": "string",
-      "enum": ["eslint", "none"],
+      "enum": ["eslint"],
       "default": "eslint"
     },
     "infraAppName": {
-      "description": "Infrastructure management application name.",
+      "description": "Cdk infrastructure management application name.",
       "type": "string",
       "default": "infra",
-      "x-prompt": "Enter infra application name",
+      "x-prompt": "Enter cdk application name",
       "alias": "i"
     },
     "lambdaAppName": {
