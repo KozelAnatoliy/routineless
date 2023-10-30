@@ -31,6 +31,11 @@ describe('main', () => {
       name: 'workspace-name',
       packageManager: 'npm',
       unitTestRunner: 'none',
+      commit: {
+        email: '',
+        message: 'Initial commit',
+        name: '',
+      },
     })
   })
 })

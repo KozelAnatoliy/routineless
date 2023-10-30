@@ -1,6 +1,6 @@
 {
   "name": "@routineless/nx-aws-cdk",
-  "version": "0.0.1-beta.2",
+  "version": "0.0.1-beta.3",
   "description": "Nx plugin for AWS CDK",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
     "Jest"
   ],
   "main": "src/index.js",
+  "typings": "src/index.d.ts",
   "author": "Anatoli Kozel",
   "license": "MIT",
   "generators": "./generators.json",
@@ -32,7 +33,7 @@
     "ignore": "5.2.4",
     "tslib": "^2.6.2",
     "@nx/jest": "17.0.2",
-    "@routineless/cdk": "0.0.1-beta.2",
+    "@routineless/cdk": "0.0.1-beta.3",
     "aws-cdk-lib": "^2.103.1"
   },
   "publishConfig": {

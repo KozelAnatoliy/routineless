@@ -26,13 +26,6 @@
         "tag": "local"
       }
     },
-    "semantic-release": {
-      "executor": "@theunderscorer/nx-semantic-release:semantic-release",
-      "options": {
-        "buildTarget": "create-aws-cdk-app:build",
-        "outputPath": "dist/packages/create-aws-cdk-app"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],

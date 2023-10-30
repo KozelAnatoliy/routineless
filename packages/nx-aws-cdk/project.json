@@ -58,13 +58,6 @@
         "tag": "local"
       }
     },
-    "semantic-release": {
-      "executor": "@theunderscorer/nx-semantic-release:semantic-release",
-      "options": {
-        "buildTarget": "nx-aws-cdk:build",
-        "outputPath": "dist/packages/nx-aws-cdk"
-      }
-    },
     "lint": {
       "executor": "@nx/eslint:lint",
       "outputs": ["{options.outputFile}"],
