@@ -4,6 +4,11 @@
   "sourceRoot": "packages/cdk/src",
   "projectType": "library",
   "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/cdk"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],

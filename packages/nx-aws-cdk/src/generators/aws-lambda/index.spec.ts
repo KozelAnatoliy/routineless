@@ -73,7 +73,7 @@ describe('aws-lambda generator', () => {
 
     const packageJson = readJson(tree, 'package.json')
 
-    expect(packageJson.dependencies['@routineless/cdk']).toEqual('latest')
+    expect(packageJson.dependencies['@routineless/cdk']).toBeDefined()
     expect(packageJson.devDependencies['@types/aws-lambda']).toBeDefined()
   })
 

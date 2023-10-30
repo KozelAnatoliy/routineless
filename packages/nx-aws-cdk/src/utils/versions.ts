@@ -21,3 +21,6 @@ export const PRETTIER_PLUGIN_SORT_IMPORTS_VERSION = '^4.2.1'
 
 //@types/aws-lambda
 export const AWS_LAMBDA_TYPES_VERSION = '^8.10.125'
+
+//@routineless/cdk
+export const ROUTINELESS_CDK_VERSION = '0.0.1-beta.2'

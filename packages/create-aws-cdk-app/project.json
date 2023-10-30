@@ -4,6 +4,11 @@
   "sourceRoot": "packages/create-aws-cdk-app/bin",
   "projectType": "library",
   "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/create-aws-cdk-app"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],

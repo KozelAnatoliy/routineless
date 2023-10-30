@@ -18,7 +18,7 @@ import { join } from 'path'
 
 import { ProjectProperties, injectProjectProperties } from '../../utils/generators'
 import { getRoutinelessConfig } from '../../utils/routineless'
-import { AWS_LAMBDA_TYPES_VERSION } from '../../utils/versions'
+import { AWS_LAMBDA_TYPES_VERSION, ROUTINELESS_CDK_VERSION } from '../../utils/versions'
 import { deleteNodeLibRedundantDirs } from '../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from './schema'
 
@@ -99,7 +99,7 @@ const addDependencies = (host: Tree): GeneratorCallback => {
   return addDependenciesToPackageJson(
     host,
     {
-      '@routineless/cdk': 'latest',
+      '@routineless/cdk': ROUTINELESS_CDK_VERSION,
     },
     {
       '@types/aws-lambda': AWS_LAMBDA_TYPES_VERSION,

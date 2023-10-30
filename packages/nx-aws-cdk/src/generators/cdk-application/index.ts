@@ -18,7 +18,13 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { updateRoutinelessConfig } from '../../utils/routineless'
-import { CDK_CONSTRUCTS_VERSION, CDK_ESLINT_VERSION, CDK_LOCAL_VERSION, CDK_VERSION } from '../../utils/versions'
+import {
+  CDK_CONSTRUCTS_VERSION,
+  CDK_ESLINT_VERSION,
+  CDK_LOCAL_VERSION,
+  CDK_VERSION,
+  ROUTINELESS_CDK_VERSION,
+} from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
@@ -130,7 +136,7 @@ const addDependencies = (host: Tree, options: NormalizedSchema): GeneratorCallba
   return addDependenciesToPackageJson(
     host,
     {
-      '@routineless/cdk': 'latest',
+      '@routineless/cdk': ROUTINELESS_CDK_VERSION,
       'aws-cdk-lib': CDK_VERSION,
       constructs: CDK_CONSTRUCTS_VERSION,
     },

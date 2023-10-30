@@ -4,6 +4,11 @@
   "sourceRoot": "packages/nx-aws-cdk/src",
   "projectType": "library",
   "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/nx-aws-cdk"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],

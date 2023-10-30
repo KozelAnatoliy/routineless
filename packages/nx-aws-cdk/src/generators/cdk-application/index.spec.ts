@@ -28,7 +28,7 @@ describe('cdk-application generator', () => {
 
     const packageJson = readJson(tree, 'package.json')
 
-    expect(packageJson.dependencies['@routineless/cdk']).toEqual('latest')
+    expect(packageJson.dependencies['@routineless/cdk']).toBeDefined()
     expect(packageJson.dependencies['aws-cdk-lib']).toBeDefined()
     expect(packageJson.dependencies['constructs']).toBeDefined()
     expect(packageJson.devDependencies['aws-cdk-local']).toBeDefined()
