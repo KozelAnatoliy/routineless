@@ -2,6 +2,8 @@
 import { createWorkspace } from 'create-nx-workspace'
 import yargs from 'yargs'
 
+import packageJson from '../package.json'
+
 async function main() {
   console.log(`Start Creating the workspace`)
 
@@ -25,17 +27,21 @@ async function main() {
 
   console.log(`Creating the workspace: ${name}`)
 
-  // This assumes "@routineless/nx-aws-cdk" and "create-aws-cdk-app" are at the same version
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const presetVersion = require('../package.json').version
+  const presetName = '@routineless/nx-aws-cdk'
+  const presetVersion = packageJson.version
 
-  const { directory } = await createWorkspace(`@routineless/nx-aws-cdk@${presetVersion}`, {
+  const { directory } = await createWorkspace(`${presetName}@${presetVersion}`, {
     i: argv['i'],
     l: argv['l'],
     unitTestRunner: argv['u'],
     nxCloud: argv.nxCloud,
     name,
     packageManager: 'npm',
+    commit: {
+      name: '',
+      email: '',
+      message: 'Initial commit',
+    },
   })
 
   console.log(`Successfully created the workspace: ${directory}.`)

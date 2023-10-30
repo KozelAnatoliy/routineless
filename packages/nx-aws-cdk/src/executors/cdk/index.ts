@@ -100,7 +100,7 @@ const normalizeOptions = async (
   }
 }
 
-const runExecutor = async (options: CdkExecutorOptions, context: ExecutorContext): Promise<{ success: boolean }> => {
+const cdkExecutor = async (options: CdkExecutorOptions, context: ExecutorContext): Promise<{ success: boolean }> => {
   const normalizedOptions = await normalizeOptions(options, context)
   const commands = createCommands(normalizedOptions, context)
   try {
@@ -139,4 +139,4 @@ const parseArgs = (
   return { command, parsedArgs }
 }
 
-export default runExecutor
+export default cdkExecutor

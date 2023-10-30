@@ -47,7 +47,8 @@
         "projects": ["nx-aws-cdk", "create-aws-cdk-app", "cdk"],
         "changelog": {
           "createRelease": "github"
-        }
+        },
+        "releaseTagPattern": "{projectName}-{version}"
       }
     }
   },
