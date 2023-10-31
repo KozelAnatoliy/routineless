@@ -3,7 +3,7 @@ const nxPreset = require('@nx/jest/preset').default
 module.exports = {
   ...nxPreset,
   testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
-  coverageReporters: ['html', 'text'],
+  coverageReporters: ['text', 'cobertura'],
   collectCoverageFrom: ['src/**/*.ts', '!**/node_modules/**', '!**/*.d.ts'],
   coverageThreshold: {
     global: {

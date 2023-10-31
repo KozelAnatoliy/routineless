@@ -1,12 +1,12 @@
 import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { Linter } from '@nx/eslint'
-import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 
 import generator from '.'
+import { getNpmScope } from '../../utils/workspace'
 import type { PresetGeneratorSchema } from './schema'
 
-jest.mock('@nx/js/src/utils/package-json/get-npm-scope')
+jest.mock('../../utils/workspace')
 
 const mockedGetNpmScope = jest.mocked(getNpmScope)
 

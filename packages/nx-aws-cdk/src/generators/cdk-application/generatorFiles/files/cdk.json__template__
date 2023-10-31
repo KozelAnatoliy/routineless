@@ -1,6 +1,6 @@
 {
     "app": "node <%= offsetFromRoot %>dist/<%= projectRoot %>/main.js",
-    "output": "<%= offsetFromRoot %>cdk.out",
+    "output": "<%= offsetFromRoot %>cdk.out/<%= projectRoot %>",
     "watch": {
       "include": ["<%= offsetFromRoot %>dist/<%= projectRoot %>/**"],
       "exclude": [

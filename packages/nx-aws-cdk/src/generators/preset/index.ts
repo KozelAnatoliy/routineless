@@ -8,7 +8,6 @@ import {
   updateJson,
 } from '@nx/devkit'
 import { Linter } from '@nx/eslint'
-import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 import { removeSync } from 'fs-extra'
 import { join } from 'path'
 
@@ -21,6 +20,7 @@ import {
   TSCONFIG_NODE_LTS_VERSION,
   TSCONFIG_STRICTEST_VERSION,
 } from '../../utils/versions'
+import { getNpmScope } from '../../utils/workspace'
 import type { PresetGeneratorSchema } from './schema'
 
 interface NormalizedSchema extends PresetGeneratorSchema {

@@ -13,7 +13,6 @@ import {
   updateProjectConfiguration,
 } from '@nx/devkit'
 import { Linter } from '@nx/eslint'
-import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
@@ -25,7 +24,7 @@ import {
   CDK_VERSION,
   ROUTINELESS_CDK_VERSION,
 } from '../../utils/versions'
-import { addGitIgnoreEntries, deleteNodeAppRedundantDirs } from '../../utils/workspace'
+import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, getNpmScope } from '../../utils/workspace'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
 

@@ -1,7 +1,14 @@
-import type { Tree } from '@nx/devkit'
+import { Tree, readJson } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
-import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, deleteNodeLibRedundantDirs } from './workspace'
+import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, deleteNodeLibRedundantDirs, getNpmScope } from './workspace'
+
+jest.mock('@nx/devkit', () => ({
+  ...jest.requireActual('@nx/devkit'),
+  readJson: jest.fn(),
+}))
+
+const mockerdReadJson = jest.mocked(readJson)
 
 describe('workspace utils', () => {
   let tree: Tree
@@ -74,6 +81,34 @@ describe('workspace utils', () => {
       deleteNodeLibRedundantDirs(tree, projectRoot)
 
       expect(deleteSpy).toHaveBeenCalledWith(`${projectRoot}/src/lib`)
+    })
+  })
+
+  describe('getNpmScope', () => {
+    it('should return npm scope', () => {
+      jest.spyOn(tree, 'exists').mockReturnValueOnce(true)
+      mockerdReadJson.mockReturnValueOnce({ name: '@test/test' })
+
+      const result = getNpmScope(tree)
+
+      expect(result).toEqual('test')
+    })
+
+    it('should return undefined if package.json does not exist', () => {
+      jest.spyOn(tree, 'exists').mockReturnValueOnce(false)
+
+      const result = getNpmScope(tree)
+
+      expect(result).toBeUndefined()
+    })
+
+    it('should return undefined if package.json does not have scope in name', () => {
+      jest.spyOn(tree, 'exists').mockReturnValueOnce(true)
+      mockerdReadJson.mockReturnValueOnce({ name: 'test' })
+
+      const result = getNpmScope(tree)
+
+      expect(result).toBeUndefined()
     })
   })
 })

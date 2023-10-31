@@ -12,14 +12,14 @@ import {
   runTasksInSerial,
   updateProjectConfiguration,
 } from '@nx/devkit'
-import { getNpmScope } from '@nx/js/src/utils/package-json/get-npm-scope'
+import { addPropertyToJestConfig } from '@nx/jest'
 import { libraryGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { ProjectProperties, injectProjectProperties } from '../../utils/generators'
 import { getRoutinelessConfig } from '../../utils/routineless'
 import { AWS_LAMBDA_TYPES_VERSION, ROUTINELESS_CDK_VERSION } from '../../utils/versions'
-import { deleteNodeLibRedundantDirs } from '../../utils/workspace'
+import { deleteNodeLibRedundantDirs, getNpmScope } from '../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from './schema'
 
 type AwsLambdaGeneratorOptions = AwsLambdaGeneratorSchema & ProjectProperties
@@ -74,15 +74,7 @@ const addStackToInfraApp = (tree: Tree, options: AwsLambdaGeneratorOptions) => {
 
 const updateJestConfig = (tree: Tree, options: AwsLambdaGeneratorOptions) => {
   const jestConfigPath = join(options.projectRoot, 'jest.config.ts')
-  const jestConfigContent = tree.read(jestConfigPath)
-  if (jestConfigContent) {
-    const testPathIgnorePatterns = Buffer.from(",collectCoverageFrom: ['src/**/*.ts', '!**/*.d.ts', '!src/index.ts']}")
-    const resultContent = Buffer.concat([
-      jestConfigContent.subarray(0, jestConfigContent.length - 3),
-      testPathIgnorePatterns,
-    ])
-    tree.write(jestConfigPath, resultContent)
-  }
+  addPropertyToJestConfig(tree, jestConfigPath, 'collectCoverageFrom', ['src/**/*.ts', '!**/*.d.ts', '!src/index.ts'])
 }
 
 const addFiles = (tree: Tree, options: AwsLambdaGeneratorOptions, filesType: 'files' | 'jest-files' = 'files') => {

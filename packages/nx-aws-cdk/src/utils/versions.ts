@@ -1,5 +1,5 @@
 //aws-cdk
-export const CDK_VERSION = '^2.102.0'
+export const CDK_VERSION = '^2.104.0'
 //aws-cdk-local
 export const CDK_LOCAL_VERSION = '^2.18.0'
 //eslint-plugin-cdk
@@ -23,4 +23,4 @@ export const PRETTIER_PLUGIN_SORT_IMPORTS_VERSION = '^4.2.1'
 export const AWS_LAMBDA_TYPES_VERSION = '^8.10.125'
 
 //@routineless/cdk
-export const ROUTINELESS_CDK_VERSION = '0.0.1-beta.2'
+export const ROUTINELESS_CDK_VERSION = '0.0.1-beta.3'

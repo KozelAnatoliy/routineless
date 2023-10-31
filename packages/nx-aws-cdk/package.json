@@ -27,12 +27,11 @@
     "@nx/node": "17.0.2",
     "@nx/devkit": "17.0.2",
     "@nx/eslint": "17.0.2",
-    "@nx/js": "17.0.2",
+    "@nx/jest": "17.0.2",
     "@smithy/shared-ini-file-loader": "^2.2.2",
     "fs-extra": "11.1.1",
     "ignore": "5.2.4",
     "tslib": "^2.6.2",
-    "@nx/jest": "17.0.2",
     "@routineless/cdk": "0.0.1-beta.3",
     "aws-cdk-lib": "^2.103.1"
   },
