@@ -1,3 +1,13 @@
+## 0.0.1-beta.3
+
+### 🚀 Features
+
+- swithed semantic versioning implementation ([20c09cc](https://github.com/KozelAnatoliy/routineless/commit/20c09cc))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 0.0.1-beta.0
 
 ### 🚀 Features

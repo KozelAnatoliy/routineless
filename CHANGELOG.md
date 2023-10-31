@@ -1,3 +1,14 @@
+## 0.0.1-beta.3
+
+
+### 🚀 Features
+
+- swithed semantic versioning implementation
+
+### ❤️  Thank You
+
+- Anatoli Kozel
+
 ## 0.0.1-beta.0
 
 
