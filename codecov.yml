@@ -1,0 +1,19 @@
+flag_management:
+  default_rules:
+    carryforward: true
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+      - type: patch
+        target: 90%
+  individual_flags:
+    - name: cdk
+      paths:
+        - packages/cdk
+    - name: create-aws-cdk-app
+      paths:
+        - packages/create-aws-cdk-app
+    - name: nx-aws-cdk
+      paths:
+        - packages/nx-aws-cdk

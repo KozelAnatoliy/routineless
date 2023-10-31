@@ -1,16 +1,14 @@
 ## 0.0.1-beta.3
 
-
 ### 🚀 Features
 
 - swithed semantic versioning implementation
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Anatoli Kozel
 
 ## 0.0.1-beta.0
-
 
 ### 🚀 Features
 
@@ -18,6 +16,6 @@
 - change cdk executor command provisioning. Implement aws info provisioning. Write initial docks
 - refactor aws lambda generator. Update packages readme files. Implement cross envs
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Anatoli Kozel

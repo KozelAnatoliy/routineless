@@ -95,6 +95,17 @@ jobs:
 
           exit 0
 
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          flags: cdk,create-aws-cdk-app,nx-aws-cdk
+          files: '!./.nx'
+          directory: coverage
+          fail_ci_if_error: true
+          verbose: true
+
       - name: Cleanup environment
         run: |
           docker compose -f ./docker/docker-compose.yaml down
