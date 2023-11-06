@@ -95,13 +95,6 @@ const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) 
   } else {
     projectConfig.targets = {}
   }
-  projectConfig.targets = {
-    ...projectConfig.targets,
-    cdk: {
-      executor: '@routineless/nx-aws-cdk:cdk',
-      dependsOn: ['build'],
-    },
-  }
   const buildTarget = projectConfig.targets['build']
   if (buildTarget) {
     delete buildTarget.defaultConfiguration

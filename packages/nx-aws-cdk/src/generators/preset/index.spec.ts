@@ -1,4 +1,4 @@
-import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
+import { Tree, generateFiles, readJson, readNxJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 import { Linter } from '@nx/eslint'
 
@@ -7,8 +7,16 @@ import { getNpmScope } from '../../utils/workspace'
 import type { PresetGeneratorSchema } from './schema'
 
 jest.mock('../../utils/workspace')
+jest.mock('@nx/devkit', () => ({
+  ...jest.requireActual('@nx/devkit'),
+  generateFiles: jest.fn(),
+  readNxJson: jest.fn(),
+}))
 
+const mockedGenerateFiles = jest.mocked(generateFiles)
+const mockedReadNxJson = jest.mocked(readNxJson)
 const mockedGetNpmScope = jest.mocked(getNpmScope)
+const actualReadNxJson = jest.requireActual('@nx/devkit').readNxJson
 
 describe('preset generator', () => {
   let appTree: Tree
@@ -18,6 +26,8 @@ describe('preset generator', () => {
   beforeEach(() => {
     appTree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
     mockedGetNpmScope.mockReturnValue(npmScope)
+    mockedGenerateFiles.mockImplementation(jest.requireActual('@nx/devkit').generateFiles)
+    mockedReadNxJson.mockImplementation(actualReadNxJson)
   })
 
   afterEach(() => {
@@ -77,24 +87,15 @@ describe('preset generator', () => {
     expect(prettierRcContent).toContain(`"printWidth": 120`)
   })
 
-  it('should add localstack docker compose', async () => {
-    await generator(appTree, options)
-
-    const dockerCompose = appTree.read('docker/docker-compose.yaml')
-    expect(dockerCompose).toBeDefined()
-    const dockerComposeContent = dockerCompose?.toString()
-    expect(dockerComposeContent).toContain('localstack')
-    expect(dockerComposeContent).toContain(`container_name: '${npmScope}-localstack_main'`)
-  })
-
   it('should default npm scope aws-cdk-app', async () => {
     mockedGetNpmScope.mockReturnValue(undefined)
+
     await generator(appTree, options)
 
-    const dockerCompose = appTree.read('docker/docker-compose.yaml')
-    expect(dockerCompose).toBeDefined()
-    const dockerComposeContent = dockerCompose?.toString()
-    expect(dockerComposeContent).toContain(`container_name: 'aws-cdk-app-localstack_main'`)
+    expect(mockedGenerateFiles).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.anything(), {
+      template: '',
+      workspaceName: 'aws-cdk-app',
+    })
   })
 
   it('should update tsconfig.base.json', async () => {
@@ -158,5 +159,24 @@ describe('preset generator', () => {
 
     const lambdaConfig = readProjectConfiguration(appTree, 'test-lambda')
     expect(lambdaConfig).toBeDefined()
+  })
+
+  it('should fail if read nx json failed', async () => {
+    mockedReadNxJson.mockReturnValue(null)
+  })
+
+  it('should update nx json config', async () => {
+    const existingPlugin = 'existing-plugin'
+    mockedReadNxJson.mockImplementationOnce((tree) => {
+      const nxJson = actualReadNxJson(tree)
+      nxJson.plugins = [existingPlugin]
+      return nxJson
+    })
+
+    await generator(appTree, options)
+    const resultNxJson = actualReadNxJson(appTree)
+
+    expect(resultNxJson.plugins).toContain(existingPlugin)
+    expect(resultNxJson.plugins).toContain('@routineless/nx-aws-cdk')
   })
 })

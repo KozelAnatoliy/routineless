@@ -1,10 +1,12 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { fromNodeProviderChain, fromNodeProviderChainInit } from '@aws-sdk/credential-providers'
-import type { ExecutorContext } from '@nx/devkit'
+import { ExecutorContext, runExecutor } from '@nx/devkit'
 import { logger } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 
-import { createCommands, runCommandsInParralel } from './executors'
+import { runCommandsInParralel } from '../../utils/executors'
+import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning as isLocalstackRunning } from '../localstack'
+import { createCommands } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
 export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
@@ -13,6 +15,7 @@ export interface ParsedCdkExecutorOption extends CdkExecutorOptions {
   root: string
   sourceRoot: string
   env: string
+  projectName: string
 }
 
 const executorPropKeys = ['cwd', 'env', 'account', 'region', 'watch', 'resolve']
@@ -97,12 +100,31 @@ const normalizeOptions = async (
     sourceRoot,
     root,
     parsedArgs,
+    projectName: context.projectName,
   }
 }
 
 const cdkExecutor = async (options: CdkExecutorOptions, context: ExecutorContext): Promise<{ success: boolean }> => {
   const normalizedOptions = await normalizeOptions(options, context)
   const commands = createCommands(normalizedOptions, context)
+
+  if (normalizedOptions.env === 'local' && !(await isLocalstackRunning(context))) {
+    logger.info('Localstack is not running. Starting localstack')
+    const localstackStartResult = await runExecutor(
+      { project: normalizedOptions.projectName, target: LOCALSTACK_TARGET_NAME },
+      { command: 'start' },
+      context,
+    )
+    for await (const resolut of localstackStartResult) {
+      if (!resolut.success) {
+        logger.error('Failed to start localstack')
+        return {
+          success: false,
+        }
+      }
+    }
+  }
+
   try {
     await runCommandsInParralel(commands)
     return {

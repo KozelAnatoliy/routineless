@@ -10,7 +10,15 @@
         "jestConfig": "apps/nx-aws-cdk-e2e/jest.config.ts",
         "runInBand": true
       },
-      "dependsOn": ["create-aws-cdk-app:publish-local", "nx-aws-cdk:publish-local"]
+      "dependsOn": ["create-aws-cdk-app:publish-local"]
+    },
+    "local-registry": {
+      "executor": "@nx/js:verdaccio",
+      "options": {
+        "port": 4873,
+        "config": ".verdaccio/config.yml",
+        "storage": "tmp/local-registry/storage"
+      }
     }
   },
   "tags": [],

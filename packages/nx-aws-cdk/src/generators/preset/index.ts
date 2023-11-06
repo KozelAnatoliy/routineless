@@ -4,8 +4,10 @@ import {
   addDependenciesToPackageJson,
   formatFiles,
   generateFiles,
+  readNxJson,
   runTasksInSerial,
   updateJson,
+  updateNxJson,
 } from '@nx/devkit'
 import { Linter } from '@nx/eslint'
 import { removeSync } from 'fs-extra'
@@ -34,6 +36,15 @@ const normalizeOptions = (_tree: Tree, options: PresetGeneratorSchema): Normaliz
     unitTestRunner: options.unitTestRunner ?? 'jest',
     infraAppName: options.infraAppName ?? 'infra',
   }
+}
+
+const updateNxConfig = (tree: Tree) => {
+  const nxJson = readNxJson(tree)
+  if (!nxJson) {
+    throw new Error('Failed to read nx.json')
+  }
+  nxJson.plugins = nxJson.plugins ? [...nxJson.plugins, '@routineless/nx-aws-cdk'] : ['@routineless/nx-aws-cdk']
+  updateNxJson(tree, nxJson)
 }
 
 const addDependencies = (host: Tree, normalizedOptions: NormalizedSchema): GeneratorCallback => {
@@ -131,6 +142,7 @@ const presetGenerator = async (tree: Tree, options: PresetGeneratorSchema) => {
   const normalizedOptions = normalizeOptions(tree, options)
   const tasks: GeneratorCallback[] = []
 
+  updateNxConfig(tree)
   tasks.push(addDependencies(tree, normalizedOptions))
   tasks.push(
     await cdkApplicationGenerator(tree, {

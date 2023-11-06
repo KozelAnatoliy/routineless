@@ -2,8 +2,6 @@ import { execSync } from 'child_process'
 import { mkdirSync, rmSync } from 'fs'
 import { dirname, join } from 'path'
 
-const localRegistryPrefix = 'npm_config_registry=http://localhost:4873'
-
 describe('create-aws-cdk-app', () => {
   let projectDirectory: string
 
@@ -43,7 +41,7 @@ function createTestProject(extraArgs = '') {
     recursive: true,
   })
 
-  execSync(`${localRegistryPrefix} npx --yes create-aws-cdk-app@local ${projectName} ${extraArgs}`, {
+  execSync(`npx --yes create-aws-cdk-app@local ${projectName} ${extraArgs}`, {
     cwd: dirname(projectDirectory),
     stdio: 'inherit',
     env: process.env,

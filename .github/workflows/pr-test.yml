@@ -51,9 +51,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-${{ steps.versions.outputs.node_version }}-
 
-      - name: Print github context
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Install dependencies
         run: npm ci
 
@@ -62,11 +59,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Setup environemnt
-        run: |
-          docker compose -f ./docker/docker-compose.yaml up --wait
-          echo "Startup complete"
 
       - name: Run commands in parallel
         run: |
@@ -83,7 +75,7 @@ jobs:
           npx nx affected -t build --parallel=3 &
           pids+=($!)
 
-          npx nx affected -t e2e --parallel=3 &
+          npm run e2e &
           pids+=($!)
 
           # run all commands in parallel and bail if one of them fails
@@ -105,7 +97,3 @@ jobs:
           directory: coverage
           fail_ci_if_error: true
           verbose: true
-
-      - name: Cleanup environment
-        run: |
-          docker compose -f ./docker/docker-compose.yaml down

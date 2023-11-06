@@ -5,6 +5,11 @@
       "implementation": "./src/executors/cdk",
       "schema": "./src/executors/cdk/schema.json",
       "description": "cdk executor"
+    },
+    "localstack": {
+      "implementation": "./src/executors/localstack",
+      "schema": "./src/executors/localstack/schema.json",
+      "description": "localstack executor"
     }
   }
 }
