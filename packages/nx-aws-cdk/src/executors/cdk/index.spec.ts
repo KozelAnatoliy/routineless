@@ -1,18 +1,28 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
-import type { ExecutorContext } from '@nx/devkit'
-import { logger } from '@nx/devkit'
+import { ExecutorContext, logger, runExecutor } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 import type { AwsCredentialIdentityProvider, SharedConfigFiles } from '@smithy/types'
 
 import executor from '.'
+import { ProcessExitInfo, runCommandsInParralel } from '../../utils/executors'
 import { mockExecutorContext } from '../../utils/testing/executor'
-import { ProcessExitInfo, createCommands, runCommandsInParralel } from './executors'
+import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning } from '../localstack'
+import { createCommands } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
 jest.mock('@aws-sdk/client-sts')
 jest.mock('@aws-sdk/credential-providers')
+jest.mock('@nx/devkit', () => ({
+  ...jest.requireActual('@nx/devkit'),
+  runExecutor: jest.fn(),
+}))
 jest.mock('@smithy/shared-ini-file-loader')
+jest.mock('../../utils/executors')
+jest.mock('../localstack', () => ({
+  ...jest.requireActual('../localstack'),
+  isRunning: jest.fn(),
+}))
 jest.mock('./executors')
 
 const mockedCreateCommands = jest.mocked(createCommands, { shallow: true })
@@ -21,22 +31,45 @@ const mockedSTSClient = STSClient as jest.MockedClass<typeof STSClient>
 const mockedGetCallerIdentityCommand = GetCallerIdentityCommand as jest.MockedClass<typeof GetCallerIdentityCommand>
 const mockedFromNodeProviderChain = jest.mocked(fromNodeProviderChain, { shallow: true })
 const mockedLoadSharedConfigFiles = jest.mocked(loadSharedConfigFiles, { shallow: true })
+const mockedRunExecutor = jest.mocked(runExecutor, { shallow: true })
+const mockedIsLocalstackRunningMock = jest.mocked(isRunning, { shallow: true })
 
 const options: CdkExecutorOptions = {
   _: ['diff'],
+}
+
+async function* successGeneratorResult() {
+  yield { success: true }
+}
+
+async function* failGeneratorResult() {
+  yield { success: false }
 }
 
 describe('Cdk Executor', () => {
   let context: ExecutorContext
   const testCommands = [{ command: 'testCommand', cwd: 'testCwd' }]
   const testProcessExitInfo: ProcessExitInfo = { code: 0, signal: null }
+  const defaultExpectedCreateCommandsOptions = {
+    command: 'diff',
+    _: ['diff'],
+    parsedArgs: {
+      _: [],
+    },
+    env: 'local',
+    root: 'apps/proj',
+    sourceRoot: 'apps/proj/src',
+    projectName: 'proj',
+  }
   const OLD_ENV = process.env
 
   beforeEach(async () => {
     jest.spyOn(logger, 'error')
-    context = mockExecutorContext('diff')
+    context = mockExecutorContext('cdk')
     mockedCreateCommands.mockReturnValue(testCommands)
     mockedRunCommandsInParralel.mockResolvedValue([testProcessExitInfo])
+    mockedRunExecutor.mockResolvedValue(successGeneratorResult())
+    mockedIsLocalstackRunningMock.mockResolvedValue(true)
     process.env = { ...OLD_ENV }
   })
 
@@ -49,19 +82,8 @@ describe('Cdk Executor', () => {
     const executionPrommise = executor(options, context)
     const executionResult = await executionPrommise
 
-    expect(mockedCreateCommands).toHaveBeenCalledWith(
-      {
-        command: 'diff',
-        _: ['diff'],
-        parsedArgs: {
-          _: [],
-        },
-        env: 'local',
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
-      },
-      context,
-    )
+    expect(mockedCreateCommands).toHaveBeenCalledWith(defaultExpectedCreateCommandsOptions, context)
+    expect(mockedRunExecutor).not.toHaveBeenCalled()
     expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
     expect(executionResult).toEqual({ success: true })
   })
@@ -73,17 +95,12 @@ describe('Cdk Executor', () => {
 
     expect(mockedCreateCommands).toHaveBeenCalledWith(
       {
-        command: 'diff',
+        ...defaultExpectedCreateCommandsOptions,
         env: 'prod',
-        _: ['diff'],
-        parsedArgs: {
-          _: [],
-        },
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
       },
       context,
     )
+    expect(mockedRunExecutor).not.toHaveBeenCalled()
     expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
     expect(executionResult).toEqual({ success: true })
   })
@@ -95,14 +112,8 @@ describe('Cdk Executor', () => {
 
     expect(mockedCreateCommands).toHaveBeenCalledWith(
       {
-        command: 'diff',
+        ...defaultExpectedCreateCommandsOptions,
         env: 'dev',
-        _: ['diff'],
-        parsedArgs: {
-          _: [],
-        },
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
       },
       context,
     )
@@ -115,14 +126,9 @@ describe('Cdk Executor', () => {
 
     expect(mockedCreateCommands).toHaveBeenCalledWith(
       {
+        ...defaultExpectedCreateCommandsOptions,
         command: 'deploy',
-        env: 'local',
         _: ['watch'],
-        parsedArgs: {
-          _: [],
-        },
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
         watch: true,
       },
       context,
@@ -134,18 +140,25 @@ describe('Cdk Executor', () => {
 
     expect(mockedCreateCommands).toHaveBeenCalledWith(
       {
+        ...defaultExpectedCreateCommandsOptions,
         command: 'deploy',
-        env: 'local',
         _: ['deploy'],
-        parsedArgs: {
-          _: [],
-        },
-        root: 'apps/proj',
-        sourceRoot: 'apps/proj/src',
         watch: true,
       },
       context,
     )
+  })
+
+  it('should return unsuccessful execution on run command failure', async () => {
+    const testError = new Error('Command execution error')
+    mockedRunCommandsInParralel.mockRejectedValue(testError)
+
+    const executionResult = await executor(options, context)
+
+    expect(logger.error).toHaveBeenLastCalledWith(
+      `Failed to execute commands ${JSON.stringify(testCommands)}: ${testError}`,
+    )
+    expect(executionResult).toEqual({ success: false })
   })
 
   describe('options parsing', () => {
@@ -159,17 +172,15 @@ describe('Cdk Executor', () => {
 
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
+          ...defaultExpectedCreateCommandsOptions,
           _: ['diff', 'FirstStack', 'SecondStack'],
           command: 'diff',
-          env: 'local',
           parsedArgs: {
             _: ['FirstStack', 'SecondStack'],
             profile: 'prod',
             v: true,
           },
           profile: 'prod',
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           v: true,
         },
         context,
@@ -225,9 +236,7 @@ describe('Cdk Executor', () => {
       expect(mockedFromNodeProviderChain).not.toHaveBeenCalled()
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: 'awsProfile',
@@ -235,8 +244,6 @@ describe('Cdk Executor', () => {
           account: 'awsAccount',
           region: awsRegion,
           profile: awsProfile,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -254,9 +261,7 @@ describe('Cdk Executor', () => {
       expect(mockedFromNodeProviderChain).not.toHaveBeenCalled()
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: 'envAwsProfile',
@@ -264,7 +269,6 @@ describe('Cdk Executor', () => {
           account: 'envAwsAccount',
           region: 'envAwsRegion',
           root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -286,9 +290,7 @@ describe('Cdk Executor', () => {
       expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
@@ -296,8 +298,6 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           account: mockedResolvedAccount,
           region: mockResolvedRegion,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -328,9 +328,7 @@ describe('Cdk Executor', () => {
       expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: true,
@@ -338,8 +336,6 @@ describe('Cdk Executor', () => {
           profile: true,
           account: mockedResolvedAccount,
           region: defaultRegion,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -370,9 +366,7 @@ describe('Cdk Executor', () => {
       expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
@@ -380,8 +374,6 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           account: mockedResolvedAccount,
           region: defaultRegion,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -404,9 +396,7 @@ describe('Cdk Executor', () => {
       expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
@@ -414,8 +404,6 @@ describe('Cdk Executor', () => {
           profile: awsProfile,
           account: mockedResolvedAccount,
           region: awsRegion,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -438,16 +426,12 @@ describe('Cdk Executor', () => {
       expect(mockedFromNodeProviderChain).not.toHaveBeenCalled()
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
           },
           profile: awsProfile,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -468,16 +452,12 @@ describe('Cdk Executor', () => {
       expect(mockedFromNodeProviderChain).not.toHaveBeenCalled()
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
           },
           profile: awsProfile,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
@@ -501,34 +481,18 @@ describe('Cdk Executor', () => {
       expect(mockedSTSClientSend).toHaveBeenCalledWith(mockedGetCallerIdentityCommandInstance)
       expect(mockedCreateCommands).toHaveBeenCalledWith(
         {
-          _: ['diff'],
-          command: 'diff',
-          env: 'local',
+          ...defaultExpectedCreateCommandsOptions,
           parsedArgs: {
             _: [],
             profile: awsProfile,
           },
           profile: awsProfile,
           region: awsRegion,
-          root: 'apps/proj',
-          sourceRoot: 'apps/proj/src',
           resolve: true,
         },
         context,
       )
     })
-  })
-
-  it('should return unsuccessful execution on run command failure', async () => {
-    const testError = new Error('Command execution error')
-    mockedRunCommandsInParralel.mockRejectedValue(testError)
-
-    const executionResult = await executor(options, context)
-
-    expect(logger.error).toHaveBeenLastCalledWith(
-      `Failed to execute commands ${JSON.stringify(testCommands)}: ${testError}`,
-    )
-    expect(executionResult).toEqual({ success: false })
   })
 
   describe('normalization options error', () => {
@@ -558,6 +522,47 @@ describe('Cdk Executor', () => {
 
     it('should fail without cdk command provided', async () => {
       await expect(executor({}, context)).rejects.toThrow('Cdk executor failed. Command is not provided')
+    })
+  })
+
+  describe('localstack startup', () => {
+    it('should start localstack if not running', async () => {
+      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
+      const executionPrommise = executor(options, context)
+      const executionResult = await executionPrommise
+
+      expect(mockedRunExecutor).toHaveBeenCalledWith(
+        { project: context.projectName, target: LOCALSTACK_TARGET_NAME },
+        { command: 'start' },
+        context,
+      )
+      expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
+      expect(executionResult).toEqual({ success: true })
+    })
+
+    it('should not start localstack for non local env', async () => {
+      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
+      const executionPrommise = executor({ ...options, env: 'prod' }, context)
+      const executionResult = await executionPrommise
+
+      expect(mockedRunExecutor).not.toHaveBeenCalled()
+      expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
+      expect(executionResult).toEqual({ success: true })
+    })
+
+    it('should fail cdk executor on failed localstack start', async () => {
+      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
+      mockedRunExecutor.mockResolvedValueOnce(failGeneratorResult())
+      const executionPrommise = executor(options, context)
+      const executionResult = await executionPrommise
+
+      expect(mockedRunExecutor).toHaveBeenCalledWith(
+        { project: context.projectName, target: LOCALSTACK_TARGET_NAME },
+        { command: 'start' },
+        context,
+      )
+      expect(mockedRunCommandsInParralel).not.toHaveBeenCalled()
+      expect(executionResult).toEqual({ success: false })
     })
   })
 })

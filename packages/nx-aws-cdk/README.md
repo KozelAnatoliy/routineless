@@ -25,6 +25,18 @@ To install this plugin to existing nx workspace run:
 npm install -D @routineless/nx-aws-cdk
 ```
 
+After installation you need to add `@routineless/nx-aws-cdk` to your `nx.json` plugins section:
+
+```json
+{
+  "targetDefaults": {...},
+  "namedInputs": {...},
+  "plugins": [
+    "@routineless/nx-aws-cdk"
+  ]
+}
+```
+
 ## Usage
 
 Right now this plugin supports nx **integrated repos** only.
@@ -62,14 +74,9 @@ It utilizes [cdk-application](###cdk-application-generator) and [aws-lambda](###
 │       └── src
 │           ├── main.ts
 │           └── stacks
-│
-├── docker
-│   └── docker-compose.yaml
 ├── libs
 └── nx.json
 ```
-
-Docker compose file can be used to start localstack environment.
 
 #### Available Options
 
@@ -81,7 +88,7 @@ Docker compose file can be used to start localstack environment.
 
 ### Cdk application generator
 
-After installing `@routineless/nx-aws-cdk` or generating workspace using preset you can add cdk application to your nx workspace by running:
+After installing `@routineless/nx-aws-cdk` and adding it to your `nx.json` plugins section or generating workspace using preset you can add cdk application to your nx workspace by running:
 
 ```sh
 npx nx g cdk-application infra
@@ -108,13 +115,24 @@ Generated application structure:
 └── tsconfig.spec.json
 ```
 
-Stacks directory contains all cdk stacks and has generated persistance stack with simple S3 bucket for demonstration purposes. Cdk application configuration is defined in cdk.json file. Project json will have cdk preconfigured target.
+Stacks directory contains all cdk stacks and has generated persistance stack with simple S3 bucket for demonstration purposes. Cdk application configuration is defined in cdk.json file. Generated project will have inferred **cdk** and **localstack** targets.
+
+You can see them by runnint `npx nx show project <projectName>`:
 
 ```json
+...
+"localstack": {
+  "executor": "@routineless/nx-aws-cdk:localstack",
+  "options": {},
+  "configurations": {}
+},
 "cdk": {
   "executor": "@routineless/nx-aws-cdk:cdk",
-  "dependsOn": ["build"]
+  "dependsOn": ["build"],
+  "options": {},
+  "configurations": {}
 }
+...
 ```
 
 All stacks that should be managed withing generated cdk application should be described in the main.ts file.
@@ -167,25 +185,42 @@ Runtime code is located in `src/runtime/main.ts` file. Infrastructure code is lo
 
 Cdk executor is responsible for cdk commands execution. It can be used to bootstrap, deploy, destroy and executing other cdk commands. General usage pattern is `npx nx cdk <cdk-project-name> <cdk command> ...args`.
 
-In order to use cdk executor you need a valid `cdk.json` configuration in the root of your application, bare minimal configuration looks like this:
+In order to use cdk executor you need a valid `cdk.json` configuration in the root of your application. By default cdk target will be inferred by `@routineless/nx-aws-cdk`, you can add additional target or override default one by adding `cdk` target to your `project.json` file:
 
 ```json
 "cdk": {
   "executor": "@routineless/nx-aws-cdk:cdk",
-  "dependsOn": ["build"]
+  "dependsOn": ["build"],
+  "options": {
+    "region": "us-east-2"
+  }
+},
+"cdk-dev": {
+  "executor": "@routineless/nx-aws-cdk:cdk",
+  "dependsOn": ["build"],
+  "options": {
+    "env": "dev"
+  }
 }
+```
+
+Or you can update `targetDefaults` section in your `nx.json` file to apply default options to all cdk targets:
+
+```json
+...
+"targetDefaults": {
+  "cdk": {
+    "options": {
+      "region": "us-east-2"
+    }
+  }
+}
+...
 ```
 
 #### Local setup
 
-By default all infrastructure would be deployed to your [localstack](https://github.com/localstack/localstack).
-If you were using [@routineless/nx-aws-cdk](###preset) preset you can start localstack by running:
-
-```sh
-(cd docker && docker-compose up --wait)
-```
-
-Otherwice you need to follow [localstack](https://github.com/localstack/localstack) insallation guide.
+By default all infrastructure would be deployed to your [localstack](https://github.com/localstack/localstack). It requires [docker](https://docs.docker.com/get-docker/) to be installed and running on your machine.
 
 Then you can run cdk diff against localstack environment:
 
@@ -193,7 +228,7 @@ Then you can run cdk diff against localstack environment:
 npx nx cdk <cdk-project-name> diff
 ```
 
-Then you can deploy your application to aws by running:
+You can deploy your application to aws by running:
 
 ```sh
 npx nx cdk <cdk-project-name> bootstrap
@@ -248,6 +283,64 @@ AWS_ENV=dev npx nx cdk <cdk-project-name> diff --resolve
 | env     | string  |         | local    | e     | AWS_ENV      | Environment name that will be used in result stack names to distinguish different environments.                                             |
 | watch   | boolean | false   | false    | w     |              | Watch mode. Will execute provided command on every change detected in cdk app and its dependencies.                                         |
 | resolve | boolean | false   | false    | R     |              | Resolve mode. Will try to resolve aws account/region info from local context during build time instead of relying on aws pseudo parameters. |
+
+### Localstack executor
+
+Localstack executor is responsible for starting and shutting down localstack docker container. It is used intarnally by [cdk executor](###cdk-executor) in local mode.
+
+This executor will be inferred as a `localstack` target to any project that contains `cdk.json` in its root directory. You can check it by running `npx nx show project <projectName>`.
+
+```json
+"localstack": {
+  "executor": "@routineless/nx-aws-cdk:localstack",
+  "options": {},
+  "configurations": {}
+}
+```
+
+You can use localstack container by running:
+
+```sh
+// Start localstack container
+npx nx localstack <projectName> start
+// Stop localstack container
+npx nx localstack <projectName> stop
+```
+
+By default cdk executor will start localstack during its first local run and will leave it running for subsequent commands executions. In order to release resources you need to stop it yourself after you are done with local testing.
+
+You can override default localstack options by adding `localstack` target to your `project.json` file:
+
+```json
+"localstack": {
+  "executor": "@routineless/nx-aws-cdk:localstack",
+    "options": {
+      "containerName": "my-project-localstack",
+      "preserveVolumes": true
+    }
+}
+```
+
+Or by updating `targetDefaults` section in your `nx.json` file to apply default options to all localstack targets:
+
+```json
+"targetDefaults": {
+  "localstack": {
+    "options": {
+      "containerName": "my-project-localstack",
+      "debug": true
+    }
+  },
+}
+```
+
+| name            | type    | default         | required | alias | description                                                                                                |
+| --------------- | ------- | --------------- | -------- | ----- | ---------------------------------------------------------------------------------------------------------- |
+| command         | string  |                 | true     | c     | Localstack commands. Accepts 'start', 'stop'.                                                              |
+| containeName    | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
+| volumeMountPath | string  | jest            | false    | v     | Path to mount localstack data. By default data will not be exposed and stored withing docker named volume. |
+| debug           | boolean | false           | false    |       | Enable localstack debug mode.                                                                              |
+| preserveVolumes | boolean | false           | false    | p     | Preserve localstack docker volumes on shutting down.                                                       |
 
 ## Maintainers
 

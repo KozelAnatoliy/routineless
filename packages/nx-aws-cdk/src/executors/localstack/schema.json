@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Localstack executor",
+  "description": "Executor for localstack",
+  "type": "object",
+  "properties": {
+    "command": {
+      "description": "Localstack command",
+      "type": "string",
+      "enum": ["start", "stop"],
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "alias": "c"
+    },
+    "containeName": {
+      "description": "Localstack container name",
+      "type": "string",
+      "alias": "n"
+    },
+    "volumeMountPath": {
+      "description": "Path to mount localstack data",
+      "type": "string",
+      "alias": "v"
+    },
+    "debug": {
+      "description": "Enable debug mode",
+      "type": "boolean"
+    },
+    "preserveVolumes": {
+      "description": "Preserve localstack docker volumes",
+      "type": "boolean",
+      "default": false,
+      "alias": "p"
+    }
+  }
+}

@@ -27,6 +27,7 @@ describe('cdk application', () => {
   })
 
   afterAll(async () => {
+    await runNxCommandAsync(`localstack ${infraProject} stop`)
     // `nx reset` kills the daemon, and performs
     // some work which can help clean up e2e leftovers
     await runNxCommandAsync('reset')

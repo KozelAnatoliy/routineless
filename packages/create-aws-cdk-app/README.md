@@ -37,11 +37,9 @@ First argument is a workspace name, so after generation completed you can naviga
 
 ### Local mode
 
-By default cdk executor will deploy all changes to [localstack](https://github.com/localstack/localstack) environment.
+By default cdk executor will deploy all changes to [localstack](https://github.com/localstack/localstack) environment. You need to have [docker](https://docs.docker.com/get-docker/) installed in order to use this mode.
 
 ```sh
-// This will start docker container for localstack environment
-(cd docker && docker-compose up --wait)
 npx nx cdk infra diff
 npx nx cdk infra deploy --all
 ```
@@ -53,7 +51,7 @@ awslocal lambda list-functions
 awslocal lambda invoke --function-name <functionName> '/dev/stdout'
 ```
 
-After exploring you can destroy your resources by running `npx nx cdk infra destroy --all` command or shutting down localstack environment by running `(cd docker && docker-compose down)`.
+After exploring you can destroy your resources by running `npx nx cdk infra destroy --all` command.
 
 ### AWS mode
 

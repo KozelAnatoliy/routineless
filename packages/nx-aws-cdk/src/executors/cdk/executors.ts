@@ -1,8 +1,8 @@
 import { ExecutorContext, logger } from '@nx/devkit'
-import { ChildProcess, spawn } from 'child_process'
 import * as path from 'path'
 
 import type { ParsedCdkExecutorOption } from '.'
+import type { Command } from '../../utils/executors'
 
 const optionsShortNemingMapping: Record<string, string> = {
   a: 'app',
@@ -14,11 +14,6 @@ const optionsShortNemingMapping: Record<string, string> = {
   r: 'role-arn',
   o: 'output',
   h: 'help',
-}
-
-export interface Command {
-  command: string
-  cwd?: string
 }
 
 interface CdkCommand extends Command {
@@ -106,56 +101,4 @@ const parsedArgToString = (key: string, value: string | boolean): string => {
   }
   const mappedKey = optionsShortNemingMapping[key] || key
   return `--${mappedKey} ${value}`
-}
-
-export const runCommandsInParralel = async (commands: Command[]): Promise<ProcessExitInfo[]> => {
-  const promises = commands.map(({ command, cwd }) => runCommand(command, cwd))
-  return Promise.all(promises)
-}
-
-export const runCommand = async (command: string, cwd?: string): Promise<ProcessExitInfo> => {
-  logger.debug(`Executing command: ${command}`)
-  logger.debug(`Working directory: ${cwd}`)
-
-  const childProcess = spawn(command, {
-    shell: true,
-    env: process.env,
-    cwd: cwd,
-    stdio: [process.stdin, process.stdout, process.stderr],
-  })
-
-  const processExitListener = () => childProcess.kill()
-  process.on('exit', processExitListener)
-  process.on('SIGTERM', processExitListener)
-
-  return onExit(childProcess, processExitListener)
-}
-
-const onExit = (childProcess: ChildProcess, processExitListener: () => boolean): Promise<ProcessExitInfo> => {
-  return new Promise((resolve, reject) => {
-    // I wanted to debug what command was finished here, maybe I can use childProcess to get this info
-    // othervise I will propagate command to this function
-    const exitHandler = (code: number, signal: NodeJS.Signals | null) => {
-      logger.debug(`Finished ${childProcess.spawnargs.join(' ')} command execution: ${code}, ${signal}`)
-      process.removeListener('exit', processExitListener)
-
-      if (code === 0) {
-        resolve({ code, signal })
-      } else if (!code) {
-        reject(new Error(`Exit with signal: ${signal}`))
-      } else {
-        reject(new Error(`Exit with error code: ${code}`))
-      }
-    }
-    childProcess.once('close', exitHandler)
-    childProcess.once('error', (err: Error) => {
-      process.removeListener('exit', processExitListener)
-      reject(err)
-    })
-  })
-}
-
-export interface ProcessExitInfo {
-  code: number
-  signal: NodeJS.Signals | null
 }

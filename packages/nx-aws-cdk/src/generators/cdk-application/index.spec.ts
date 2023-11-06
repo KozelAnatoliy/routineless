@@ -54,7 +54,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'cdk'])
+    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint'])
     expect(tree.exists('cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('cdk/jest.config.ts')).toBeFalsy()
     expect(tree.exists('cdk/src/main.ts')).toBeTruthy()
@@ -67,7 +67,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test', 'cdk'])
+    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test'])
     expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
   })
 
