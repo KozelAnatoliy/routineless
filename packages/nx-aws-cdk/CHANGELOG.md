@@ -1,3 +1,13 @@
+## 0.0.1-beta.4
+
+### 🚀 Features
+
+- implement localstack executor ([f9b3848](https://github.com/KozelAnatoliy/routineless/commit/f9b3848))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 0.0.1-beta.3
 
 ### 🚀 Features
