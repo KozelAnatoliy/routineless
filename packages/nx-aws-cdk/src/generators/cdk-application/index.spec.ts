@@ -12,7 +12,7 @@ describe('cdk-application generator', () => {
   const options: CdkApplicationGeneratorSchema = { name: 'cdk' }
 
   beforeEach(() => {
-    tree = createTreeWithEmptyWorkspace()
+    tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
   })
 
   it('should generate cdk app without routineless config', async () => {
@@ -55,11 +55,11 @@ describe('cdk-application generator', () => {
     const config = readProjectConfiguration(tree, 'cdk')
 
     expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint'])
-    expect(tree.exists('cdk/cdk.json')).toBeTruthy()
-    expect(tree.exists('cdk/jest.config.ts')).toBeFalsy()
-    expect(tree.exists('cdk/src/main.ts')).toBeTruthy()
-    expect(tree.exists('cdk/src/stacks/persistance.ts')).toBeTruthy()
-    expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeFalsy()
+    expect(tree.exists('apps/cdk/cdk.json')).toBeTruthy()
+    expect(tree.exists('apps/cdk/jest.config.ts')).toBeFalsy()
+    expect(tree.exists('apps/cdk/src/main.ts')).toBeTruthy()
+    expect(tree.exists('apps/cdk/src/stacks/persistance.ts')).toBeTruthy()
+    expect(tree.exists('apps/cdk/src/stacks/persistance.spec.ts')).toBeFalsy()
   })
 
   it('should generate cdk app with tests', async () => {
@@ -68,7 +68,20 @@ describe('cdk-application generator', () => {
     const config = readProjectConfiguration(tree, 'cdk')
 
     expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test'])
-    expect(tree.exists('cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
+    expect(tree.exists('apps/cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
+  })
+
+  it('should generate cdk app in provided directory', async () => {
+    await generator(tree, { ...options, directory: 'dir', unitTestRunner: 'jest' })
+
+    const config = readProjectConfiguration(tree, 'dir-cdk')
+
+    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test'])
+    expect(tree.exists('apps/dir/cdk/cdk.json')).toBeTruthy()
+    expect(tree.exists('apps/dir/cdk/jest.config.ts')).toBeTruthy()
+    expect(tree.exists('apps/dir/cdk/src/main.ts')).toBeTruthy()
+    expect(tree.exists('apps/dir/cdk/src/stacks/persistance.ts')).toBeTruthy()
+    expect(tree.exists('apps/dir/cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
   })
 
   it('should update tsconfig', async () => {
@@ -81,7 +94,7 @@ describe('cdk-application generator', () => {
   it('should update jest config', async () => {
     await generator(tree, { ...options, unitTestRunner: 'jest' })
 
-    const jestConfig = tree.read('cdk/jest.config.ts')
+    const jestConfig = tree.read('apps/cdk/jest.config.ts')
 
     expect(jestConfig).toBeDefined()
 

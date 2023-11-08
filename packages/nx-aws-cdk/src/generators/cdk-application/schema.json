@@ -13,6 +13,16 @@
       },
       "x-prompt": "Enter cdk app name"
     },
+    "tags": {
+      "type": "string",
+      "description": "Add tags to the application (used for linting).",
+      "alias": "t"
+    },
+    "directory": {
+      "type": "string",
+      "description": "A directory where the project is placed",
+      "alias": "c"
+    },
     "skipFormat": {
       "description": "Skip formatting files",
       "type": "boolean",
@@ -30,11 +40,6 @@
       "description": "Test runner to use for unit tests.",
       "default": "jest",
       "alias": "u"
-    },
-    "tags": {
-      "type": "string",
-      "description": "Add tags to the application (used for linting).",
-      "alias": "t"
     },
     "setAsRoutinelessInfraApp": {
       "type": "boolean",

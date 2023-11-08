@@ -4,7 +4,6 @@ import {
   addDependenciesToPackageJson,
   formatFiles,
   generateFiles,
-  getWorkspaceLayout,
   names,
   offsetFromRoot,
   readProjectConfiguration,
@@ -16,6 +15,7 @@ import { Linter } from '@nx/eslint'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
+import { ProjectProperties, injectProjectProperties } from '../../utils/generators'
 import { updateRoutinelessConfig } from '../../utils/routineless'
 import {
   CDK_CONSTRUCTS_VERSION,
@@ -28,22 +28,7 @@ import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, getNpmScope } from '..
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
 
-interface NormalizedSchema extends CdkApplicationGeneratorSchema {
-  projectName: string
-  projectRoot: string
-}
-
-const normalizeOptions = (tree: Tree, options: CdkApplicationGeneratorSchema): NormalizedSchema => {
-  const name = names(options.name).fileName
-  const projectName = name.replace(new RegExp('/', 'g'), '-')
-  const projectRoot = `${getWorkspaceLayout(tree).appsDir}/${name}`
-
-  return {
-    ...options,
-    projectName,
-    projectRoot,
-  }
-}
+type NormalizedSchema = CdkApplicationGeneratorSchema & ProjectProperties
 
 const addFiles = (tree: Tree, options: NormalizedSchema, filesType: 'files' | 'jest-files' = 'files') => {
   const scope = getNpmScope(tree)
@@ -138,7 +123,7 @@ export const cdkApplicationGenerator = async (
   tree: Tree,
   options: CdkApplicationGeneratorSchema,
 ): Promise<GeneratorCallback> => {
-  const normalizedOptions = normalizeOptions(tree, options)
+  const normalizedOptions = injectProjectProperties(tree, options)
 
   const tasks: GeneratorCallback[] = []
 
@@ -152,6 +137,7 @@ export const cdkApplicationGenerator = async (
   tasks.push(
     await nodeApplicationGenerator(tree, {
       ...normalizedOptions,
+      directory: normalizedOptions.projectDirectory,
       e2eTestRunner: 'none',
       skipFormat: true,
     }),
