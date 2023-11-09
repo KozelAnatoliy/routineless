@@ -1,3 +1,14 @@
+## 0.0.1-beta.5
+
+### 🚀 Features
+
+- implement aws lambda runtime code bundling
+- implement cdk application generator directory option
+
+### ❤️ Thank You
+
+- Anatoli Kozel
+
 ## 0.0.1-beta.4
 
 ### 🚀 Features

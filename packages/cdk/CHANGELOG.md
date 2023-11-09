@@ -1,3 +1,14 @@
+## 0.0.1-beta.5
+
+### 🚀 Features
+
+- implement aws lambda runtime code bundling ([bb6b40c](https://github.com/KozelAnatoliy/routineless/commit/bb6b40c))
+- implement cdk application generator directory option ([d21436d](https://github.com/KozelAnatoliy/routineless/commit/d21436d))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 0.0.1-beta.4
 
 ### 🚀 Features
