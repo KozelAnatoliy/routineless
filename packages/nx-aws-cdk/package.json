@@ -33,7 +33,6 @@
     "ignore": "5.2.4",
     "tslib": "^2.6.2",
     "@routineless/cdk": "0.0.1-beta.4",
-    "aws-cdk-lib": "^2.103.1",
     "events": "3.3.0"
   },
   "publishConfig": {

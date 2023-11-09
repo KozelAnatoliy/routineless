@@ -1,4 +1,4 @@
-import { Tree, logger, readJson, readProjectConfiguration } from '@nx/devkit'
+import { Tree, logger, readJson, readNxJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import generator from '.'
@@ -6,8 +6,14 @@ import { getRoutinelessConfig } from '../../utils/routineless'
 import { AwsLambdaGeneratorSchema } from './schema'
 
 jest.mock('../../utils/routineless')
+jest.mock('@nx/devkit', () => ({
+  ...jest.requireActual('@nx/devkit'),
+  readNxJson: jest.fn(),
+}))
 
 const mockedGetRoutinelessConfig = jest.mocked(getRoutinelessConfig, { shallow: true })
+const mockedReadNxJson = jest.mocked(readNxJson)
+const actualReadNxJson = jest.requireActual('@nx/devkit').readNxJson
 
 describe('aws-lambda generator', () => {
   let tree: Tree
@@ -20,6 +26,7 @@ describe('aws-lambda generator', () => {
   beforeEach(() => {
     tree = createTreeWithEmptyWorkspace({ layout: 'apps-libs' })
     mockedGetRoutinelessConfig.mockReturnValue({ infraApp: 'infra' })
+    mockedReadNxJson.mockImplementation(actualReadNxJson)
   })
 
   afterEach(() => jest.clearAllMocks())
@@ -65,7 +72,41 @@ describe('aws-lambda generator', () => {
     await generator(tree, options)
 
     const projectConfig = readProjectConfiguration(tree, 'test-aws-lambda')
-    expect(projectConfig.targets?.['build']?.options.bundle).toBeTruthy()
+    expect(projectConfig.targets?.['build']?.dependsOn).toEqual(['build-runtime'])
+    expect(projectConfig.targets?.['build-runtime']).toEqual({
+      executor: '@nx/esbuild:esbuild',
+      outputs: ['{options.outputPath}'],
+      defaultConfiguration: 'development',
+      options: {
+        platform: 'node',
+        outputPath: `dist/lambdas-runtime/${options.name}`,
+        format: ['cjs'],
+        bundle: true,
+        main: `apps/${options.name}/src/runtime/main.ts`,
+        tsConfig: `apps/${options.name}/tsconfig.lib.json`,
+        thirdParty: true,
+        external: ['@aws-sdk/*'],
+        assets: ['src/assets'],
+        esbuildOptions: {
+          sourcemap: true,
+          outExtension: {
+            '.js': '.js',
+          },
+        },
+      },
+      configurations: {
+        development: {},
+        production: {
+          minify: true,
+          esbuildOptions: {
+            sourcemap: false,
+            outExtension: {
+              '.js': '.js',
+            },
+          },
+        },
+      },
+    })
   })
 
   it('should add dependencies', async () => {
@@ -92,5 +133,35 @@ describe('aws-lambda generator', () => {
     await generator(tree, { ...options, addLambdaToInfraApp: true })
 
     expect(logger.error).toHaveBeenCalledWith('Could not find infra app')
+  })
+
+  it('should fail if read nx json failed', async () => {
+    mockedReadNxJson.mockReturnValue(null)
+
+    await expect(generator(tree, options)).rejects.toThrow(new Error('Failed to read nx.json'))
+  })
+
+  it('should update nx json with build-runtime defaults', async () => {
+    await generator(tree, options)
+    const resultNxJson = actualReadNxJson(tree)
+
+    expect(resultNxJson.targetDefaults['build-runtime']).toEqual({
+      cache: true,
+      dependsOn: ['^build'],
+      inputs: ['production', '^production'],
+    })
+  })
+
+  it('should not update nx json if build-runtime already presented', async () => {
+    mockedReadNxJson.mockImplementationOnce((tree) => {
+      const nxJson = actualReadNxJson(tree)
+      nxJson.targetDefaults = { ...(nxJson.targetDefaults || {}), 'build-runtime': {} }
+      return nxJson
+    })
+
+    await generator(tree, options)
+    const resultNxJson = actualReadNxJson(tree)
+
+    expect(resultNxJson.targetDefaults['build-runtime']).toBeUndefined()
   })
 })

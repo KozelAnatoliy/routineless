@@ -90,12 +90,10 @@ const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
 
 const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) => {
   const projectConfig = readProjectConfiguration(tree, options.projectName)
-  if (projectConfig.targets) {
-    delete projectConfig.targets['serve']
-  } else {
-    projectConfig.targets = {}
-  }
-  const buildTarget = projectConfig.targets['build']
+  const projectTargets = projectConfig.targets ?? {}
+  delete projectTargets['serve']
+
+  const buildTarget = projectTargets['build']
   if (buildTarget) {
     delete buildTarget.defaultConfiguration
     delete buildTarget.configurations

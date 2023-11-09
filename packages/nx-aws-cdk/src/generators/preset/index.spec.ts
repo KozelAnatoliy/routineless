@@ -163,6 +163,8 @@ describe('preset generator', () => {
 
   it('should fail if read nx json failed', async () => {
     mockedReadNxJson.mockReturnValue(null)
+
+    await expect(generator(appTree, options)).rejects.toThrow(new Error('Failed to read nx.json'))
   })
 
   it('should update nx json config', async () => {

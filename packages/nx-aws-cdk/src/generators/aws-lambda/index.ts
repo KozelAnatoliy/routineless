@@ -8,8 +8,10 @@ import {
   logger,
   names,
   offsetFromRoot,
+  readNxJson,
   readProjectConfiguration,
   runTasksInSerial,
+  updateNxJson,
   updateProjectConfiguration,
 } from '@nx/devkit'
 import { addPropertyToJestConfig } from '@nx/jest'
@@ -26,20 +28,68 @@ type AwsLambdaGeneratorOptions = AwsLambdaGeneratorSchema & ProjectProperties
 
 const updateAwsLambdaProjectConfiguration = (tree: Tree, options: AwsLambdaGeneratorOptions) => {
   const projectConfig = readProjectConfiguration(tree, options.projectName)
-  if (!projectConfig.targets) {
-    projectConfig.targets = {}
-  }
+  const projectTargets = projectConfig.targets ?? {}
 
-  const buildTarget = projectConfig.targets['build']
+  const buildTarget = projectTargets['build']
   if (buildTarget) {
-    buildTarget.options.bundle = true
+    buildTarget.dependsOn = ['build-runtime']
   }
 
   projectConfig.targets = {
-    ...projectConfig.targets,
+    ...projectTargets,
+    ['build-runtime']: {
+      executor: '@nx/esbuild:esbuild',
+      outputs: ['{options.outputPath}'],
+      defaultConfiguration: 'development',
+      options: {
+        platform: 'node',
+        outputPath: `dist/lambdas-runtime/${options.projectName}`,
+        format: ['cjs'],
+        bundle: true,
+        main: `${options.projectRoot}/src/runtime/main.ts`,
+        tsConfig: `${options.projectRoot}/tsconfig.lib.json`,
+        thirdParty: true,
+        external: ['@aws-sdk/*'],
+        assets: ['src/assets'],
+        esbuildOptions: {
+          sourcemap: true,
+          outExtension: {
+            '.js': '.js',
+          },
+        },
+      },
+      configurations: {
+        development: {},
+        production: {
+          minify: true,
+          esbuildOptions: {
+            sourcemap: false,
+            outExtension: {
+              '.js': '.js',
+            },
+          },
+        },
+      },
+    },
   }
 
   updateProjectConfiguration(tree, options.projectName, projectConfig)
+}
+
+const updateNxConfig = (tree: Tree) => {
+  const nxJson = readNxJson(tree)
+  if (!nxJson) {
+    throw new Error('Failed to read nx.json')
+  }
+  const targetDefaults = nxJson.targetDefaults ?? {}
+  if (!targetDefaults['build-runtime']) {
+    targetDefaults['build-runtime'] = {
+      cache: true,
+      dependsOn: ['^build'],
+      inputs: ['production', '^production'],
+    }
+    updateNxJson(tree, nxJson)
+  }
 }
 
 const addStackToInfraApp = (tree: Tree, options: AwsLambdaGeneratorOptions) => {
@@ -104,6 +154,7 @@ const awsLambdaGenerator = async (tree: Tree, options: AwsLambdaGeneratorSchema)
 
   const tasks: GeneratorCallback[] = []
 
+  updateNxConfig(tree)
   tasks.push(addDependencies(tree))
   tasks.push(
     await libraryGenerator(tree, {

@@ -190,19 +190,28 @@ In order to use cdk executor you need a valid `cdk.json` configuration in the ro
 ```json
 "cdk": {
   "executor": "@routineless/nx-aws-cdk:cdk",
-  "dependsOn": ["build"],
-  "options": {
-    "region": "us-east-2"
-  }
+  "configurations": {
+    "development": {
+      "env": "dev",
+      "resolve": true
+    },
+    "production": {
+      "env": "prod",
+      "resolve": true
+    }
+  },
+  "dependsOn": ["build"]
 },
-"cdk-dev": {
+"cdk-new": {
   "executor": "@routineless/nx-aws-cdk:cdk",
   "dependsOn": ["build"],
   "options": {
-    "env": "dev"
+    "env": "new"
   }
 }
 ```
+
+Using production configuration by providing `-c production` to your cdk command will utilize lambda runtime production configuration that will minify output bundle.
 
 Or you can update `targetDefaults` section in your `nx.json` file to apply default options to all cdk targets:
 
