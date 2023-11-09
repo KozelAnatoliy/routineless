@@ -3,6 +3,7 @@ import {
   checkFilesExist,
   ensureNxProject,
   patchPackageJsonForPlugin,
+  runCommandAsync,
   runNxCommandAsync,
   runPackageManagerInstall,
   uniq,
@@ -119,6 +120,22 @@ describe('cdk application', () => {
 
       expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+    })
+
+    it('should deploy lambda', async () => {
+      const { className, fileName } = names(project)
+
+      await runNxCommandAsync(`run ${infraProject}:cdk bootstrap`)
+      const deployResult = await runNxCommandAsync(
+        `run ${infraProject}:cdk deploy ${className}StackLocal --require-approval never`,
+      )
+      expect(deployResult.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+
+      await runCommandAsync(`awslocal lambda invoke --function-name ${className}Local ${fileName}-response.json`)
+      const invokeResult = await runCommandAsync(`cat ${fileName}-response.json`)
+      expect(invokeResult.stdout).toContain('Hello World')
+      const destroyResult = await runNxCommandAsync(`run ${infraProject}:cdk destroy ${className}StackLocal -f`)
+      expect(destroyResult.stdout).toContain(`${className}StackLocal: destroyed`)
     })
 
     it('should have tests coverage', async () => {

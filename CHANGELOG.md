@@ -1,11 +1,10 @@
 ## 0.0.1-beta.4
 
-
 ### 🚀 Features
 
 - implement localstack executor
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Anatoli Kozel
 

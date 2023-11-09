@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib'
 import { Template } from 'aws-cdk-lib/assertions'
+import { AssetCode, Code } from 'aws-cdk-lib/aws-lambda'
 
 import { <%= className %>Stack } from '.'
 
@@ -10,14 +11,24 @@ jest.mock('aws-cdk-lib/aws-lambda', () => {
     ...originalModule,
     Code: {
       ...originalModule.Code,
-      fromAsset: jest.fn().mockReturnValue(originalModule.Code.fromInline('const message = "Hello world!"')),
+      fromAsset: jest.fn(),
     },
   }
 })
 
+const actualFromInline = jest.requireActual('aws-cdk-lib/aws-lambda').Code.fromInline
+const fromAssetMock = jest.mocked(Code.fromAsset)
+
 describe('<%= className %>Stack', () => {
   const envName = 'local'
   const stackId = '<%= className %>Stack'
+
+  beforeEach(() => {
+    fromAssetMock.mockReturnValue(actualFromInline('const message = "Hello world!"') as unknown as AssetCode)
+  })
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
 
   it('should define lambda function', () => {
     const app = new cdk.App()
@@ -30,5 +41,13 @@ describe('<%= className %>Stack', () => {
       Handler: 'main.handler',
       Runtime: 'nodejs18.x',
     })
+  })
+
+  it('should get code from provided bundles directory', () => {
+    const app = new cdk.App()
+
+    new <%= className %>Stack(app, stackId, { env: { envName }, runtimeBundlesDir: 'bundles' })
+
+    expect(fromAssetMock).toHaveBeenCalledWith('bundles/<%= projectName %>')
   })
 })
