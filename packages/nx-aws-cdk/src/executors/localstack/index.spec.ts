@@ -1,9 +1,10 @@
-import { ExecutorContext, logger } from '@nx/devkit'
+import { ExecutorContext } from '@nx/devkit'
 import events from 'events'
 import fs, { WriteStream } from 'fs'
 
 import executor, { DockerPsOuptutEntry, isRunning } from '.'
 import { ProcessExitInfo, runCommand } from '../../utils/executors'
+import { logger } from '../../utils/logger'
 import { mockExecutorContext } from '../../utils/testing/executor'
 import type { LocalstackExecutorOptions } from './schema'
 

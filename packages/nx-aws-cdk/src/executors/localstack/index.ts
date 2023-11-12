@@ -1,9 +1,9 @@
 import type { ExecutorContext } from '@nx/devkit'
-import { logger } from '@nx/devkit'
 import events from 'events'
 import fs from 'fs'
 
 import { Command, runCommand } from '../../utils/executors'
+import { logger } from '../../utils/logger'
 import type { LocalstackExecutorOptions } from './schema'
 
 export const TARGET_NAME = 'localstack'

@@ -1,8 +1,9 @@
-import { ExecutorContext, logger } from '@nx/devkit'
+import { ExecutorContext } from '@nx/devkit'
 import * as path from 'path'
 
 import type { ParsedCdkExecutorOption } from '.'
 import type { Command } from '../../utils/executors'
+import { logger } from '../../utils/logger'
 
 const optionsShortNemingMapping: Record<string, string> = {
   a: 'app',

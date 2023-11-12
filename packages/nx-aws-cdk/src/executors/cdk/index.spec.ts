@@ -1,11 +1,12 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
-import { ExecutorContext, logger, runExecutor } from '@nx/devkit'
+import { ExecutorContext, runExecutor } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 import type { AwsCredentialIdentityProvider, SharedConfigFiles } from '@smithy/types'
 
 import executor from '.'
 import { ProcessExitInfo, runCommandsInParralel } from '../../utils/executors'
+import { logger } from '../../utils/logger'
 import { mockExecutorContext } from '../../utils/testing/executor'
 import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning } from '../localstack'
 import { createCommands } from './executors'

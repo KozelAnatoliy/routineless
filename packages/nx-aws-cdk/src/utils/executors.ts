@@ -1,6 +1,7 @@
-import { logger } from '@nx/devkit'
 import { ChildProcess, spawn } from 'child_process'
 import { Stream } from 'stream'
+
+import { logger } from '../utils/logger'
 
 export type Stdio = 'inherit' | 'ignore' | Stream | 'pipe' | 'overlapped' | undefined | null
 

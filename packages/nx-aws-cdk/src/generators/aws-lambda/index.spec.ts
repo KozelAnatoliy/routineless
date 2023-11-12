@@ -1,7 +1,8 @@
-import { Tree, logger, readJson, readNxJson, readProjectConfiguration } from '@nx/devkit'
+import { Tree, readJson, readNxJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import generator from '.'
+import { logger } from '../../utils/logger'
 import { getRoutinelessConfig } from '../../utils/routineless'
 import { AwsLambdaGeneratorSchema } from './schema'
 
