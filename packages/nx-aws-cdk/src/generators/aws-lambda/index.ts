@@ -5,7 +5,6 @@ import {
   addDependenciesToPackageJson,
   formatFiles,
   generateFiles,
-  logger,
   names,
   offsetFromRoot,
   readNxJson,
@@ -19,6 +18,7 @@ import { libraryGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { ProjectProperties, injectProjectProperties } from '../../utils/generators'
+import { logger } from '../../utils/logger'
 import { getRoutinelessConfig } from '../../utils/routineless'
 import { AWS_LAMBDA_TYPES_VERSION, ROUTINELESS_CDK_VERSION } from '../../utils/versions'
 import { deleteNodeLibRedundantDirs, getNpmScope } from '../../utils/workspace'

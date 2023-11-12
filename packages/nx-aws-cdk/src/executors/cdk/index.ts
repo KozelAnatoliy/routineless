@@ -1,10 +1,10 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
 import { fromNodeProviderChain, fromNodeProviderChainInit } from '@aws-sdk/credential-providers'
 import { ExecutorContext, runExecutor } from '@nx/devkit'
-import { logger } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 
 import { runCommandsInParralel } from '../../utils/executors'
+import { logger } from '../../utils/logger'
 import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning as isLocalstackRunning } from '../localstack'
 import { createCommands } from './executors'
 import type { CdkExecutorOptions } from './schema'

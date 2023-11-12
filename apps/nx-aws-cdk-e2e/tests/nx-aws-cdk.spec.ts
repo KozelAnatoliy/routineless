@@ -58,10 +58,14 @@ describe('cdk application', () => {
     })
 
     it('should add lambda function to infra app', async () => {
+      process.env['ROUTINELESS_LOG_LEVEL'] = 'debug'
       const result = await runNxCommandAsync(`run ${infraProject}:cdk diff`)
 
       const { className } = names(lambdaProject)
+      expect(result.stdout).toContain('debug: Cdk executor options {"_":["diff"],"command":"diff"')
+      expect(result.stdout).toContain('debug: Finished /bin/sh -c AWS_ENV=local')
       expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
+      expect(result.stdout).toContain('debug: Finished /bin/sh -c AWS_ENV=local')
     })
   })
 
@@ -83,6 +87,8 @@ describe('cdk application', () => {
     it('should run cdk diff', async () => {
       const result = await runNxCommandAsync(`run ${project}:cdk diff`)
 
+      expect(result.stdout).not.toContain('debug: Cdk executor options')
+      expect(result.stdout).not.toContain('debug: Finished /bin/sh -c AWS_ENV=local')
       expect(result.stdout).toContain('[+] AWS::S3::Bucket Bucket')
       expect(result.stdout).toContain(`Successfully ran target cdk for project ${project}`)
     })

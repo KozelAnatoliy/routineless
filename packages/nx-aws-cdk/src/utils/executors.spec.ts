@@ -1,6 +1,6 @@
-import { logger } from '@nx/devkit'
 import * as child_process from 'child_process'
 
+import { logger } from '../utils/logger'
 import { Command, Stdio, runCommand, runCommandsInParralel } from './executors'
 import { MockChildProcess, mockChildProcess } from './testing/executor'
 
