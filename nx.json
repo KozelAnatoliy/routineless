@@ -54,19 +54,23 @@
     "groups": {
       "default": {
         "projects": ["*", "!*e2e"],
-        "releaseTagPattern": "{projectName}-{version}",
-        "version": {
-          "generator": "@nx/js:release-version",
-          "generatorOptions": {
-            "specifierSource": "conventional-commits",
-            "currentVersionResolver": "git-tag"
-          }
-        },
-        "changelog": {
-          "createRelease": "github"
-        }
+        "releaseTagPattern": "{version}",
+        "changelog": false
       }
-    }
+    },
+    "version": {
+      "generator": "@nx/js:release-version",
+      "generatorOptions": {
+        "specifierSource": "conventional-commits",
+        "currentVersionResolver": "git-tag"
+      }
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github"
+      }
+    },
+    "releaseTagPattern": "{version}"
   },
   "workspaceLayout": {
     "appsDir": "apps",

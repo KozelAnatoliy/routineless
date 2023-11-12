@@ -1,3 +1,14 @@
+## 0.1.1
+
+### 🩹 Fixes
+
+- fix cdk project targets inference. Migrate nx to 17.1.1 ([18399ac](https://github.com/KozelAnatoliy/routineless/commit/18399ac))
+- swithc logging to winston to support log levels ([b84713b](https://github.com/KozelAnatoliy/routineless/commit/b84713b))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 0.1.0
 
 ### 🚀 Features
