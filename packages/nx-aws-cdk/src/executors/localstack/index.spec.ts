@@ -1,6 +1,6 @@
 import { ExecutorContext, logger } from '@nx/devkit'
 import events from 'events'
-import fs from 'fs'
+import fs, { WriteStream } from 'fs'
 
 import executor, { DockerPsOuptutEntry, isRunning } from '.'
 import { ProcessExitInfo, runCommand } from '../../utils/executors'
@@ -116,7 +116,7 @@ describe('localstack executor', () => {
     beforeEach(() => {
       mockedEvents.once.mockResolvedValueOnce([])
       mockedFs.existsSync.mockReturnValue(true)
-      mockedFs.createWriteStream.mockReturnValue({ close: jest.fn() } as any)
+      mockedFs.createWriteStream.mockReturnValue({ close: jest.fn() } as unknown as WriteStream)
       mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify([isRunningJson])))
       mockedRunCommand.mockResolvedValue(testProcessExitInfo)
     })
