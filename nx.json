@@ -3,7 +3,6 @@
   "targetDefaults": {
     "nx-release-publish": {
       "executor": "@nx/js:release-publish",
-      "dependsOn": ["^nx-release-publish", "build"],
       "configurations": {
         "local": {
           "registry": "http://localhost:4873",
