@@ -1,5 +1,5 @@
 //aws-cdk
-export const CDK_VERSION = '^2.104.0'
+export const CDK_VERSION = '^2.106.0'
 //aws-cdk-local
 export const CDK_LOCAL_VERSION = '^2.18.0'
 //eslint-plugin-cdk

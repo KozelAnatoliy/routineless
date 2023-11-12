@@ -20,9 +20,18 @@
       "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
       "cache": true
     },
-    "test": {
+    "@nx/jest:jest": {
+      "cache": true,
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-      "cache": true
+      "options": {
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
     },
     "e2e": {
       "dependsOn": ["^build"],
@@ -44,11 +53,18 @@
   "release": {
     "groups": {
       "default": {
-        "projects": ["nx-aws-cdk", "create-aws-cdk-app", "cdk"],
+        "projects": ["*", "!*e2e"],
+        "releaseTagPattern": "{projectName}-{version}",
+        "version": {
+          "generator": "@nx/js:release-version",
+          "generatorOptions": {
+            "specifierSource": "conventional-commits",
+            "currentVersionResolver": "git-tag"
+          }
+        },
         "changelog": {
           "createRelease": "github"
-        },
-        "releaseTagPattern": "{projectName}-{version}"
+        }
       }
     }
   },
