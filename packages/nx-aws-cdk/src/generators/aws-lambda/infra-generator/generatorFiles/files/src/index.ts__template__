@@ -8,13 +8,12 @@ export class <%= className %>Stack extends Stack {
   constructor(scope: Construct, id: string, props: BaseLambdaStackProps) {
     super(scope, id, props)
 
-    const { env, runtimeBundlesDir } = props
+    const { env } = props
 
     new lambda.Function(this, '<%= className %>Function', {
       functionName: `<%= className %>${capitalize(env.envName)}`,
       runtime: lambda.Runtime.NODEJS_18_X,
-      code: lambda.Code.fromAsset(
-        runtimeBundlesDir ? path.join(runtimeBundlesDir, '<%= projectName %>') : path.join(__dirname, '../runtime')
+      code: lambda.Code.fromAsset(path.join(__dirname, '../../runtime/src')
       ),
       handler: 'main.handler',
     })

@@ -72,7 +72,12 @@ describe('cdk-application generator', () => {
   })
 
   it('should generate cdk app in provided directory', async () => {
-    await generator(tree, { ...options, directory: 'dir', unitTestRunner: 'jest' })
+    await generator(tree, {
+      ...options,
+      directory: `dir/${options.name}`,
+      name: `dir-${options.name}`,
+      unitTestRunner: 'jest',
+    })
 
     const config = readProjectConfiguration(tree, 'dir-cdk')
 

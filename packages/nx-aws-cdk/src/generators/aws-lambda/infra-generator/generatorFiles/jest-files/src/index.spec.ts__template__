@@ -42,12 +42,4 @@ describe('<%= className %>Stack', () => {
       Runtime: 'nodejs18.x',
     })
   })
-
-  it('should get code from provided bundles directory', () => {
-    const app = new cdk.App()
-
-    new <%= className %>Stack(app, stackId, { env: { envName }, runtimeBundlesDir: 'bundles' })
-
-    expect(fromAssetMock).toHaveBeenCalledWith('bundles/<%= projectName %>')
-  })
 })

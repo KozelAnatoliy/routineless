@@ -63,12 +63,12 @@ It utilizes [cdk-application](###cdk-application-generator) and [aws-lambda](###
 ```
 ├── apps
 │   ├── <lambdaApp>
-│   │   └── src
-│   │       ├── index.ts
-│   │       ├── infra
-│   │       │   └── index.ts
-│   │       └── runtime
-│   │           └── main.ts
+│   │   ├── infra
+|   |   |   └── src
+|   |           └── index.ts
+|   |   └── runtime
+|   |       └── src
+|   |           └── main.ts
 │   └── <cdkApp>
 │       ├── cdk.json
 │       └── src
@@ -155,20 +155,28 @@ npx nx g aws-lambda foo-lambda
 Generated application structure:
 
 ```
-├── jest.config.ts
-├── package.json
-├── project.json
-├── src
-│   ├── index.ts
-│   ├── infra
-│   │   ├── index.spec.ts
-│   │   └── index.ts
-│   └── runtime
-│       ├── main.spec.ts
-│       └── main.ts
-├── tsconfig.json
-├── tsconfig.lib.json
-└── tsconfig.spec.json
+├── infra
+|   ├── src
+|   │   ├── index.spec.ts
+|   │   └── index.ts
+|   ├── .eslintrc.json
+|   ├── jest.config.ts
+|   ├── project.json
+|   ├── tsconfig.json
+|   ├── tsconfig.lib.json
+|   └── tsconfig.spec.json
+|
+└── runtime
+    ├── src
+    │   ├── main.spec.ts
+    │   └── main.ts
+    ├── .eslintrc.json
+    ├── jest.config.ts
+    ├── project.json
+    ├── tsconfig.json
+    ├── tsconfig.app.json
+    └── tsconfig.spec.json
+
 ```
 
 Runtime code is located in `src/runtime/main.ts` file. Infrastructure code is located in `src/infra/index.ts` file.

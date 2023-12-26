@@ -74,7 +74,7 @@ const updateLintConfig = (tree: Tree, options: NormalizedSchema) => {
 }
 
 const updateInfraProjectConfiguration = (tree: Tree, options: NormalizedSchema) => {
-  const projectConfig = readProjectConfiguration(tree, options.projectName)
+  const projectConfig = readProjectConfiguration(tree, options.name)
   const projectTargets = projectConfig.targets ?? {}
   delete projectTargets['serve']
 
@@ -129,7 +129,7 @@ export const cdkApplicationGenerator = async (
 
   if (normalizedOptions.setAsRoutinelessInfraApp) {
     updateRoutinelessConfig(tree, (config) => {
-      config.infraApp = normalizedOptions.projectName
+      config.infraApp = normalizedOptions.name
       return config
     })
   }
@@ -137,7 +137,8 @@ export const cdkApplicationGenerator = async (
   tasks.push(
     await nodeApplicationGenerator(tree, {
       ...normalizedOptions,
-      directory: normalizedOptions.projectDirectory,
+      directory: normalizedOptions.projectRoot,
+      projectNameAndRootFormat: 'as-provided',
       e2eTestRunner: 'none',
       skipFormat: true,
     }),

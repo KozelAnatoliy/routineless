@@ -8,6 +8,4 @@ export interface BaseStackProps extends StackProps {
   readonly env: CdkEnvironment
 }
 
-export interface BaseLambdaStackProps extends BaseStackProps {
-  runtimeBundlesDir?: string
-}
+export interface BaseLambdaStackProps extends BaseStackProps {}
