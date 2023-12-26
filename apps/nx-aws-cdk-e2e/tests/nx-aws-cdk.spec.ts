@@ -50,7 +50,8 @@ describe('cdk application', () => {
     })
 
     it('should create lambda application', () => {
-      expect(() => checkFilesExist(`apps/${lambdaProject}`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${lambdaProject}/runtime`)).not.toThrow()
+      expect(() => checkFilesExist(`apps/${lambdaProject}/infra`)).not.toThrow()
     })
 
     it('should remove redundant files', () => {
@@ -111,47 +112,69 @@ describe('cdk application', () => {
       await runNxCommandAsync(`generate aws-lambda ${project}`)
     })
 
-    it('should lambda generate files', () => {
-      expect(() => checkFilesExist(`apps/${project}/project.json`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/runtime/main.ts`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/runtime/main.spec.ts`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/infra/index.ts`)).not.toThrow()
-      expect(() => checkFilesExist(`apps/${project}/src/infra/index.spec.ts`)).not.toThrow()
+    describe('lambda runtime', () => {
+      it('should generate files', () => {
+        expect(() => checkFilesExist(`apps/${project}/runtime/project.json`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.ts`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/runtime/src/main.spec.ts`)).not.toThrow()
+      })
+
+      it('should have tests coverage', async () => {
+        const result = await runNxCommandAsync(
+          `test ${project}-runtime -- --codeCoverage=true --coverageReporters=text-summary`,
+        )
+
+        expect(result.stdout).toContain('Statements   : 100%')
+        expect(result.stdout).toContain('Branches     : 100%')
+        expect(result.stdout).toContain('Functions    : 100%')
+        expect(result.stdout).toContain('Lines        : 100%')
+        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-runtime`)
+      })
     })
 
-    it('should run cdk diff', async () => {
-      const { className } = names(project)
+    describe('lambda infra', () => {
+      it('should generate files', () => {
+        expect(() => checkFilesExist(`apps/${project}/infra/project.json`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/infra/src/index.ts`)).not.toThrow()
+        expect(() => checkFilesExist(`apps/${project}/infra/src/index.spec.ts`)).not.toThrow()
+      })
 
-      const result = await runNxCommandAsync(`run ${infraProject}:cdk diff`)
+      it('should have tests coverage', async () => {
+        const result = await runNxCommandAsync(
+          `test ${project}-infra -- --codeCoverage=true --coverageReporters=text-summary`,
+        )
 
-      expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
-      expect(result.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
-    })
+        expect(result.stdout).toContain('Statements   : 100%')
+        expect(result.stdout).toContain('Branches     : 100%')
+        expect(result.stdout).toContain('Functions    : 100%')
+        expect(result.stdout).toContain('Lines        : 100%')
+        expect(result.stdout).toContain(`Successfully ran target test for project ${project}-infra`)
+      })
 
-    it('should deploy lambda', async () => {
-      const { className, fileName } = names(project)
+      it('should add lambda infra to cdk app', async () => {
+        const { className } = names(project)
 
-      await runNxCommandAsync(`run ${infraProject}:cdk bootstrap`)
-      const deployResult = await runNxCommandAsync(
-        `run ${infraProject}:cdk deploy ${className}StackLocal --require-approval never`,
-      )
-      expect(deployResult.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+        const result = await runNxCommandAsync(`run ${infraProject}:cdk diff`)
 
-      await runCommandAsync(`awslocal lambda invoke --function-name ${className}Local ${fileName}-response.json`)
-      const invokeResult = await runCommandAsync(`cat ${fileName}-response.json`)
-      expect(invokeResult.stdout).toContain('Hello World')
-      const destroyResult = await runNxCommandAsync(`run ${infraProject}:cdk destroy ${className}StackLocal -f`)
-      expect(destroyResult.stdout).toContain(`${className}StackLocal: destroyed`)
-    })
+        expect(result.stdout).toContain(`[+] AWS::Lambda::Function ${className}Function`)
+        expect(result.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+      })
 
-    it('should have tests coverage', async () => {
-      const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --coverageReporters=text-summary`)
+      it('should deploy lambda from cdk app', async () => {
+        const { className, fileName } = names(project)
 
-      expect(result.stdout).toContain('Statements   : 100%')
-      expect(result.stdout).toContain('Branches     : 100%')
-      expect(result.stdout).toContain('Functions    : 100%')
-      expect(result.stdout).toContain('Lines        : 100%')
-      expect(result.stdout).toContain(`Successfully ran target test for project ${project}`)
+        await runNxCommandAsync(`run ${infraProject}:cdk bootstrap`)
+        const deployResult = await runNxCommandAsync(
+          `run ${infraProject}:cdk deploy ${className}StackLocal --require-approval never`,
+        )
+        expect(deployResult.stdout).toContain(`Successfully ran target cdk for project ${infraProject}`)
+
+        await runCommandAsync(`awslocal lambda invoke --function-name ${className}Local ${fileName}-response.json`)
+        const invokeResult = await runCommandAsync(`cat ${fileName}-response.json`)
+        expect(invokeResult.stdout).toContain('Hello World')
+        const destroyResult = await runNxCommandAsync(`run ${infraProject}:cdk destroy ${className}StackLocal -f`)
+        expect(destroyResult.stdout).toContain(`${className}StackLocal: destroyed`)
+      })
     })
   })
 })

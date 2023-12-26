@@ -22,7 +22,7 @@ describe('generators', () => {
   })
   describe('injectProjectProperties', () => {
     const options = {
-      name: 'testPackage',
+      name: 'test-package',
     }
 
     beforeEach(() => {
@@ -34,13 +34,13 @@ describe('generators', () => {
     })
 
     it('should inject project properties', () => {
-      const result = injectProjectProperties(tree, { ...options, directory: 'test-dir' })
+      const result = injectProjectProperties(tree, { name: 'test-dir-test-packge', directory: 'test-dir/test-package' })
 
       expect(result).toMatchObject({
-        appDirectory: 'test-dir/test-package',
+        appsDir: 'apps',
         projectName: 'test-dir-test-package',
         projectRoot: 'apps/test-dir/test-package',
-        projectDirectory: 'apps/test-dir',
+        projectDirectory: 'test-dir/test-package',
       })
     })
 
@@ -48,21 +48,24 @@ describe('generators', () => {
       const result = injectProjectProperties(tree, options)
 
       expect(result).toMatchObject({
-        appDirectory: 'test-package',
+        appsDir: 'apps',
         projectName: 'test-package',
         projectRoot: 'apps/test-package',
-        projectDirectory: 'apps',
+        projectDirectory: 'test-package',
       })
     })
 
     it('should inject project properties with apps directory', () => {
-      const result = injectProjectProperties(tree, { ...options, directory: 'apps/test-dir' })
+      const result = injectProjectProperties(tree, {
+        name: 'test-dir-test-package',
+        directory: 'apps/test-dir/test-package',
+      })
 
       expect(result).toMatchObject({
-        appDirectory: 'test-dir/test-package',
+        appsDir: 'apps',
         projectName: 'test-dir-test-package',
         projectRoot: 'apps/test-dir/test-package',
-        projectDirectory: 'apps/test-dir',
+        projectDirectory: 'test-dir/test-package',
       })
     })
 
@@ -76,10 +79,10 @@ describe('generators', () => {
       const result = injectProjectProperties(tree, options)
 
       expect(result).toMatchObject({
-        appDirectory: 'test-package',
+        appsDir: '',
         projectName: 'test-package',
         projectRoot: 'test-package',
-        projectDirectory: '.',
+        projectDirectory: 'test-package',
       })
     })
 
@@ -90,13 +93,16 @@ describe('generators', () => {
         standaloneAsDefault: false,
       })
 
-      const result = injectProjectProperties(tree, { ...options, directory: 'test-dir' })
+      const result = injectProjectProperties(tree, {
+        name: 'test-dir-test-package',
+        directory: 'test-dir/test-package',
+      })
 
       expect(result).toMatchObject({
-        appDirectory: 'test-dir/test-package',
+        appsDir: '',
         projectName: 'test-dir-test-package',
         projectRoot: 'test-dir/test-package',
-        projectDirectory: 'test-dir',
+        projectDirectory: 'test-dir/test-package',
       })
     })
   })

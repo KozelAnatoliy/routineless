@@ -4,5 +4,6 @@ nx run-many --target=e2e &
 P2=$!
 wait $P2
 E2E=$?
-kill $P1
+echo killing registry
+kill $(lsof -t -i:4873)
 exit $E2E

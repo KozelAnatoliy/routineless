@@ -57,7 +57,6 @@ if (tag !== 'local') {
     console.error(`Error reading package.json file from library build output.`)
   }
 } else {
-  execSync(`npm set //${localRegistryWithoutProtocol}/:_authToken=verdaccioAuthToken`)
   execSync(`npm unpublish --force --registry ${localRgistry} || true`)
 }
 

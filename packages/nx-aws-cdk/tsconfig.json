@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
-    "skipLibCheck": false
+    "skipLibCheck": true
   },
   "files": [],
   "include": [],

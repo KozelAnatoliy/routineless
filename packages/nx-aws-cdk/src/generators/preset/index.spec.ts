@@ -157,7 +157,10 @@ describe('preset generator', () => {
   it('should generate lambda app', async () => {
     await generator(appTree, { lambdaAppName: 'test-lambda' })
 
-    const lambdaConfig = readProjectConfiguration(appTree, 'test-lambda')
+    let lambdaConfig = readProjectConfiguration(appTree, 'test-lambda-infra')
+    expect(lambdaConfig).toBeDefined()
+
+    lambdaConfig = readProjectConfiguration(appTree, 'test-lambda-runtime')
     expect(lambdaConfig).toBeDefined()
   })
 
