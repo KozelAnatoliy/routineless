@@ -65,7 +65,7 @@ It utilizes [cdk-application](###cdk-application-generator) and [aws-lambda](###
 │   ├── <lambdaApp>
 │   │   ├── infra
 |   |   |   └── src
-|   |           └── index.ts
+|   |   |       └── index.ts
 |   |   └── runtime
 |   |       └── src
 |   |           └── main.ts

@@ -1,3 +1,17 @@
+# 1.0.0 (2023-12-27)
+
+### 🚀 Features
+
+- ⚠️ split lambda app into two separate nodes ([5b46098](https://github.com/KozelAnatoliy/routineless/commit/5b46098))
+
+#### ⚠️ Breaking Changes
+
+- Generated lambda app structure changes.
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 0.1.1
 
 ### 🩹 Fixes
