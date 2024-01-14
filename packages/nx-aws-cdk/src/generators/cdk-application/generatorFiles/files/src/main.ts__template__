@@ -1,10 +1,10 @@
-import { BaseLambdaStackProps, capitalize } from '@routineless/cdk'
+import { BaseStackProps, capitalize } from '@routineless/cdk'
 import * as cdk from 'aws-cdk-lib'
 
 import { environment } from './environment'
 import { PersistanceStack } from './stacks/persistance'
 
-const baseStackProps: BaseLambdaStackProps = {env: environment}
+const baseStackProps: BaseStackProps = {env: environment}
 
 const stackEnvPostfix = capitalize(baseStackProps.env.envName)
 const app = new cdk.App()

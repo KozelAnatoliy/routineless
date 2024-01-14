@@ -1,34 +1,11 @@
 import * as cdk from 'aws-cdk-lib'
 import { Template } from 'aws-cdk-lib/assertions'
-import { AssetCode, Code } from 'aws-cdk-lib/aws-lambda'
 
 import { <%= className %>Stack } from '.'
-
-jest.mock('aws-cdk-lib/aws-lambda', () => {
-  const originalModule = jest.requireActual('aws-cdk-lib/aws-lambda')
-
-  return {
-    ...originalModule,
-    Code: {
-      ...originalModule.Code,
-      fromAsset: jest.fn(),
-    },
-  }
-})
-
-const actualFromInline = jest.requireActual('aws-cdk-lib/aws-lambda').Code.fromInline
-const fromAssetMock = jest.mocked(Code.fromAsset)
 
 describe('<%= className %>Stack', () => {
   const envName = 'local'
   const stackId = '<%= className %>Stack'
-
-  beforeEach(() => {
-    fromAssetMock.mockReturnValue(actualFromInline('const message = "Hello world!"') as unknown as AssetCode)
-  })
-  afterEach(() => {
-    jest.resetAllMocks()
-  })
 
   it('should define lambda function', () => {
     const app = new cdk.App()

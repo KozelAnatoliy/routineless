@@ -20,33 +20,25 @@ describe('cdk-application generator', () => {
 
     const config = getRoutinelessConfig(tree)
 
-    expect(config).toBeUndefined()
+    expect(config).toEqual({})
   })
 
-  it('should add cdk dependencies without eslint', async () => {
+  it('should not add eslint-plugin-cdk without eslint', async () => {
     await generator(tree, options)
 
     const packageJson = readJson(tree, 'package.json')
 
-    expect(packageJson.dependencies['@routineless/cdk']).toBeDefined()
-    expect(packageJson.dependencies['aws-cdk-lib']).toBeDefined()
-    expect(packageJson.dependencies['constructs']).toBeDefined()
-    expect(packageJson.devDependencies['aws-cdk-local']).toBeDefined()
-    expect(packageJson.devDependencies['aws-cdk']).toBeDefined()
-
     expect(packageJson.devDependencies['eslint-plugin-cdk']).toBeUndefined()
+    expect(packageJson.devDependencies['aws-cdk-lib']).toBeDefined()
   })
 
-  it('should add cdk dependencies with eslint', async () => {
+  it('should add eslint-plugin-cdk with eslint', async () => {
     await generator(tree, { ...options, linter: Linter.EsLint })
 
     const packageJson = readJson(tree, 'package.json')
 
-    expect(packageJson.dependencies['aws-cdk-lib']).toBeDefined()
-    expect(packageJson.dependencies['constructs']).toBeDefined()
-    expect(packageJson.devDependencies['aws-cdk']).toBeDefined()
-    expect(packageJson.devDependencies['aws-cdk-local']).toBeDefined()
     expect(packageJson.devDependencies['eslint-plugin-cdk']).toBeDefined()
+    expect(packageJson.devDependencies['aws-cdk-lib']).toBeDefined()
   })
 
   it('should generate cdk app without tests', async () => {

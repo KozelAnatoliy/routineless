@@ -22,6 +22,7 @@
           {
             "input": "./packages/nx-aws-cdk/src",
             "glob": "**/!(*.ts)",
+            "ignore": ["**/fixtures/**"],
             "output": "./src"
           },
           {
@@ -61,15 +62,7 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": [
-          "packages/nx-aws-cdk/**/*.ts",
-          "packages/nx-aws-cdk/generators.json",
-          "packages/nx-aws-cdk/executors.json",
-          "packages/nx-aws-cdk/package.json"
-        ]
-      }
+      "outputs": ["{options.outputFile}"]
     },
     "test": {
       "executor": "@nx/jest:jest",

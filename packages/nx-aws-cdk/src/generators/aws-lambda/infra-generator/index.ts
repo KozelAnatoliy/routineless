@@ -2,7 +2,6 @@ import {
   GeneratorCallback,
   ProjectConfiguration,
   Tree,
-  addDependenciesToPackageJson,
   formatFiles,
   generateFiles,
   logger,
@@ -70,6 +69,8 @@ const updateAwsLambdaInfraProjectConfiguration = (tree: Tree, options: AwsLambda
   const implicitDependencies = projectConfig.implicitDependencies || []
   implicitDependencies.push(options.name.replace('infra', 'runtime'))
   projectConfig.implicitDependencies = implicitDependencies
+  const testTarget = projectConfig.targets?.['test']
+  if (testTarget) testTarget.dependsOn = ['^build']
 
   updateProjectConfiguration(tree, options.name, projectConfig)
 }
@@ -85,10 +86,6 @@ const addFiles = (tree: Tree, options: AwsLambdaInfraGeneratorOptions, filesType
   generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.directory, templateOptions)
 }
 
-const addDependencies = (host: Tree): GeneratorCallback => {
-  return addDependenciesToPackageJson(host, {}, {})
-}
-
 const awsLambdaInfraLibraryGenerator = async (
   tree: Tree,
   options: AwsLambdaGeneratorSchema & ProjectProperties,
@@ -96,7 +93,6 @@ const awsLambdaInfraLibraryGenerator = async (
   const tasks: GeneratorCallback[] = []
   const normalizedOptions = normalizeOptions(options)
 
-  tasks.push(addDependencies(tree))
   tasks.push(
     await libraryGenerator(tree, {
       ...normalizedOptions,

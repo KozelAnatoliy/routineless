@@ -1,5 +1,6 @@
 import { GetCallerIdentityCommand, STSClient } from '@aws-sdk/client-sts'
-import { fromNodeProviderChain, fromNodeProviderChainInit } from '@aws-sdk/credential-providers'
+import { DefaultProviderInit } from '@aws-sdk/credential-provider-node'
+import { fromNodeProviderChain } from '@aws-sdk/credential-providers'
 import { ExecutorContext, runExecutor } from '@nx/devkit'
 import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 
@@ -73,7 +74,7 @@ const normalizeOptions = async (
 
     if (!resolvedAccount) {
       if (resolvedRegion) {
-        const init: fromNodeProviderChainInit = {}
+        const init: DefaultProviderInit = {}
         if (profile && typeof profile === 'string') {
           init.profile = profile
         }
