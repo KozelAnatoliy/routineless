@@ -43,7 +43,17 @@
       "files": ["*.json"],
       "parser": "jsonc-eslint-parser",
       "rules": {
-        "@nx/dependency-checks": "error"
+        "@nx/dependency-checks": [
+          "error",
+          {
+            "buildTargets": ["build"],
+            "ignoredDependencies": ["aws-cdk", "aws-cdk-local", "aws-cdk-lib", "constructs", "@types/aws-lambda"],
+            "includeTransitiveDependencies": false,
+            "checkMissingDependencies": true, // toggle to disable
+            "checkObsoleteDependencies": true, // toggle to disable
+            "checkVersionMismatches": true
+          }
+        ]
       }
     }
   ]

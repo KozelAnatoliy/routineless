@@ -1,11 +1,24 @@
-import { Tree, readJson, updateJson } from '@nx/devkit'
+import { Tree, readJson, readJsonFile, updateJson } from '@nx/devkit'
+import type { ExecutorContext } from '@nx/devkit'
+import { existsSync } from 'fs'
+import * as path from 'path'
 
 const routinelessConfigPath = '.routineless.json'
 
-export const getRoutinelessConfig = (tree: Tree): RoutinelessConfig | undefined => {
-  if (!tree.exists(routinelessConfigPath)) return
-  const routinelessConfig = readJson<RoutinelessConfig>(tree, routinelessConfigPath)
+export const getRoutinelessConfig = (context: Tree | ExecutorContext): RoutinelessConfig => {
+  let routinelessConfig: RoutinelessConfig = {}
+  if (isTree(context)) {
+    if (!context.exists(routinelessConfigPath)) return routinelessConfig
+    routinelessConfig = readJson<RoutinelessConfig>(context, routinelessConfigPath)
+  } else {
+    if (!existsSync(path.join(context.root, routinelessConfigPath))) return routinelessConfig
+    routinelessConfig = readJsonFile<RoutinelessConfig>(path.join(context.root, routinelessConfigPath))
+  }
   return routinelessConfig
+}
+
+const isTree = (context: Tree | ExecutorContext): context is Tree => {
+  return (context as Tree).read !== undefined
 }
 
 export const updateRoutinelessConfig = (tree: Tree, updater: (config: RoutinelessConfig) => RoutinelessConfig) => {
@@ -16,5 +29,5 @@ export const updateRoutinelessConfig = (tree: Tree, updater: (config: Routineles
 }
 
 export interface RoutinelessConfig {
-  infraApp: string
+  infraApp?: string
 }

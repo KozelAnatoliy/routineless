@@ -30,7 +30,10 @@ export const isRunning = async (context: ExecutorContext): Promise<boolean> => {
   logStream.close()
   const logsContent = fs.readFileSync(tmpLogsPath)
   try {
-    const dockerPsOutput: DockerPsOuptutEntry[] = JSON.parse(logsContent.toString())
+    let dockerPsOutput: DockerPsOuptutEntry[] | DockerPsOuptutEntry = JSON.parse(logsContent.toString())
+    if (!Array.isArray(dockerPsOutput)) {
+      dockerPsOutput = [dockerPsOutput]
+    }
     for (const container of dockerPsOutput) {
       if (container.Image === 'localstack/localstack' && container.State === 'running') {
         return true

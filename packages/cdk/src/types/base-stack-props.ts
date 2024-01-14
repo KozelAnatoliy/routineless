@@ -7,5 +7,3 @@ export interface CdkEnvironment extends Environment {
 export interface BaseStackProps extends StackProps {
   readonly env: CdkEnvironment
 }
-
-export interface BaseLambdaStackProps extends BaseStackProps {}

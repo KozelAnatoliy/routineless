@@ -22,12 +22,12 @@ describe('main', () => {
     jest.doMock('../package.json', () => ({ version: '<version>' }))
     mockedCreateWorkspace.mockResolvedValue({ directory: 'directory', nxCloudInfo: 'cludInfo' })
 
-    await runCommand('workspace-name', '--i', 'infra-app', '--l', 'lambda-app', '--nxCloud', '--u', 'none')
+    await runCommand('workspace-name', '--i', 'infra-app', '--l', 'lambda-app', '--nxCloud', 'yes', '--u', 'none')
 
     expect(mockedCreateWorkspace).toHaveBeenCalledWith('@routineless/nx-aws-cdk@<version>', {
       i: 'infra-app',
       l: 'lambda-app',
-      nxCloud: true,
+      nxCloud: 'yes',
       name: 'workspace-name',
       packageManager: 'npm',
       unitTestRunner: 'none',

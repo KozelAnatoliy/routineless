@@ -1,0 +1,6 @@
+{
+  "bundle": true,
+  "platform": "node",
+  "outfile": "build/main.js",
+  "sourcemap": true
+}

@@ -1,7 +1,17 @@
-import { Tree } from '@nx/devkit'
+import { ExecutorContext, Tree, readJsonFile } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import { existsSync } from 'fs'
 
 import { getRoutinelessConfig, updateRoutinelessConfig } from './routineless'
+
+jest.mock('fs')
+jest.mock('@nx/devkit', () => ({
+  ...jest.requireActual('@nx/devkit'),
+  readJsonFile: jest.fn(),
+}))
+
+const mockedExistsSync = jest.mocked(existsSync)
+const mockedReadJsonFile = jest.mocked(readJsonFile)
 
 describe('routineless', () => {
   let tree: Tree
@@ -24,9 +34,26 @@ describe('routineless', () => {
       })
     })
 
-    it('should return undefined if routineless config does not exist', () => {
+    it('should get routineless config if exists using context', () => {
+      mockedExistsSync.mockReturnValue(true)
+      mockedReadJsonFile.mockReturnValue({
+        infraApp: 'infra',
+      })
+      const routinelessConfig = getRoutinelessConfig({ root: '/root' } as ExecutorContext)
+      expect(routinelessConfig).toEqual({
+        infraApp: 'infra',
+      })
+    })
+
+    it('should return default config if routineless config does not exist', () => {
       const routinelessConfig = getRoutinelessConfig(tree)
-      expect(routinelessConfig).toBeUndefined()
+      expect(routinelessConfig).toEqual({})
+    })
+
+    it('should return default config if routineless config does not exist using context', () => {
+      mockedExistsSync.mockReturnValue(false)
+      const routinelessConfig = getRoutinelessConfig({ root: '/root' } as ExecutorContext)
+      expect(routinelessConfig).toEqual({})
     })
   })
 

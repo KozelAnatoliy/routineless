@@ -1,4 +1,4 @@
-import { capitalize } from './string-utils'
+import { capitalize, toCamelCase } from './string-utils'
 
 describe('StringUtils', () => {
   describe('capitalize', () => {
@@ -16,6 +16,17 @@ describe('StringUtils', () => {
 
     it('should not fail on undefined', () => {
       expect(capitalize(undefined)).toBeUndefined()
+    })
+  })
+
+  describe('toCamelCase', () => {
+    it('should convert to camel case', () => {
+      expect(toCamelCase('TO_CAMEL')).toEqual('toCamel')
+      expect(toCamelCase('to_camel')).toEqual('toCamel')
+      expect(toCamelCase('TO-CAMEL')).toEqual('toCamel')
+      expect(toCamelCase('to-camel')).toEqual('toCamel')
+      expect(toCamelCase('toCamel')).toEqual('toCamel')
+      expect(toCamelCase('ToCamel')).toEqual('ToCamel')
     })
   })
 })

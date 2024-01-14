@@ -14,6 +14,12 @@
 
 - [Install](#install)
 - [Usage](#usage)
+  - [Preset](#preset)
+  - [Cdk application generator](#cdk-application-generator)
+  - [Lambda application generator](#lambda-application-generator)
+  - [Lambda runtime executor](#lambda-runtime-executor)
+  - [Cdk executor](#cdk-executor)
+  - [Localstack executor](#localstack-executor)
 - [Maintainers](#maintainers)
 - [License](#license)
 
@@ -189,6 +195,57 @@ Runtime code is located in `src/runtime/main.ts` file. Infrastructure code is lo
 | directory           | string  |         | false    | c     | A directory name where to generate lambda application. Can be provided using -d alias. |
 | addLambdaToInfraApp | boolean | true    | false    | a     | Adds generated lambda to configured cdk infrastrucure app.                             |
 
+### Lambda runtime executor
+
+Lambda runtime executor is responsible for preparing your lambda runtime code for deployment.
+
+Executor has two main modes bundled and unbundled. Bundled mode will create a single file that will contain all runtime dependencies and your lambda code. Unbundled mode will keep your lambda and internal dependencies projects structure and bundle third party dependencies in a separate file that will be placed in output node_modules directory.
+
+> Important: Unbundled mode supports only _esm_ format and is in experimental stage. If you encounter any issues building and deploying your project fall back to bundled mode.
+
+Basic configuration can be described in `project.json` file as:
+
+```json
+    "build": {
+      "executor": "@routineless/nx-aws-cdk:lambda-runtime",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "development",
+      "options": {
+        "outputPath": "dist/apps/<lambda-project>/runtime",
+        "tsConfig": "apps/<lambda-project>/runtime/tsconfig.app.json"
+      },
+      "configurations": {
+        "development": {
+          "bundle": false
+        },
+        "production": {
+          "minify": false
+        }
+      }
+    },
+```
+
+| name                  | type     | default        | required | alias | description                                                                                                                                  |
+| --------------------- | -------- | -------------- | -------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| tsConfig              | string   |                | true     |       | The path to tsconfig file.                                                                                                                   |
+| outputPath            | string   |                | true     |       | The output path of the generated files.                                                                                                      |
+| main                  | string   |                | false    |       | The path to the entry file, relative to project.                                                                                             |
+| bundle                | boolean  | true           | false    |       | Whether to bundle the main entry point and additional entry points. Set to false to keep individual output files. Esm format supported only. |
+| format                | string   | esm            | false    | f     | Module format to output.                                                                                                                     |
+| outputFileName        | string   |                | false    |       | Name of the main output file. Defaults same basename as 'main' file.                                                                         |
+| additionalEntryPoints | string[] | []             | false    |       | List of additional entry points.                                                                                                             |
+| assets                | string[] | []             | false    |       | List of static assets.                                                                                                                       |
+| external              | string[] | ["@aws-sdk/*"] | false    |       | Mark one or more module as external. Can use _ wildcards, such as '@aws-sdk/_'.                                                              |
+| deleteOutputPath      | boolean  | true           | false    |       | Delete the output path before building.                                                                                                      |
+| metafile              | boolean  | false          | false    |       | Generate a meta.json file in the output folder that includes metadata about the build. This file can be analyzed by other tools.             |
+| minify                | boolean  | false          | false    |       | Minifies outputs.                                                                                                                            |
+| skipTypeCheck         | boolean  | false          | false    |       | Skip type-checking via TypeScript. Skipping type-checking speeds up the build but type errors are not caught.                                |
+| generatePackageJson   | boolean  | false          | false    |       | Generates a `package.json` with dependencies that were excluded and needs to be installed.                                                   |
+| thirdParty            | boolean  | true           | false    |       | Includes third-party packages in the bundle (i.e. npm packages).                                                                             |
+| target                | string   | esnext         | false    |       | The environment target for outputs.                                                                                                          |
+| esbuildOptions        | object   |                | false    |       | Additional options to pass to esbuild. See https://esbuild.github.io/api/. Cannot be used with 'esbuildConfig' option.                       |
+| esbuildConfig         | string   |                | false    |       | Path to a esbuild configuration file. See https://esbuild.github.io/api/. Cannot be used with 'esbuildOptions' option.                       |
+
 ### Cdk executor
 
 Cdk executor is responsible for cdk commands execution. It can be used to bootstrap, deploy, destroy and executing other cdk commands. General usage pattern is `npx nx cdk <cdk-project-name> <cdk command> ...args`.
@@ -245,7 +302,7 @@ Then you can run cdk diff against localstack environment:
 npx nx cdk <cdk-project-name> diff
 ```
 
-You can deploy your application to aws by running:
+You can deploy your application by running:
 
 ```sh
 npx nx cdk <cdk-project-name> bootstrap
@@ -297,7 +354,7 @@ AWS_ENV=dev npx nx cdk <cdk-project-name> diff --resolve
 | ------- | ------- | ------- | -------- | ----- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | account | number  |         | false    | a     | AWS_ACCOUNT  | AWS account id to deploy cdk application.                                                                                                   |
 | region  | string  |         | false    | r     | AWS_REGION   | AWS region to deploy cdk application.                                                                                                       |
-| env     | string  |         | local    | e     | AWS_ENV      | Environment name that will be used in result stack names to distinguish different environments.                                             |
+| env     | string  | local   | false    | e     | AWS_ENV      | Environment name that will be used in result stack names to distinguish different environments.                                             |
 | watch   | boolean | false   | false    | w     |              | Watch mode. Will execute provided command on every change detected in cdk app and its dependencies.                                         |
 | resolve | boolean | false   | false    | R     |              | Resolve mode. Will try to resolve aws account/region info from local context during build time instead of relying on aws pseudo parameters. |
 

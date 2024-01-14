@@ -1,7 +1,6 @@
 import {
   GeneratorCallback,
   Tree,
-  addDependenciesToPackageJson,
   formatFiles,
   generateFiles,
   readProjectConfiguration,
@@ -12,7 +11,6 @@ import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
 import { join } from 'path'
 
 import { ProjectProperties } from '../../../utils/generators'
-import { AWS_LAMBDA_TYPES_VERSION, ROUTINELESS_CDK_VERSION } from '../../../utils/versions'
 import { deleteNodeAppRedundantDirs } from '../../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from '../schema'
 
@@ -37,36 +35,19 @@ const updateAwsLambdaRuntumeProjectConfiguration = (tree: Tree, options: AwsLamb
   projectConfig.targets = {
     ...projectTargets,
     build: {
-      executor: '@nx/esbuild:esbuild',
+      executor: '@routineless/nx-aws-cdk:lambda-runtime',
       outputs: ['{options.outputPath}'],
       defaultConfiguration: 'development',
       options: {
-        platform: 'node',
         outputPath: `dist/${options.directory}`,
-        format: ['cjs'],
-        bundle: true,
-        main: `${options.directory}/src/main.ts`,
         tsConfig: `${options.directory}/tsconfig.app.json`,
-        thirdParty: true,
-        external: ['@aws-sdk/*'],
-        assets: [`${options.directory}/src/assets`],
-        esbuildOptions: {
-          sourcemap: true,
-          outExtension: {
-            '.js': '.js',
-          },
-        },
       },
       configurations: {
-        development: {},
+        development: {
+          bundle: false,
+        },
         production: {
           minify: true,
-          esbuildOptions: {
-            sourcemap: false,
-            outExtension: {
-              '.js': '.js',
-            },
-          },
         },
       },
     },
@@ -90,18 +71,6 @@ const addFiles = (
   generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.directory, templateOptions)
 }
 
-const addDependencies = (host: Tree): GeneratorCallback => {
-  return addDependenciesToPackageJson(
-    host,
-    {
-      '@routineless/cdk': ROUTINELESS_CDK_VERSION,
-    },
-    {
-      '@types/aws-lambda': AWS_LAMBDA_TYPES_VERSION,
-    },
-  )
-}
-
 const awsLambdaRuntimeApplicationGenerator = async (
   tree: Tree,
   options: AwsLambdaGeneratorSchema & ProjectProperties,
@@ -109,7 +78,6 @@ const awsLambdaRuntimeApplicationGenerator = async (
   const tasks: GeneratorCallback[] = []
   const normalizedOptions = normalizeOptions(options)
 
-  tasks.push(addDependencies(tree))
   tasks.push(
     await nodeApplicationGenerator(tree, {
       ...normalizedOptions,
