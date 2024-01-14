@@ -1,6 +1,6 @@
 {
   "name": "create-aws-cdk-app",
-  "version": "1.0.0",
+  "version": "1.1.0-beta.0",
   "description": "Bin executable for @routineless/nx-aws-cdk plugin",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
   "author": "Anatoli Kozel",
   "license": "MIT",
   "dependencies": {
-    "create-nx-workspace": "17.2.7",
+    "create-nx-workspace": "17.3.1",
     "tslib": "^2.6.2",
     "yargs": "^17.7.2"
   },

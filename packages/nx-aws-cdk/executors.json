@@ -10,6 +10,11 @@
       "implementation": "./src/executors/localstack",
       "schema": "./src/executors/localstack/schema.json",
       "description": "localstack executor"
+    },
+    "lambda-runtime": {
+      "implementation": "./src/executors/lambda-runtime/executor",
+      "schema": "./src/executors/lambda-runtime/schema.json",
+      "description": "lambda-runtime executor"
     }
   }
 }

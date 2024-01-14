@@ -1,6 +1,6 @@
 {
   "name": "@routineless/nx-aws-cdk",
-  "version": "1.0.0",
+  "version": "1.1.0-beta.0",
   "description": "Nx plugin for AWS CDK",
   "repository": {
     "type": "git",
@@ -23,19 +23,32 @@
   "executors": "./executors.json",
   "dependencies": {
     "@aws-sdk/client-sts": "^3.433.0",
-    "@aws-sdk/credential-providers": "^3.433.0",
-    "@nx/node": "17.2.7",
-    "@nx/devkit": "17.2.7",
-    "@nx/eslint": "17.2.7",
-    "@nx/jest": "17.2.7",
-    "@nx/js": "17.2.7",
+    "@aws-sdk/credential-providers": "^3.504.1",
+    "@aws-sdk/credential-provider-node": "^3.504.0",
+    "@nx/devkit": "^17.3.1",
+    "@nx/esbuild": "^17.3.1",
+    "@nx/eslint": "^17.3.1",
+    "@nx/node": "^17.3.1",
+    "@nx/jest": "^17.3.1",
+    "@nx/js": "^17.3.1",
     "@smithy/shared-ini-file-loader": "^2.2.2",
+    "@types/aws-lambda": "^8.10.133",
+    "aws-cdk": "^2.125.0",
+    "aws-cdk-local": "^2.18.0",
+    "constructs": "10.3.0",
     "fs-extra": "11.2.0",
-    "ignore": "5.3.0",
+    "ignore": "5.3.1",
     "tslib": "^2.6.2",
-    "@routineless/cdk": "1.0.0",
+    "@routineless/cdk": "1.1.0-beta.0",
     "events": "3.3.0",
-    "winston": "^3.11.0"
+    "esbuild": "0.19.8",
+    "winston": "^3.11.0",
+    "glob": "10.3.10",
+    "recast": "^0.23.4",
+    "ast-types": "0.16.1"
+  },
+  "peerDependencies": {
+    "aws-cdk-lib": "^2.125.0"
   },
   "publishConfig": {
     "access": "public"

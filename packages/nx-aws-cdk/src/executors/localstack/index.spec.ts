@@ -128,6 +128,13 @@ describe('localstack executor', () => {
       expect(result).toBe(true)
     })
 
+    it('should return true if single localstack container is running', async () => {
+      mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify(isRunningJson)))
+      const result = await isRunning(context)
+
+      expect(result).toBe(true)
+    })
+
     it('should retrun false if localstack is in exited state', async () => {
       mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify([isNotRunningJson])))
 

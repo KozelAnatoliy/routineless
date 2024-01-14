@@ -51,10 +51,11 @@ describe('awsLambdaInfraLibraryGenerator', () => {
 
     const projectConfig = readProjectConfiguration(tree, 'aws-lambda-infra')
     expect(projectConfig.implicitDependencies).toEqual(['aws-lambda-runtime'])
+    expect(projectConfig.targets?.['test']?.dependsOn).toEqual(['^build'])
   })
 
   it('should not add lambda to infra app if routineless config is not defined', async () => {
-    mockedGetRoutinelessConfig.mockReturnValue(undefined)
+    mockedGetRoutinelessConfig.mockReturnValue({})
     jest.spyOn(logger, 'warn')
     await awsLambdaInfraLibraryGenerator(tree, { ...options, addLambdaToInfraApp: true })
 

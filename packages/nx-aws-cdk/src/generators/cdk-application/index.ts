@@ -17,13 +17,7 @@ import { join } from 'path'
 
 import { ProjectProperties, injectProjectProperties } from '../../utils/generators'
 import { updateRoutinelessConfig } from '../../utils/routineless'
-import {
-  CDK_CONSTRUCTS_VERSION,
-  CDK_ESLINT_VERSION,
-  CDK_LOCAL_VERSION,
-  CDK_VERSION,
-  ROUTINELESS_CDK_VERSION,
-} from '../../utils/versions'
+import { AWS_CDK_LIB_VERSION, CDK_ESLINT_VERSION } from '../../utils/versions'
 import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, getNpmScope } from '../../utils/workspace'
 import eslintCdkRules from './eslint-cdk-rules.json'
 import type { CdkApplicationGeneratorSchema } from './schema'
@@ -101,22 +95,12 @@ const updateTsConfig = (tree: Tree) => {
 }
 
 const addDependencies = (host: Tree, options: NormalizedSchema): GeneratorCallback => {
-  const devDependencies: Record<string, string> = {
-    'aws-cdk-local': CDK_LOCAL_VERSION,
-    'aws-cdk': CDK_VERSION,
-  }
+  const devDependencies: Record<string, string> = {}
   if (options.linter === Linter.EsLint) {
     devDependencies['eslint-plugin-cdk'] = CDK_ESLINT_VERSION
   }
-  return addDependenciesToPackageJson(
-    host,
-    {
-      '@routineless/cdk': ROUTINELESS_CDK_VERSION,
-      'aws-cdk-lib': CDK_VERSION,
-      constructs: CDK_CONSTRUCTS_VERSION,
-    },
-    devDependencies,
-  )
+  devDependencies['aws-cdk-lib'] = AWS_CDK_LIB_VERSION
+  return addDependenciesToPackageJson(host, {}, devDependencies)
 }
 
 export const cdkApplicationGenerator = async (

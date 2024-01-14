@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createWorkspace } from 'create-nx-workspace'
+import { CreateWorkspaceOptions, createWorkspace } from 'create-nx-workspace'
 import yargs from 'yargs'
 
 import packageJson from '../package.json'
@@ -15,9 +15,11 @@ async function main() {
     .describe('i', 'infra application name')
     .alias('l', 'lambda')
     .describe('l', 'lambda application name')
-    .boolean('nxCloud')
-    .describe('nxCloud', 'Connect the workspace to the free tier of the distributed cache provided by Nx Cloud.')
-    .default('nxCloud', false)
+    .option('nxCloud', {
+      choices: ['yes', 'github', 'circleci', 'skip'],
+      describe: 'Connect the workspace to the free tier of the distributed cache provided by Nx Cloud.',
+      default: 'skip',
+    })
     .alias('u', 'unitTestRunner')
     .describe('u', 'Test runner to use for unit tests. Acceptable values: jest, none')
     .default('u', 'jest')
@@ -34,7 +36,7 @@ async function main() {
     i: argv['i'],
     l: argv['l'],
     unitTestRunner: argv['u'],
-    nxCloud: argv.nxCloud,
+    nxCloud: argv.nxCloud as CreateWorkspaceOptions['nxCloud'],
     name,
     packageManager: 'npm',
     commit: {

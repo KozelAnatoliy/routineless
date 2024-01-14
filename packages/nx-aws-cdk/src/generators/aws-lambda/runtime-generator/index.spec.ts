@@ -40,6 +40,6 @@ describe('awsLambdaRuntimeApplicationGenerator', () => {
     await awsLambdaRuntimeApplicationGenerator(tree, options)
 
     const projectConfig = readProjectConfiguration(tree, 'aws-lambda-runtime')
-    expect(projectConfig.targets?.['build']?.options.bundle).toBeTruthy()
+    expect(projectConfig.targets?.['build']?.executor).toEqual('@routineless/nx-aws-cdk:lambda-runtime')
   })
 })

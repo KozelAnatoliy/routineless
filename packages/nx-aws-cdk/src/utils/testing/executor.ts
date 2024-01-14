@@ -3,13 +3,20 @@ import type * as child_process from 'child_process'
 import EventEmitter from 'events'
 import type { Readable, Writable } from 'stream'
 
-export const mockExecutorContext = (executorName: string, workspaceVersion = 2): ExecutorContext => {
+import { MockProjectGraphOptions, mockProjectGraph } from './project-graph'
+
+type MockExeutorOptions = {
+  targetOptions?: Record<string, unknown>
+  mockProjectGraphOptions?: MockProjectGraphOptions
+}
+
+export const mockExecutorContext = (executorName: string, options: MockExeutorOptions = {}): ExecutorContext => {
   return {
     projectName: 'proj',
     root: '/root',
     cwd: '/root',
     projectsConfigurations: {
-      version: workspaceVersion,
+      version: 2,
       projects: {
         proj: {
           root: 'apps/proj',
@@ -22,8 +29,14 @@ export const mockExecutorContext = (executorName: string, workspaceVersion = 2):
         },
       },
     },
+    projectGraph: mockProjectGraph(options.mockProjectGraphOptions).projectGraph,
+    nxJsonConfiguration: {},
     target: {
       executor: `@routineless/nx-aws-cdk:${executorName}`,
+      options: {
+        outputPath: 'dist/apps/proj',
+        ...(options.targetOptions ?? {}),
+      },
     },
     isVerbose: true,
   }
