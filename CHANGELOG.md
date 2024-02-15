@@ -1,3 +1,13 @@
+## 1.1.0 (2024-02-15)
+
+### 🚀 Features
+
+- implement lambda runtime executor ([1ed0492](https://github.com/KozelAnatoliy/routineless/commit/1ed0492))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 # 1.0.0 (2023-12-27)
 
 ### 🚀 Features
