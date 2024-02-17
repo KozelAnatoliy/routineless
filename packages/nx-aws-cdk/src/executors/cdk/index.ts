@@ -6,7 +6,7 @@ import { loadSharedConfigFiles } from '@smithy/shared-ini-file-loader'
 
 import { runCommandsInParralel } from '../../utils/executors'
 import { logger } from '../../utils/logger'
-import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning as isLocalstackRunning } from '../localstack'
+import { TARGET_NAME as LOCALSTACK_TARGET_NAME } from '../localstack'
 import { createCommands } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
@@ -109,8 +109,7 @@ const cdkExecutor = async (options: CdkExecutorOptions, context: ExecutorContext
   const normalizedOptions = await normalizeOptions(options, context)
   const commands = createCommands(normalizedOptions, context)
 
-  if (normalizedOptions.env === 'local' && !(await isLocalstackRunning(context))) {
-    logger.info('Localstack is not running. Starting localstack')
+  if (normalizedOptions.env === 'local') {
     const localstackStartResult = await runExecutor(
       { project: normalizedOptions.projectName, target: LOCALSTACK_TARGET_NAME },
       { command: 'start' },
