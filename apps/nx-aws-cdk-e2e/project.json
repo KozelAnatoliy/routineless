@@ -9,6 +9,7 @@
       "options": {
         "jestConfig": "apps/nx-aws-cdk-e2e/jest.config.ts",
         "runInBand": true,
+        "verbose": true,
         "passWithNoTests": false
       },
       "dependsOn": ["create-aws-cdk-app:publish-local"]

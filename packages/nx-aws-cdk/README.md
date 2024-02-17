@@ -390,6 +390,7 @@ You can override default localstack options by adding `localstack` target to you
   "executor": "@routineless/nx-aws-cdk:localstack",
     "options": {
       "containerName": "my-project-localstack",
+      "composeFile": "path/to/localstack/docker-compose.yml",
       "preserveVolumes": true
     }
 }
@@ -412,6 +413,7 @@ Or by updating `targetDefaults` section in your `nx.json` file to apply default 
 | --------------- | ------- | --------------- | -------- | ----- | ---------------------------------------------------------------------------------------------------------- |
 | command         | string  |                 | true     | c     | Localstack commands. Accepts 'start', 'stop'.                                                              |
 | containerName    | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
+| composeFile     | string  |                 | false    | f     | Custom localstack docker-compose file path relative to workspace root.                                     |
 | volumeMountPath | string  | jest            | false    | v     | Path to mount localstack data. By default data will not be exposed and stored withing docker named volume. |
 | debug           | boolean | false           | false    |       | Enable localstack debug mode.                                                                              |
 | preserveVolumes | boolean | false           | false    | p     | Preserve localstack docker volumes on shutting down.                                                       |

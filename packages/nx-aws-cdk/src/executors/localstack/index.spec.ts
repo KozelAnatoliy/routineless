@@ -21,11 +21,35 @@ describe('localstack executor', () => {
   const testProcessExitInfo: ProcessExitInfo = { code: 0, signal: null }
   const expectedDockerFilePath =
     '/node_modules/@routineless/nx-aws-cdk/src/executors/localstack/docker/docker-compose.yaml'
+  const isRunningJson: DockerPsOuptutEntry = {
+    ID: 'id',
+    Names: 'localstack_main',
+    Image: 'localstack/localstack',
+    State: 'running',
+    Status: 'Up 2 minutes (healthy)',
+  }
+  const anotherContainer: DockerPsOuptutEntry = {
+    ID: 'id2',
+    Names: 'container',
+    Image: 'image',
+    State: 'running',
+    Status: 'Up 2 minutes (healthy)',
+  }
+  const isNotRunningJson: DockerPsOuptutEntry = {
+    ...isRunningJson,
+    State: 'exited',
+  }
 
   beforeEach(async () => {
     jest.spyOn(logger, 'error')
     context = mockExecutorContext('localstack')
     mockedRunCommand.mockResolvedValue(testProcessExitInfo)
+    mockedEvents.once.mockResolvedValueOnce([])
+    mockedFs.existsSync.mockReturnValue(true)
+    mockedFs.createWriteStream.mockReturnValue({ close: jest.fn() } as unknown as WriteStream)
+    mockedFs.readFileSync.mockReturnValue(
+      Buffer.from([isNotRunningJson].map((container) => JSON.stringify(container)).join('\n')),
+    )
   })
 
   afterEach(() => {
@@ -42,12 +66,40 @@ describe('localstack executor', () => {
     expect(executionResult).toEqual({ success: true })
   })
 
+  it('should not run localstack start command if localstack is already running', async () => {
+    mockedFs.readFileSync.mockReturnValue(
+      Buffer.from([isRunningJson, anotherContainer].map((container) => JSON.stringify(container)).join('\n')),
+    )
+
+    const executionResult = await executor({ command: 'start' }, context)
+
+    expect(mockedRunCommand).toHaveBeenCalledTimes(1)
+    expect(mockedRunCommand).toHaveBeenCalledWith(
+      {
+        command: 'docker ps --format json',
+      },
+      expect.anything(),
+    )
+    expect(executionResult).toEqual({ success: true })
+  })
+
   it('should run localstack stop command', async () => {
     const executionPrommise = executor({ command: 'stop' }, context)
     const executionResult = await executionPrommise
 
     expect(mockedRunCommand).toHaveBeenCalledWith({
       command: `docker compose -f ${context.root}${expectedDockerFilePath} down -v`,
+    })
+    expect(executionResult).toEqual({ success: true })
+  })
+
+  it('should run localstack start with provided compose file', async () => {
+    const composeFile = 'custom-docker-compose.yaml'
+    const executionPrommise = executor({ command: 'start', composeFile }, context)
+    const executionResult = await executionPrommise
+
+    expect(mockedRunCommand).toHaveBeenCalledWith({
+      command: `docker compose -f /root/${composeFile} up --wait`,
     })
     expect(executionResult).toEqual({ success: true })
   })
@@ -90,7 +142,8 @@ describe('localstack executor', () => {
 
   it('should fail if command fails', async () => {
     const error = new Error('Error')
-    mockedRunCommand.mockRejectedValue(error)
+    mockedRunCommand.mockResolvedValueOnce(testProcessExitInfo)
+    mockedRunCommand.mockRejectedValueOnce(error)
 
     const executionPrommise = executor({ command: 'start' }, context)
     const executionResult = await executionPrommise
@@ -100,26 +153,10 @@ describe('localstack executor', () => {
   })
 
   describe('isRunning', () => {
-    const isRunningJson: DockerPsOuptutEntry = {
-      ID: 'id',
-      Name: 'localstack_main',
-      Image: 'localstack/localstack',
-      State: 'running',
-      Status: 'Up 2 minutes (healthy)',
-      Health: 'healthy',
-    }
-    const isNotRunningJson: DockerPsOuptutEntry = {
-      ...isRunningJson,
-      State: 'exited',
-      Health: '',
-    }
-
     beforeEach(() => {
-      mockedEvents.once.mockResolvedValueOnce([])
-      mockedFs.existsSync.mockReturnValue(true)
-      mockedFs.createWriteStream.mockReturnValue({ close: jest.fn() } as unknown as WriteStream)
-      mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify([isRunningJson])))
-      mockedRunCommand.mockResolvedValue(testProcessExitInfo)
+      mockedFs.readFileSync.mockReturnValue(
+        Buffer.from([isRunningJson, anotherContainer].map((container) => JSON.stringify(container)).join('\n')),
+      )
     })
 
     it('should return true if localstack is running', async () => {
@@ -136,7 +173,7 @@ describe('localstack executor', () => {
     })
 
     it('should retrun false if localstack is in exited state', async () => {
-      mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify([isNotRunningJson])))
+      mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify(isNotRunningJson)))
 
       const result = await isRunning(context)
 
@@ -144,7 +181,7 @@ describe('localstack executor', () => {
     })
 
     it('should return false if localstack is not in the list', async () => {
-      mockedFs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify([])))
+      mockedFs.readFileSync.mockReturnValue(Buffer.from(''))
 
       const result = await isRunning(context)
 

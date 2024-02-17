@@ -14,6 +14,11 @@
       },
       "alias": "c"
     },
+    "composeFile": {
+      "description": "Custom localstack docker-compose file path relative to workspace root.",
+      "type": "string",
+      "alias": "f"
+    },
     "containerName": {
       "description": "Localstack container name",
       "type": "string",

@@ -10,16 +10,15 @@ export const TARGET_NAME = 'localstack'
 
 export interface DockerPsOuptutEntry {
   ID: string
-  Name: string
+  Names: string
   Image: string
   State: string
-  Health: string
   Status: string
 }
 
 export const isRunning = async (context: ExecutorContext): Promise<boolean> => {
-  const command = buildCommand({ command: 'ps' }, context)
-  const tmpLogsPath = `${context.root}/tmp/docker-localstack-ps-log.json`
+  const command = buildCommand({ command: 'ps' }, context, false)
+  const tmpLogsPath = `${context.root}/tmp/docker-ps-log.json`
 
   if (fs.existsSync(tmpLogsPath)) {
     fs.rmSync(tmpLogsPath)
@@ -28,14 +27,14 @@ export const isRunning = async (context: ExecutorContext): Promise<boolean> => {
   await events.once(logStream, 'open')
   await runCommand(command, { stdio: [process.stdin, logStream, process.stderr] })
   logStream.close()
-  const logsContent = fs.readFileSync(tmpLogsPath)
+  const logsContent = fs.readFileSync(tmpLogsPath).toString()
+  if (!logsContent) {
+    return false
+  }
   try {
-    let dockerPsOutput: DockerPsOuptutEntry[] | DockerPsOuptutEntry = JSON.parse(logsContent.toString())
-    if (!Array.isArray(dockerPsOutput)) {
-      dockerPsOutput = [dockerPsOutput]
-    }
+    const dockerPsOutput: DockerPsOuptutEntry[] = logsContent.split(/\r?\n/).map((line) => JSON.parse(line))
     for (const container of dockerPsOutput) {
-      if (container.Image === 'localstack/localstack' && container.State === 'running') {
+      if (container.Image.includes('localstack') && container.State === 'running') {
         return true
       }
     }
@@ -46,11 +45,19 @@ export const isRunning = async (context: ExecutorContext): Promise<boolean> => {
   return false
 }
 
-const buildCommand = (options: LocalstackExecutorOptions, context: ExecutorContext): Command => {
+const buildCommand = (options: LocalstackExecutorOptions, context: ExecutorContext, compose = true): Command => {
   const pluginPath = `${context.root}/node_modules/@routineless/nx-aws-cdk`
   const executorPath = `${pluginPath}/src/executors/localstack`
-  const dockerComposeFilePath = `${executorPath}/docker/docker-compose.yaml`
-  let command = `docker compose -f ${dockerComposeFilePath}`
+  const routinelessDockerComposeFilePath = `${executorPath}/docker/docker-compose.yaml`
+  let command = `docker`
+  if (compose) {
+    command = `${command} compose`
+    if (options.composeFile) {
+      command = `${command} -f ${context.root}/${options.composeFile}`
+    } else {
+      command = `${command} -f ${routinelessDockerComposeFilePath}`
+    }
+  }
   switch (options.command) {
     case 'start':
       command = `${command} up --wait`
@@ -84,6 +91,15 @@ const localstackExecutor = async (
   context: ExecutorContext,
 ): Promise<{ success: boolean }> => {
   logger.debug('Localstack executor options %s', JSON.stringify(options))
+  if (options.command === 'start') {
+    if (await isRunning(context)) {
+      logger.info('Localstack is already running')
+      return {
+        success: true,
+      }
+    }
+    logger.info('Localstack is not running. Starting localstack')
+  }
   const command: Command = buildCommand(options, context)
   try {
     await runCommand(command)

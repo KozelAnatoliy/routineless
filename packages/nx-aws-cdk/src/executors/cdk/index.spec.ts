@@ -8,7 +8,7 @@ import executor from '.'
 import { ProcessExitInfo, runCommandsInParralel } from '../../utils/executors'
 import { logger } from '../../utils/logger'
 import { mockExecutorContext } from '../../utils/testing/executor'
-import { TARGET_NAME as LOCALSTACK_TARGET_NAME, isRunning } from '../localstack'
+import { TARGET_NAME as LOCALSTACK_TARGET_NAME } from '../localstack'
 import { createCommands } from './executors'
 import type { CdkExecutorOptions } from './schema'
 
@@ -20,10 +20,6 @@ jest.mock('@nx/devkit', () => ({
 }))
 jest.mock('@smithy/shared-ini-file-loader')
 jest.mock('../../utils/executors')
-jest.mock('../localstack', () => ({
-  ...jest.requireActual('../localstack'),
-  isRunning: jest.fn(),
-}))
 jest.mock('./executors')
 
 const mockedCreateCommands = jest.mocked(createCommands, { shallow: true })
@@ -33,7 +29,6 @@ const mockedGetCallerIdentityCommand = GetCallerIdentityCommand as jest.MockedCl
 const mockedFromNodeProviderChain = jest.mocked(fromNodeProviderChain, { shallow: true })
 const mockedLoadSharedConfigFiles = jest.mocked(loadSharedConfigFiles, { shallow: true })
 const mockedRunExecutor = jest.mocked(runExecutor, { shallow: true })
-const mockedIsLocalstackRunningMock = jest.mocked(isRunning, { shallow: true })
 
 const options: CdkExecutorOptions = {
   _: ['diff'],
@@ -70,7 +65,6 @@ describe('Cdk Executor', () => {
     mockedCreateCommands.mockReturnValue(testCommands)
     mockedRunCommandsInParralel.mockResolvedValue([testProcessExitInfo])
     mockedRunExecutor.mockResolvedValue(successGeneratorResult())
-    mockedIsLocalstackRunningMock.mockResolvedValue(true)
     process.env = { ...OLD_ENV }
   })
 
@@ -84,7 +78,7 @@ describe('Cdk Executor', () => {
     const executionResult = await executionPrommise
 
     expect(mockedCreateCommands).toHaveBeenCalledWith(defaultExpectedCreateCommandsOptions, context)
-    expect(mockedRunExecutor).not.toHaveBeenCalled()
+    expect(mockedRunExecutor).toHaveBeenCalled()
     expect(mockedRunCommandsInParralel).toHaveBeenCalledWith(testCommands)
     expect(executionResult).toEqual({ success: true })
   })
@@ -527,8 +521,7 @@ describe('Cdk Executor', () => {
   })
 
   describe('localstack startup', () => {
-    it('should start localstack if not running', async () => {
-      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
+    it('should start localstack for local env', async () => {
       const executionPrommise = executor(options, context)
       const executionResult = await executionPrommise
 
@@ -542,7 +535,6 @@ describe('Cdk Executor', () => {
     })
 
     it('should not start localstack for non local env', async () => {
-      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
       const executionPrommise = executor({ ...options, env: 'prod' }, context)
       const executionResult = await executionPrommise
 
@@ -552,7 +544,6 @@ describe('Cdk Executor', () => {
     })
 
     it('should fail cdk executor on failed localstack start', async () => {
-      mockedIsLocalstackRunningMock.mockResolvedValueOnce(false)
       mockedRunExecutor.mockResolvedValueOnce(failGeneratorResult())
       const executionPrommise = executor(options, context)
       const executionResult = await executionPrommise

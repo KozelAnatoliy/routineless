@@ -418,4 +418,66 @@ describe('cdk application', () => {
       })
     })
   })
+
+  describe('localstack executor', () => {
+    const composeFile = 'custom-docker-compose.yaml'
+
+    beforeAll(async () => {
+      await runNxCommandAsync(`localstack ${infraProject} stop`)
+      await copyFile(path.join(__dirname, 'fixtures', composeFile), path.join(tmpProjPath(), composeFile))
+    })
+
+    it('should run localstack start command', async () => {
+      await runNxCommandAsync(`localstack ${infraProject} start`)
+
+      const { stdout } = await runCommandAsync('docker ps --format json')
+
+      expect(stdout).toContain('"Image":"localstack/localstack"')
+      expect(stdout).toContain('"State":"running"')
+
+      await runNxCommandAsync(`localstack ${infraProject} stop`)
+    })
+
+    it('should run localstack with provided compose file', async () => {
+      await runNxCommandAsync(`localstack ${infraProject} start --composeFile ${composeFile}`)
+
+      let { stdout } = await runCommandAsync('docker ps --format json')
+
+      expect(stdout).toContain('"Image":"localstack/localstack"')
+      expect(stdout).toContain('"Names":"e2e-custom-localstack"')
+      expect(stdout).toContain('"State":"running"')
+
+      await runNxCommandAsync(`localstack ${infraProject} stop --composeFile ${composeFile}`)
+
+      stdout = (await runCommandAsync('docker ps --format json')).stdout
+
+      expect(stdout).not.toContain('"Image":"localstack/localstack"')
+      expect(stdout).not.toContain('"State":"running"')
+    })
+
+    it('should start localstack through cdk using default overrides', async () => {
+      const nxJson = readJson('nx.json')
+      nxJson.targetDefaults.localstack = {
+        options: {
+          composeFile,
+        },
+      }
+      updateFile('nx.json', JSON.stringify(nxJson))
+
+      await runNxCommandAsync(`cdk ${infraProject} bootstrap`)
+
+      let { stdout } = await runCommandAsync('docker ps --format json')
+
+      expect(stdout).toContain('"Image":"localstack/localstack"')
+      expect(stdout).toContain('"Names":"e2e-custom-localstack"')
+      expect(stdout).toContain('"State":"running"')
+
+      await runNxCommandAsync(`localstack ${infraProject} stop`)
+
+      stdout = (await runCommandAsync('docker ps --format json')).stdout
+
+      expect(stdout).not.toContain('"Image":"localstack/localstack"')
+      expect(stdout).not.toContain('"State":"running"')
+    })
+  })
 })

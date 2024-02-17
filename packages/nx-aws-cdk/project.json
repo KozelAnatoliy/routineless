@@ -45,11 +45,6 @@
             "glob": "**/generatorFiles/**",
             "output": "./src"
           }
-        ],
-        "transformers": [
-          {
-            "name": "typescript-transform-paths/nx-transformer"
-          }
         ]
       }
     },
