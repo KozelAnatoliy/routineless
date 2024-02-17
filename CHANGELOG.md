@@ -1,3 +1,14 @@
+## 1.2.0 (2024-02-17)
+
+
+### 🚀 Features
+
+- **nx-aws-cdk:** implement localstack executor custom compose file ([9daa5a7](https://github.com/KozelAnatoliy/routineless/commit/9daa5a7))
+
+### ❤️  Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 1.1.0 (2024-02-15)
 
 ### 🚀 Features
