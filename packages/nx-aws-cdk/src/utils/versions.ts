@@ -2,7 +2,7 @@
 export const CDK_ESLINT_VERSION = '1.8.0'
 
 //aws-cdk-lib
-export const AWS_CDK_LIB_VERSION = '^2.125.0'
+export const AWS_CDK_LIB_VERSION = '^2.106.0'
 
 //@tsconfig/node-lts
 export const TSCONFIG_NODE_LTS_VERSION = '20.1.1'
