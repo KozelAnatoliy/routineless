@@ -7,7 +7,7 @@
     "e2e": {
       "executor": "@nx/jest:jest",
       "options": {
-        "jestConfig": "apps/nx-aws-cdk-e2e/jest.config.ts",
+        "jestConfig": "apps/nx-aws-cdk-e2e/jest-e2e.config.ts",
         "runInBand": true,
         "verbose": true,
         "passWithNoTests": false

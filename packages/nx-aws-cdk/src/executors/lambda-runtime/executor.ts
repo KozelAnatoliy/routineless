@@ -13,7 +13,7 @@ import * as esbuild from 'esbuild'
 import { existsSync, removeSync } from 'fs-extra'
 import path from 'path'
 
-import { getPackageName, resolveDependencies } from './lib/dependencies'
+import { getPackageName, getPackageVersion, resolveDependencies } from './lib/dependencies'
 import { build, getOutExtension } from './lib/esbuild-helper'
 import { LambdaRuntimeExecutorOptions, NormalizedLambdaRuntimeExecutorOptions } from './schema'
 
@@ -146,14 +146,14 @@ const generatePackageJson = async (
 
   // Any dependencies expect excluded external should already be bundeld or added to external node module
   cpjOptions.overrideDependencies = externalDependencies
-  const externalDepsName = externalDependencies.reduce((acc, dep) => acc.add(getPackageName(dep)), new Set<string>())
 
   const packageJsonResult = await copyPackageJson(cpjOptions, context)
   const generatedPackageJson = readJsonFile(`${options.outputPath}/package.json`)
-  ;(generatedPackageJson.dependencies = Object.keys(generatedPackageJson.dependencies || {})
-    .filter((dep) => externalDepsName.has(dep))
-    .reduce((acc, dep) => ({ ...acc, [dep]: generatedPackageJson.dependencies[dep] }), {})),
-    writeJsonFile(`${options.outputPath}/package.json`, generatedPackageJson)
+  generatedPackageJson.dependencies = externalDependencies.reduce(
+    (acc, dep) => ({ ...acc, [getPackageName(dep)]: getPackageVersion(dep) }),
+    {},
+  )
+  writeJsonFile(`${options.outputPath}/package.json`, generatedPackageJson)
   if (!packageJsonResult.success) {
     throw new Error('Failed to generate package.json')
   }

@@ -1,46 +1,14 @@
-import { CreateNodes, CreateNodesContext, CreateNodesFunction, CreateNodesResult } from '@nx/devkit'
-import { existsSync } from 'fs'
-import { dirname } from 'path'
+import type { CreateNodes, CreateNodesContext, CreateNodesResult } from '@nx/devkit'
 
-type NxAwsCdkPluginOptions = object
-type CreateNodesFunctionMapper = Array<
-  [(projectConfigFilePath: string) => boolean, createNodesFunction: CreateNodesFunction<NxAwsCdkPluginOptions>]
->
+import lambdaInfraInference from './generators/aws-lambda/infra-generator/inferrence'
+import lambdaRuntimeInference from './generators/aws-lambda/runtime-generator/inferrence'
+import cdkAppInference from './generators/cdk-application/inferrence'
+import type { CreateNodesFunctionMapper, NxAwsCdkPluginOptions } from './utils/inferrence'
 
-const createCdkAppNode: CreateNodesFunction<NxAwsCdkPluginOptions> = (projectConfigFilePath: string) => {
-  const projectRoot = dirname(projectConfigFilePath)
-
-  return {
-    projects: {
-      [projectRoot]: {
-        targets: {
-          localstack: {
-            executor: '@routineless/nx-aws-cdk:localstack',
-          },
-          cdk: {
-            executor: '@routineless/nx-aws-cdk:cdk',
-            configurations: {
-              development: {
-                env: 'dev',
-                resolve: true,
-                'hotswap-fallback': true,
-                concurrency: 3,
-              },
-              production: {
-                env: 'prod',
-                resolve: true,
-              },
-            },
-            dependsOn: ['build'],
-          },
-        },
-      },
-    },
-  }
-}
-
-const filePathToConfigurationMapper: CreateNodesFunctionMapper = [
-  [(projectConfigFilePath) => existsSync(projectConfigFilePath.replace('project.json', 'cdk.json')), createCdkAppNode],
+const filePathToConfigurationMappings: CreateNodesFunctionMapper[] = [
+  cdkAppInference,
+  lambdaRuntimeInference,
+  lambdaInfraInference,
 ]
 
 export const createNodes: CreateNodes<NxAwsCdkPluginOptions> = [
@@ -51,7 +19,7 @@ export const createNodes: CreateNodes<NxAwsCdkPluginOptions> = [
     context: CreateNodesContext,
   ) => {
     const nodesResult: CreateNodesResult[] = []
-    for (const [predicate, createNodesFunction] of filePathToConfigurationMapper) {
+    for (const { predicate, createNodesFunction } of filePathToConfigurationMappings) {
       if (predicate(projectConfigurationFilePath)) {
         nodesResult.push(await createNodesFunction(projectConfigurationFilePath, opts, context))
       }
@@ -67,7 +35,12 @@ const mergeCreateNodesResults = (createNodesResults: CreateNodesResult[]): Creat
     if (createNodesResult.projects) {
       result.projects = result.projects ?? {}
       for (const [key, value] of Object.entries(createNodesResult.projects)) {
-        result.projects[key] = { ...(result.projects[key] ?? {}), ...value }
+        const resolvedProject = result.projects[key]
+        if (!resolvedProject) {
+          result.projects[key] = value
+        } else {
+          resolvedProject.targets = { ...resolvedProject.targets, ...value.targets }
+        }
       }
     }
   }

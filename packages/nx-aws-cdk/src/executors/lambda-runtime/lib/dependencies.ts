@@ -24,6 +24,17 @@ export const getPackageName = (node: DependentBuildableProjectNode): string => {
   return isInternalProjectNode(node.node) ? node.name : node.node.data.packageName
 }
 
+export const getPackageVersion = (node: DependentBuildableProjectNode): string => {
+  if (!isInternalProjectNode(node.node)) return node.node.data.version
+
+  const packageJsonPath = join(node.node.data.root, 'package.json')
+  if (!existsSync(packageJsonPath)) {
+    return '0.0.0'
+  }
+  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
+  return packageJson.version
+}
+
 export const dependenciesReducer = (
   acc: { internal: DependentBuildableProjectNode[]; external: DependentBuildableProjectNode[] },
   dep: DependentBuildableProjectNode,

@@ -40,7 +40,6 @@ describe('preset generator', () => {
     const packageJson = readJson(appTree, 'package.json')
     expect(packageJson.devDependencies['jsonc-eslint-parser']).toBeDefined()
     expect(packageJson.devDependencies['eslint-plugin-prettier']).toBeDefined()
-    expect(packageJson.devDependencies['@tsconfig/node-lts']).toBeDefined()
     expect(packageJson.devDependencies['@tsconfig/strictest']).toBeDefined()
     expect(packageJson.devDependencies['@trivago/prettier-plugin-sort-imports']).toBeDefined()
   })
@@ -102,13 +101,9 @@ describe('preset generator', () => {
     await generator(appTree, options)
 
     const tsConfig = readJson(appTree, 'tsconfig.base.json')
-    expect(tsConfig.extends).toEqual(['@tsconfig/node-lts/tsconfig.json', '@tsconfig/strictest/tsconfig.json'])
+    expect(tsConfig.extends).toEqual('./node_modules/@tsconfig/strictest/tsconfig.json')
     expect(tsConfig.compilerOptions.resolveJsonModule).toBe(true)
-    expect(tsConfig.compilerOptions.lib).toBeUndefined()
-    expect(tsConfig.compilerOptions.module).toBeUndefined()
-    expect(tsConfig.compilerOptions.target).toBeUndefined()
     expect(tsConfig.compilerOptions.skipLibCheck).toBeUndefined()
-    expect(tsConfig.compilerOptions.moduleResolution).toBeUndefined()
   })
 
   it('should update package.json', async () => {
@@ -118,7 +113,7 @@ describe('preset generator', () => {
     expect(packageJson.scripts['build']).toBe('nx run-many --target=build')
     expect(packageJson.scripts['test']).toBe('nx run-many --target=test')
     expect(packageJson.scripts['test:coverage']).toBe(
-      'nx run-many --target=test --codeCoverage=true --output-style="static" --passWithNoTests=false --skip-nx-cache',
+      'nx run-many --target=test --skip-nx-cache --output-style=static --coverage --passWithNoTests=false',
     )
     expect(packageJson.scripts['lint']).toBe('nx run-many --target=lint')
   })

@@ -36,10 +36,11 @@ describe('awsLambdaRuntimeApplicationGenerator', () => {
     expect(tree.exists('apps/aws-lambda/runtime/jest.config.ts')).toBeFalsy()
   })
 
-  it('should update project configuration', async () => {
+  it('should remove generated targets from project configuration', async () => {
     await awsLambdaRuntimeApplicationGenerator(tree, options)
 
     const projectConfig = readProjectConfiguration(tree, 'aws-lambda-runtime')
-    expect(projectConfig.targets?.['build']?.executor).toEqual('@routineless/nx-aws-cdk:lambda-runtime')
+    expect(projectConfig.targets?.['build']).toBeUndefined()
+    expect(projectConfig.targets?.['serve']).toBeUndefined()
   })
 })

@@ -1,12 +1,12 @@
 import { getHelperDependenciesFromProjectGraph } from '@nx/js'
 import { DependentBuildableProjectNode } from '@nx/js/src/utils/buildable-libs-utils'
-import { existsSync } from 'fs'
+import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 
 import { mockExecutorContext } from '../../../utils/testing/executor'
 import { MockProjectGraphOptions, mockProjectGraph } from '../../../utils/testing/project-graph'
 import { NormalizedLambdaRuntimeExecutorOptions } from '../schema'
-import { dependenciesReducer, getPackageName, resolveDependencies } from './dependencies'
+import { dependenciesReducer, getPackageName, getPackageVersion, resolveDependencies } from './dependencies'
 
 jest.mock('@nx/js/src/utils/buildable-libs-utils', () => ({
   calculateProjectBuildableDependencies: jest.fn(),
@@ -20,10 +20,12 @@ jest.mock('@nx/devkit', () => ({
 }))
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
+  readFileSync: jest.fn(),
   existsSync: jest.fn(),
 }))
 
 const mockedGetHelperDependenciesFromProjectGraph = jest.mocked(getHelperDependenciesFromProjectGraph)
+const mockedReadFileSync = jest.mocked(readFileSync)
 const mockedExistsSync = jest.mocked(existsSync)
 
 describe('dependencies', () => {
@@ -141,10 +143,45 @@ describe('dependencies', () => {
     })
   })
 
+  describe('getPackageVersion', () => {
+    it('should return version from node data if it is external', () => {
+      const { nodes } = mockProjectGraph({
+        nodesGraph: {
+          e1: {},
+        },
+      })
+      expect(getPackageVersion(nodes[0]!)).toEqual('1.0.0')
+    })
+
+    it('should return version from package.json if it is internal', () => {
+      const { nodes } = mockProjectGraph({
+        nodesGraph: {
+          i1: {},
+        },
+      })
+      mockedExistsSync.mockReturnValue(true)
+      mockedReadFileSync.mockReturnValue(JSON.stringify({ version: '1.0.0' }))
+
+      expect(getPackageVersion(nodes[0]!)).toEqual('1.0.0')
+    })
+
+    it('should return 0.0.0 if package.json does not exist', () => {
+      const { nodes } = mockProjectGraph({
+        nodesGraph: {
+          i1: {},
+        },
+      })
+      mockedExistsSync.mockReturnValue(false)
+
+      expect(getPackageVersion(nodes[0]!)).toEqual('0.0.0')
+    })
+  })
+
   describe('resolveDependencies', () => {
     beforeEach(() => {
       mockedExistsSync.mockReturnValue(true)
       mockedGetHelperDependenciesFromProjectGraph.mockReturnValue([])
+      mockedReadFileSync.mockImplementation(jest.requireActual('fs').readFileSync)
     })
 
     const expectDependencies = (result: DependentBuildableProjectNode[], expected: DependentBuildableProjectNode[]) => {

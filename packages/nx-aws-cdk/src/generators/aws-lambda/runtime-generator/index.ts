@@ -31,27 +31,7 @@ const updateAwsLambdaRuntumeProjectConfiguration = (tree: Tree, options: AwsLamb
   const projectConfig = readProjectConfiguration(tree, options.name)
   const projectTargets = projectConfig.targets ?? {}
   delete projectTargets['serve']
-
-  projectConfig.targets = {
-    ...projectTargets,
-    build: {
-      executor: '@routineless/nx-aws-cdk:lambda-runtime',
-      outputs: ['{options.outputPath}'],
-      defaultConfiguration: 'development',
-      options: {
-        outputPath: `dist/${options.directory}`,
-        tsConfig: `${options.directory}/tsconfig.app.json`,
-      },
-      configurations: {
-        development: {
-          bundle: false,
-        },
-        production: {
-          minify: true,
-        },
-      },
-    },
-  }
+  delete projectTargets['build']
 
   projectConfig.targets = {
     ...projectConfig.targets,
@@ -84,6 +64,7 @@ const awsLambdaRuntimeApplicationGenerator = async (
       projectNameAndRootFormat: 'as-provided',
       e2eTestRunner: 'none',
       skipFormat: true,
+      addPlugin: true,
     }),
   )
 

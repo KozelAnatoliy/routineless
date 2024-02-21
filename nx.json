@@ -15,23 +15,6 @@
       "inputs": ["production", "^production"],
       "cache": true
     },
-    "@nx/jest:jest": {
-      "cache": true,
-      "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"],
-      "options": {
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
-      }
-    },
-    "@nx/eslint:lint": {
-      "inputs": ["default", "{workspaceRoot}/.eslintrc.json"],
-      "cache": true
-    },
     "e2e": {
       "dependsOn": ["^build"],
       "cache": true
@@ -75,5 +58,19 @@
     "appsDir": "apps",
     "libsDir": "packages"
   },
+  "plugins": [
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": {
+        "targetName": "lint"
+      }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": {
+        "targetName": "test"
+      }
+    }
+  ],
   "nxCloudAccessToken": "YzZjNDU3OGUtNDk1OC00ZGYyLWE4ZWUtNjlhM2FhZWU3OGZmfHJlYWQtd3JpdGU="
 }

@@ -7,7 +7,7 @@ export const AWS_CDK_LIB_VERSION = '^2.106.0'
 //@tsconfig/node-lts
 export const TSCONFIG_NODE_LTS_VERSION = '20.1.1'
 //@tsconfig/strictest
-export const TSCONFIG_STRICTEST_VERSION = '2.0.2'
+export const TSCONFIG_STRICTEST_VERSION = '^2.0.3'
 
 //jsonc-eslint-parser
 export const JSON_ESLINT_PARSER_VERSION = '2.4.0'

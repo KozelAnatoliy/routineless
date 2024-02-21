@@ -72,7 +72,7 @@ jobs:
           npx nx affected -t lint --parallel=3 &
           pids+=($!)
 
-          npx nx affected -t test --parallel=3 --ci --code-coverage &
+          npx nx affected -t test --parallel=3 --ci --coverage --passWithNoTests &
           pids+=($!)
 
           npx nx affected -t build --parallel=3 &

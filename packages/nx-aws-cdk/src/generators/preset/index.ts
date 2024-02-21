@@ -19,7 +19,6 @@ import {
   ESLINT_PLUGIN_PRETTIER_VERSION,
   JSON_ESLINT_PARSER_VERSION,
   PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
-  TSCONFIG_NODE_LTS_VERSION,
   TSCONFIG_STRICTEST_VERSION,
 } from '../../utils/versions'
 import { getNpmScope } from '../../utils/workspace'
@@ -49,7 +48,6 @@ const updateNxConfig = (tree: Tree) => {
 
 const addDependencies = (host: Tree, normalizedOptions: NormalizedSchema): GeneratorCallback => {
   let devDependencies: Record<string, string> = {
-    '@tsconfig/node-lts': TSCONFIG_NODE_LTS_VERSION,
     '@tsconfig/strictest': TSCONFIG_STRICTEST_VERSION,
     '@trivago/prettier-plugin-sort-imports': PRETTIER_PLUGIN_SORT_IMPORTS_VERSION,
   }
@@ -83,7 +81,7 @@ const updatePackageJson = (tree: Tree, normalizedOptions: NormalizedSchema) => {
     if (normalizedOptions.unitTestRunner !== 'none') {
       json.scripts['test'] = 'nx run-many --target=test'
       json.scripts['test:coverage'] =
-        'nx run-many --target=test --codeCoverage=true --output-style="static" --passWithNoTests=false --skip-nx-cache'
+        'nx run-many --target=test --skip-nx-cache --output-style=static --coverage --passWithNoTests=false'
     }
     if (normalizedOptions.linter !== Linter.None) {
       json.scripts['lint'] = 'nx run-many --target=lint'
@@ -95,15 +93,11 @@ const updatePackageJson = (tree: Tree, normalizedOptions: NormalizedSchema) => {
 const updateTsConfig = (tree: Tree) => {
   updateJson(tree, `tsconfig.base.json`, (tsConfig) => {
     //TODO extend node-lts after nx typescript 5 support
-    tsConfig.extends = ['@tsconfig/node-lts/tsconfig.json', '@tsconfig/strictest/tsconfig.json']
+    tsConfig.extends = './node_modules/@tsconfig/strictest/tsconfig.json'
     tsConfig.compilerOptions.resolveJsonModule = true
+    tsConfig.moduleResolution = 'node'
 
-    // Remove properties provided by node-lts
-    delete tsConfig.compilerOptions.lib
-    delete tsConfig.compilerOptions.module
-    delete tsConfig.compilerOptions.target
     delete tsConfig.compilerOptions.skipLibCheck
-    // delete tsConfig.compilerOptions.moduleResolution
     return tsConfig
   })
 }
