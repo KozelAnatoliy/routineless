@@ -18,7 +18,7 @@
   "author": "Anatoli Kozel",
   "license": "MIT",
   "dependencies": {
-    "create-nx-workspace": "17.3.1",
+    "create-nx-workspace": "^18.0.4",
     "tslib": "^2.6.2",
     "yargs": "^17.7.2"
   },

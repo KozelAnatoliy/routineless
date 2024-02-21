@@ -125,6 +125,7 @@ export const cdkApplicationGenerator = async (
       projectNameAndRootFormat: 'as-provided',
       e2eTestRunner: 'none',
       skipFormat: true,
+      addPlugin: true,
     }),
   )
 

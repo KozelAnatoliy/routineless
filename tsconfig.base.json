@@ -1,7 +1,11 @@
 {
-  "extends": ["@tsconfig/node-lts/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
+  "extends": "@tsconfig/strictest/tsconfig.json",
   "compileOnSave": false,
   "compilerOptions": {
+    "lib": ["es2023"],
+    "module": "node16",
+    "target": "es2022",
+    "moduleResolution": "node",
     "ignoreDeprecations": "5.0",
     "rootDir": ".",
     "sourceMap": true,
@@ -9,8 +13,6 @@
     "importHelpers": true,
     "skipDefaultLibCheck": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {

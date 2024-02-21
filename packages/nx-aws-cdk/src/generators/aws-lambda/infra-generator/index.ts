@@ -69,8 +69,6 @@ const updateAwsLambdaInfraProjectConfiguration = (tree: Tree, options: AwsLambda
   const implicitDependencies = projectConfig.implicitDependencies || []
   implicitDependencies.push(options.name.replace('infra', 'runtime'))
   projectConfig.implicitDependencies = implicitDependencies
-  const testTarget = projectConfig.targets?.['test']
-  if (testTarget) testTarget.dependsOn = ['^build']
 
   updateProjectConfiguration(tree, options.name, projectConfig)
 }
@@ -99,6 +97,7 @@ const awsLambdaInfraLibraryGenerator = async (
       projectNameAndRootFormat: 'as-provided',
       skipFormat: true,
       compiler: 'tsc',
+      addPlugin: true,
     }),
   )
 

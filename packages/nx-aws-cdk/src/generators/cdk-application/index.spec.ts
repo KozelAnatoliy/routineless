@@ -46,7 +46,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint'])
+    expect(Object.keys(config?.targets || {})).toEqual(['build'])
     expect(tree.exists('apps/cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('apps/cdk/jest.config.ts')).toBeFalsy()
     expect(tree.exists('apps/cdk/src/main.ts')).toBeTruthy()
@@ -58,8 +58,15 @@ describe('cdk-application generator', () => {
     await generator(tree, { ...options, unitTestRunner: 'jest' })
 
     const config = readProjectConfiguration(tree, 'cdk')
+    const nxConfig = readJson(tree, 'nx.json')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test'])
+    expect(Object.keys(config?.targets || {})).toEqual(['build'])
+    expect(nxConfig.plugins).toContainEqual({
+      plugin: '@nx/jest/plugin',
+      options: {
+        targetName: 'test',
+      },
+    })
     expect(tree.exists('apps/cdk/src/stacks/persistance.spec.ts')).toBeTruthy()
   })
 
@@ -73,7 +80,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'dir-cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build', 'lint', 'test'])
+    expect(Object.keys(config?.targets || {})).toEqual(['build'])
     expect(tree.exists('apps/dir/cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('apps/dir/cdk/jest.config.ts')).toBeTruthy()
     expect(tree.exists('apps/dir/cdk/src/main.ts')).toBeTruthy()

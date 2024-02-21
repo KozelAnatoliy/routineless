@@ -110,7 +110,7 @@ describe('cdk application', () => {
     })
 
     it('should have tests coverage', async () => {
-      const result = await runNxCommandAsync(`test ${project} -- --codeCoverage=true --coverageReporters=text-summary`)
+      const result = await runNxCommandAsync(`test ${project} -- --coverage --coverageReporters=text-summary`)
       const strippedStdout = stripAnsi(result.stdout)
 
       expect(strippedStdout).toContain('Statements   : 100%')
@@ -136,9 +136,7 @@ describe('cdk application', () => {
       })
 
       it('should have tests coverage', async () => {
-        const result = await runNxCommandAsync(
-          `test ${project}-runtime -- --codeCoverage=true --coverageReporters=text-summary`,
-        )
+        const result = await runNxCommandAsync(`test ${project}-runtime -- --coverage --coverageReporters=text-summary`)
         const strippedStdout = stripAnsi(result.stdout)
 
         expect(strippedStdout).toContain('Statements   : 100%')
@@ -157,9 +155,7 @@ describe('cdk application', () => {
       })
 
       it('should have tests coverage', async () => {
-        const result = await runNxCommandAsync(
-          `test ${project}-infra -- --codeCoverage=true --coverageReporters=text-summary`,
-        )
+        const result = await runNxCommandAsync(`test ${project}-infra -- --coverage --coverageReporters=text-summary`)
         const strippedStdout = stripAnsi(result.stdout)
 
         expect(strippedStdout).toContain('Statements   : 100%')
@@ -227,12 +223,21 @@ describe('cdk application', () => {
           targets: {
             ...projectConfig.targets,
             build: {
-              ...projectConfig.targets.build,
+              executor: '@routineless/nx-aws-cdk:lambda-runtime',
+              outputs: ['{options.outputPath}'],
+              defaultConfiguration: 'development',
               options: {
-                ...projectConfig.targets.build.options,
+                outputPath: `dist/apps/${project}/runtime`,
+                tsConfig: `apps/${project}/runtime/tsconfig.app.json`,
                 ...options,
               },
               configurations: {
+                development: {
+                  bundle: false,
+                },
+                production: {
+                  minify: true,
+                },
                 ...configurations,
               },
             },
@@ -273,18 +278,13 @@ describe('cdk application', () => {
         tmpProjPath(`libs/transitive-internal/src/lib/transitive-internal.ts`),
       )
 
-      updateProjectConfig({
-        generatePackageJson: true,
-        metafile: true,
-      })
-
       await runNxCommandAsync(`localstack ${infraProject} stop`)
       await runNxCommandAsync(`run ${infraProject}:cdk bootstrap`)
     })
 
     describe('build', () => {
       it('should build default unbandled lambda', async () => {
-        await runNxCommandAsync(`build ${runtimeProject}`)
+        await runNxCommandAsync(`build ${runtimeProject} --generatePackageJson=true --metafile=true`)
 
         expect(() => checkFilesExist(distFolder)).not.toThrow()
         expect(() => checkFilesExist(`${distFolder}/main.mjs`)).not.toThrow()
@@ -310,7 +310,7 @@ describe('cdk application', () => {
       })
 
       it('should exclude third party libs', async () => {
-        await runNxCommandAsync(`build ${runtimeProject} --thirdParty=false`)
+        await runNxCommandAsync(`build ${runtimeProject} --thirdParty=false --generatePackageJson=true`)
 
         expect(() => checkFilesExist(distFolder)).not.toThrow()
         expect(() => checkFilesExist(`${distFolder}/main.mjs`)).not.toThrow()
@@ -323,7 +323,9 @@ describe('cdk application', () => {
       })
 
       it('should exclude external libs', async () => {
-        await runNxCommandAsync(`build ${runtimeProject} --external "@babel/*,@proj/transitive-internal"`)
+        await runNxCommandAsync(
+          `build ${runtimeProject} --external "@babel/*,@proj/transitive-internal" --generatePackageJson=true`,
+        )
 
         expect(() => checkFilesExist(distFolder)).not.toThrow()
         expect(() => checkFilesExist(`${distFolder}/main.mjs`)).not.toThrow()
@@ -352,16 +354,6 @@ describe('cdk application', () => {
       })
 
       it('should deploy unbandled esm lambda', async () => {
-        updateProjectConfig(
-          {
-            format: 'esm',
-          },
-          {
-            development: {
-              bundle: false,
-            },
-          },
-        )
         const deployResult = await runNxCommandAsync(
           `run ${infraProject}:cdk deploy ${className}StackLocal --require-approval never`,
         )
