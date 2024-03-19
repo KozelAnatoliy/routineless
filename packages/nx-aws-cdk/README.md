@@ -354,7 +354,7 @@ Or by updating `targetDefaults` section in your `nx.json` file to apply default 
 | name            | type    | default         | required | alias | description                                                                                                |
 | --------------- | ------- | --------------- | -------- | ----- | ---------------------------------------------------------------------------------------------------------- |
 | command         | string  |                 | true     | c     | Localstack commands. Accepts 'start', 'stop'.                                                              |
-| containeName    | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
+| containerName    | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
 | volumeMountPath | string  | jest            | false    | v     | Path to mount localstack data. By default data will not be exposed and stored withing docker named volume. |
 | debug           | boolean | false           | false    |       | Enable localstack debug mode.                                                                              |
 | preserveVolumes | boolean | false           | false    | p     | Preserve localstack docker volumes on shutting down.                                                       |

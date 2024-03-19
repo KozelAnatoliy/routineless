@@ -13,7 +13,7 @@ A set of utilities to simplify aws applications development, testing and deploym
 
 Routineless nx-aws-cdk is a tool to generate boilerplate structure for cloud backend application managed by [cdk](https://github.com/aws/aws-cdk).
 
-For detailed documentation navigate to the [package](packages/nx-plugin/README.md).
+For detailed documentation navigate to the [package](packages/nx-aws-cdk/README.md).
 
 ## create-aws-cdk-app
 
