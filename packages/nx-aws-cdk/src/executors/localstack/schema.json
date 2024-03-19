@@ -14,7 +14,7 @@
       },
       "alias": "c"
     },
-    "containeName": {
+    "containerName": {
       "description": "Localstack container name",
       "type": "string",
       "alias": "n"
