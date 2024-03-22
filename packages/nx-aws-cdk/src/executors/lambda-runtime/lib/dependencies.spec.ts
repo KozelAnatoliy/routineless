@@ -14,10 +14,6 @@ jest.mock('@nx/js/src/utils/buildable-libs-utils', () => ({
 jest.mock('@nx/js', () => ({
   getHelperDependenciesFromProjectGraph: jest.fn(),
 }))
-jest.mock('@nx/devkit', () => ({
-  ...jest.requireActual('@nx/devkit'),
-  workspaceRoot: path.join(__dirname, 'fixtures', 'dependencies'),
-}))
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'),
   readFileSync: jest.fn(),
@@ -80,7 +76,10 @@ describe('dependencies', () => {
     external: [],
   } as never as NormalizedLambdaRuntimeExecutorOptions
   const tsConfigPath = 'tsConfigPath'
-  const context = mockExecutorContext('lambda-runtime', { targetOptions: { tsConfig: tsConfigPath } })
+  const context = mockExecutorContext('lambda-runtime', {
+    root: path.join(__dirname, 'fixtures', 'dependencies'),
+    targetOptions: { tsConfig: tsConfigPath },
+  })
 
   afterEach(() => {
     jest.clearAllMocks()
@@ -356,7 +355,9 @@ describe('dependencies', () => {
     it('should throw error if tsconfig is not resolved', () => {
       mockedExistsSync.mockReturnValue(false)
 
-      expect(() => resolveDependencies(context, mockedProjectGraph, options)).toThrow('Could not find root tsconfig')
+      expect(() => resolveDependencies(context, mockedProjectGraph, options)).toThrow(
+        'Could not find a root tsconfig.json or tsconfig.base.json file.',
+      )
     })
   })
 })

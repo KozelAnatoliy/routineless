@@ -94,6 +94,7 @@ describe('util', () => {
       expect(lib1Imports).toBeDefined()
       expect(lib1Imports!.defaultImport).toEqual(false)
       expect(lib1Imports!.namespaceImport).toEqual(false)
+      expect(lib1Imports!.sideEffectImport).toEqual(false)
       expect(Array.from(lib1Imports!.namedImports).sort()).toEqual([
         'lib1NamedImport1',
         'lib1NamedImport2',
@@ -104,13 +105,22 @@ describe('util', () => {
       expect(lib2Imports).toBeDefined()
       expect(lib2Imports!.defaultImport).toEqual(true)
       expect(lib2Imports!.namespaceImport).toEqual(false)
+      expect(lib2Imports!.sideEffectImport).toEqual(false)
       expect(Array.from(lib2Imports!.namedImports)).toEqual(['lib2NamedImport1'])
 
       const lib3Imports = imports.get('lib3')
       expect(lib3Imports).toBeDefined()
       expect(lib3Imports!.defaultImport).toEqual(false)
       expect(lib3Imports!.namespaceImport).toEqual(true)
+      expect(lib3Imports!.sideEffectImport).toEqual(false)
       expect(Array.from(lib3Imports!.namedImports)).toEqual(['lib3NamedImport1'])
+
+      const lib4Imports = imports.get('lib4')
+      expect(lib4Imports).toBeDefined()
+      expect(lib4Imports!.defaultImport).toEqual(false)
+      expect(lib4Imports!.namespaceImport).toEqual(false)
+      expect(lib4Imports!.sideEffectImport).toEqual(true)
+      expect(lib4Imports!.namedImports.size).toEqual(0)
     })
   })
 })

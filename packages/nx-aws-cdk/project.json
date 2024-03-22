@@ -48,12 +48,8 @@
         ]
       }
     },
-    "publish-local": {
-      "command": "node tools/scripts/publish.mjs nx-aws-cdk {args.ver} {args.tag}",
-      "dependsOn": ["build", "^publish-local"],
-      "options": {
-        "tag": "local"
-      }
+    "publish": {
+      "command": "node tools/scripts/publish.mjs nx-aws-cdk {args.ver} {args.tag}"
     }
   },
   "tags": [],

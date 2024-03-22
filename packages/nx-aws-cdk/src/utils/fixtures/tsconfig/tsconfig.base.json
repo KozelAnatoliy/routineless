@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "proj/i1": ["libs/i1"],
+      "proj/i2": ["libs/i2"],
+      "proj/i3": ["libs/i3"]
+    }
+  }
+}

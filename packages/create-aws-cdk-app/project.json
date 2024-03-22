@@ -20,12 +20,8 @@
         "assets": ["packages/create-aws-cdk-app/*.md"]
       }
     },
-    "publish-local": {
-      "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.tag} {args.ver}",
-      "dependsOn": ["build", "^publish-local"],
-      "options": {
-        "tag": "local"
-      }
+    "publish": {
+      "command": "node tools/scripts/publish.mjs create-aws-cdk-app {args.tag} {args.ver}"
     }
   },
   "tags": [],

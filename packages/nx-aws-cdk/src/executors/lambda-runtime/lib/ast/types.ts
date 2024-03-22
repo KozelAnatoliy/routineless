@@ -13,6 +13,7 @@ export type Modifications = CjsModifications | EsmModifications
 export type Imports = {
   namespaceImport: boolean
   defaultImport: boolean
+  sideEffectImport: boolean
   namedImports: Set<string>
 }
 

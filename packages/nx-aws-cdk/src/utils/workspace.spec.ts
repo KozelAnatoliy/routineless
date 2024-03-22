@@ -1,14 +1,27 @@
 import { Tree, readJson } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
+import path from 'path'
+import { loadConfig } from 'tsconfig-paths'
 
-import { addGitIgnoreEntries, deleteNodeAppRedundantDirs, deleteNodeLibRedundantDirs, getNpmScope } from './workspace'
+import { mockExecutorContext } from './testing/executor'
+import {
+  addGitIgnoreEntries,
+  deleteNodeAppRedundantDirs,
+  deleteNodeLibRedundantDirs,
+  getNpmScope,
+  getTsConfigCompilerPaths,
+} from './workspace'
 
 jest.mock('@nx/devkit', () => ({
   ...jest.requireActual('@nx/devkit'),
   readJson: jest.fn(),
 }))
+jest.mock('tsconfig-paths', () => ({
+  loadConfig: jest.fn(),
+}))
 
 const mockerdReadJson = jest.mocked(readJson)
+const mockedLoadConfig = jest.mocked(loadConfig)
 
 describe('workspace utils', () => {
   let tree: Tree
@@ -109,6 +122,38 @@ describe('workspace utils', () => {
       const result = getNpmScope(tree)
 
       expect(result).toBeUndefined()
+    })
+  })
+
+  describe('getTsConfigCompilerPaths', () => {
+    const context = mockExecutorContext('test', { root: path.join(__dirname, 'fixtures', 'tsconfig') })
+
+    beforeEach(() => {
+      mockedLoadConfig.mockImplementation(jest.requireActual('tsconfig-paths').loadConfig)
+    })
+
+    it('should return tsconfig compiler paths', () => {
+      const result = getTsConfigCompilerPaths(context)
+
+      expect(result).toEqual({
+        'proj/i1': ['libs/i1'],
+        'proj/i2': ['libs/i2'],
+        'proj/i3': ['libs/i3'],
+      })
+    })
+
+    it('should fail if could not find tsconfig file', () => {
+      const context = mockExecutorContext('test')
+
+      expect(() => getTsConfigCompilerPaths(context)).toThrow(
+        'Could not find a root tsconfig.json or tsconfig.base.json file.',
+      )
+    })
+
+    it('should fail if counld not load tsconfig', () => {
+      mockedLoadConfig.mockReturnValueOnce({ resultType: 'failed', message: 'error' })
+
+      expect(() => getTsConfigCompilerPaths(context)).toThrow('Cannot load tsconfig file')
     })
   })
 })

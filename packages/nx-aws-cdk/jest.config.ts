@@ -1,6 +1,6 @@
 /* eslint-disable */
 export default {
-  displayName: 'routineless',
+  displayName: 'nx-aws-cdk',
   preset: '../../jest.preset.js',
   transform: {
     '^.+\\.[tj]s$': [

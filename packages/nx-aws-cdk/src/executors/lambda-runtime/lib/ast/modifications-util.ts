@@ -49,7 +49,7 @@ type ImportSpecifier =
   | { default?: never; namespace?: never; named: string }
 
 export const resolveReexportingName = (importedModule: string, importSpecifier: ImportSpecifier): string => {
-  const normalizedImportedModule = importedModule.replace('/', '-').replace('@', '')
+  const normalizedImportedModule = importedModule.replaceAll('/', '-').replaceAll('@', '')
   if (importSpecifier.namespace) {
     return `${toCamelCase(normalizedImportedModule)}Namespace`
   }

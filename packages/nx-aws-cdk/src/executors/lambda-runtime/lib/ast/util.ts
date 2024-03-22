@@ -85,11 +85,18 @@ export const collectAllImports = async (files: string[], excluded: string[] = []
       }
       let importsAggregate = allImports.get(importModule)
       if (!importsAggregate) {
-        importsAggregate = { namespaceImport: false, defaultImport: false, namedImports: new Set() }
+        importsAggregate = {
+          namespaceImport: false,
+          defaultImport: false,
+          sideEffectImport: false,
+          namedImports: new Set(),
+        }
         allImports.set(importModule, importsAggregate)
       }
 
-      for (const specifier of path.node.specifiers || []) {
+      const specifiers = path.node.specifiers || []
+
+      for (const specifier of specifiers) {
         if (namedTypes.ImportSpecifier.check(specifier)) {
           const importedName = specifier.imported.name as string
           importsAggregate.namedImports.add(importedName)
@@ -98,6 +105,9 @@ export const collectAllImports = async (files: string[], excluded: string[] = []
         } else if (namedTypes.ImportNamespaceSpecifier.check(specifier)) {
           importsAggregate.namespaceImport = true
         }
+      }
+      if (specifiers.length === 0) {
+        importsAggregate.sideEffectImport = true
       }
     }
     return false
