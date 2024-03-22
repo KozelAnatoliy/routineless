@@ -12,7 +12,7 @@
         "verbose": true,
         "passWithNoTests": false
       },
-      "dependsOn": ["create-aws-cdk-app:publish-local"]
+      "dependsOn": ["create-aws-cdk-app:publish"]
     },
     "local-registry": {
       "executor": "@nx/js:verdaccio",

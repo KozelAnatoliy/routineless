@@ -8,7 +8,7 @@
       "rules": {
         "prettier/prettier": "error",
         "@nx/enforce-module-boundaries": [
-          "error",
+          "warn",
           {
             "enforceBuildableLibDependency": true,
             "allow": [],
@@ -49,8 +49,8 @@
             "buildTargets": ["build"],
             "ignoredDependencies": ["aws-cdk", "aws-cdk-local", "aws-cdk-lib", "constructs", "@types/aws-lambda"],
             "includeTransitiveDependencies": false,
-            "checkMissingDependencies": true, // toggle to disable
-            "checkObsoleteDependencies": true, // toggle to disable
+            "checkMissingDependencies": true,
+            "checkObsoleteDependencies": true,
             "checkVersionMismatches": true
           }
         ]

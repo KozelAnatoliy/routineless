@@ -1,10 +1,10 @@
 import { ExecutorContext, ProjectGraphProjectNode, joinPathFragments, logger, workspaceRoot } from '@nx/devkit'
-import { getEntryPoints } from '@nx/esbuild/src/utils/get-entry-points'
 import { DependentBuildableProjectNode } from '@nx/js/src/utils/buildable-libs-utils'
 import * as esbuild from 'esbuild'
 import { mkdir, writeFile, writeJson } from 'fs-extra'
 import * as path from 'path'
 
+import { getEntryPoints } from '../../../utils/esbuild'
 import { NormalizedLambdaRuntimeExecutorOptions } from '../schema'
 import {
   Imports,
@@ -149,13 +149,13 @@ const buildMainAppEsbuildOptions = (
 }
 
 const buildDependencies = async (
-  options: NormalizedLambdaRuntimeExecutorOptions,
+  _options: NormalizedLambdaRuntimeExecutorOptions,
   context: ExecutorContext,
   mainAppEsbuildOptions: esbuild.BuildOptions,
   internal: DependentBuildableProjectNode[],
 ): Promise<{ buildResult: esbuild.BuildResult; reexportingResult: ReexportingResult }> => {
+  const options = { ..._options, bundle: true }
   const esbuildOptions = buildBaseEsbuildOptions(options)
-  esbuildOptions.bundle = true
   esbuildOptions.outdir = `${options.outputPath}/node_modules/${externalBundleName}`
   esbuildOptions.banner = options.format === 'esm' ? shimBanner : {}
 
@@ -262,6 +262,8 @@ const getReexportingFileContent = (imports: Map<string, Imports>): string => {
       const hasBoth = importsAggregate.namedImports.size && importsAggregate.defaultImport
       const namedExports = `${hasBoth ? ', ' : ''}${namedImports}`
       exportStatements.push(`export { ${defaultExport}${namedExports} } from '${importModule}'`)
+    } else if (!importsAggregate.namespaceImport && importsAggregate.sideEffectImport) {
+      exportStatements.push(`import '${importModule}'`)
     }
   }
   return exportStatements.join('\n')

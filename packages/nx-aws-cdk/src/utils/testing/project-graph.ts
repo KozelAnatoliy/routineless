@@ -105,7 +105,7 @@ export const mockProjectGraph = (
       for (const nodeKey of Object.keys(nodeOptions)) {
         const depNode = nodes.get(nodeKey)
         resultProjectGraph.dependencies[node.node.name]!.push({
-          type: 'static',
+          type: depNode!.name.startsWith('im') ? 'implicit' : 'static',
           source: node.node.name,
           target: depNode!.node.name,
         })

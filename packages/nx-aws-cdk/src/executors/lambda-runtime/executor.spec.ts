@@ -7,6 +7,7 @@ import path from 'path'
 
 import { mockExecutorContext } from '../../utils/testing/executor'
 import { mockProjectGraph } from '../../utils/testing/project-graph'
+import { getTsConfigCompilerPaths } from '../../utils/workspace'
 import executor from './executor'
 import { build } from './lib/esbuild-helper'
 import { LambdaRuntimeExecutorOptions } from './schema'
@@ -22,6 +23,9 @@ jest.mock('@nx/js', () => ({
   copyPackageJson: jest.fn(),
   printDiagnostics: jest.fn(),
   runTypeCheck: jest.fn(),
+}))
+jest.mock('../../utils/workspace', () => ({
+  getTsConfigCompilerPaths: jest.fn(),
 }))
 jest.mock('./lib/esbuild-helper', () => ({
   ...jest.requireActual('./lib/esbuild-helper'),
@@ -43,6 +47,7 @@ const mockedCopyAssets = jest.mocked(copyAssets)
 const mockedCopyPackageJson = jest.mocked(copyPackageJson)
 const mockedPrintDiagnostics = jest.mocked(printDiagnostics)
 const mockedRunTypeCheck = jest.mocked(runTypeCheck)
+const mockedGetTsConfigCompilerPaths = jest.mocked(getTsConfigCompilerPaths)
 const mockedEsbuildBuild = jest.mocked(build)
 const mockedRemoveSync = jest.mocked(removeSync)
 const mockedPathResolve = jest.mocked(path.resolve)
@@ -85,6 +90,7 @@ describe('LambdaRuntime Executor', () => {
       },
     })
     mockedRunTypeCheck.mockResolvedValue(mockTypeCheckResult)
+    mockedGetTsConfigCompilerPaths.mockReturnValue({})
     mockedEsbuildBuild.mockResolvedValue({ errors: [] } as never as BuildResult)
     context = mockExecutorContext('lambda-runtime', {
       mockProjectGraphOptions: {

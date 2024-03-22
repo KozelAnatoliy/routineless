@@ -1,8 +1,8 @@
 import { ExecutorContext, workspaceRoot } from '@nx/devkit'
-import { getEntryPoints } from '@nx/esbuild/src/utils/get-entry-points'
 import { BuildResult, Metafile, build as esbuildBuild } from 'esbuild'
 import { mkdir, writeFile, writeJson } from 'fs-extra'
 
+import { getEntryPoints } from '../../../utils/esbuild'
 import { mockExecutorContext } from '../../../utils/testing/executor'
 import { mockProjectGraph } from '../../../utils/testing/project-graph'
 import { NormalizedLambdaRuntimeExecutorOptions } from '../schema'
@@ -13,7 +13,7 @@ jest.mock('@nx/devkit', () => ({
   ...jest.requireActual('@nx/devkit'),
   workspaceRoot: 'workspace',
 }))
-jest.mock('@nx/esbuild/src/utils/get-entry-points', () => ({
+jest.mock('../../../utils/esbuild', () => ({
   getEntryPoints: jest.fn(),
 }))
 jest.mock('esbuild', () => ({
@@ -251,8 +251,17 @@ describe('esbuild-helper', () => {
               {
                 namespaceImport: true,
                 defaultImport: true,
+                sideEffectImport: true,
                 namedImports: new Set(['namedImport']),
               },
+            ],
+            [
+              'moment/min/moment-with-locales',
+              { defaultImport: true, namespaceImport: false, sideEffectImport: true, namedImports: new Set() },
+            ],
+            [
+              'moment/locale/ru',
+              { defaultImport: false, namespaceImport: false, sideEffectImport: true, namedImports: new Set() },
             ],
           ]),
         )
@@ -303,6 +312,16 @@ describe('esbuild-helper', () => {
         expect(mockedWriteFile).toHaveBeenCalledWith(
           `${workspaceRoot}/tmp/proj/external/index.js`,
           expect.stringContaining("export * as externalNamespace from 'external'"),
+        )
+        expect(mockedWriteFile).toHaveBeenCalledWith(
+          `${workspaceRoot}/tmp/proj/external/index.js`,
+          expect.stringContaining(
+            "export { default as momentMinMomentWithLocalesDefault } from 'moment/min/moment-with-locales'",
+          ),
+        )
+        expect(mockedWriteFile).toHaveBeenCalledWith(
+          `${workspaceRoot}/tmp/proj/external/index.js`,
+          expect.stringContaining("import 'moment/locale/ru'"),
         )
         //generates reexporting package json
         expect(mockedWriteJson).toHaveBeenCalledWith('dist/apps/proj/node_modules/external/package.json', {

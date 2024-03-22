@@ -4,15 +4,14 @@ import {
   ProjectGraphDependency,
   ProjectGraphExternalNode,
   ProjectGraphProjectNode,
-  workspaceRoot,
 } from '@nx/devkit'
 import { getHelperDependenciesFromProjectGraph } from '@nx/js'
 import { DependentBuildableProjectNode } from '@nx/js/src/utils/buildable-libs-utils'
-import type { TsconfigRaw } from 'esbuild'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 import { PatternTrie } from '../../../utils/trie'
+import { getTsConfigCompilerPaths } from '../../../utils/workspace'
 import { NormalizedLambdaRuntimeExecutorOptions } from '../schema'
 
 export type ResolveDependenciesOutput = {
@@ -53,8 +52,7 @@ export const resolveDependencies = (
   options: NormalizedLambdaRuntimeExecutorOptions,
 ): ResolveDependenciesOutput => {
   const { includeInternal, thirdParty } = options
-  // const internalDepsPackageNameMap = getInternalDepsPackageNameMap(context, options)
-  const internalDepsPackageNameResolver = getInternalDepsPackageNameResolver()
+  const internalDepsPackageNameResolver = getInternalDepsPackageNameResolver(context)
 
   const deps = new Map<string, DependentBuildableProjectNode>()
   const excluded = new Map<string, DependentBuildableProjectNode>()
@@ -119,13 +117,12 @@ export const resolveDependencies = (
   }
 }
 
-const getInternalDepsPackageNameResolver = (): ((node: ProjectGraphProjectNode) => string) => {
-  const tsConfig = getRootTsConfig()
+const getInternalDepsPackageNameResolver = (context: ExecutorContext): ((node: ProjectGraphProjectNode) => string) => {
   // "paths": {
   //   "@routineless/cdk": ["packages/cdk/src/index.ts"],
   //   "@routineless/nx-aws-cdk": ["packages/nx-aws-cdk/src/*"]
   // }
-  const tsConfigPaths = tsConfig.compilerOptions?.paths || {}
+  const tsConfigPaths = getTsConfigCompilerPaths(context)
   const sourcePathsAliasMap = new Map<string, string>()
   const sourcePathsTrie = new PatternTrie()
 
@@ -181,21 +178,4 @@ const isExcluded = (
   const packageName = dep.name.replace('npm:', '')
 
   return external.has(packageName)
-}
-
-const getRootTsConfig = (): TsconfigRaw => {
-  const tsConfigFileName = getRootTsConfigFileName()
-
-  return JSON.parse(readFileSync(join(workspaceRoot, tsConfigFileName), 'utf-8'))
-}
-
-const getRootTsConfigFileName = (): string => {
-  for (const tsConfigName of ['tsconfig.base.json', 'tsconfig.json']) {
-    const tsConfigPath = join(workspaceRoot, tsConfigName)
-    if (existsSync(tsConfigPath)) {
-      return tsConfigName
-    }
-  }
-
-  throw new Error('Could not find root tsconfig')
 }

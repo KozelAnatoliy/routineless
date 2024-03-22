@@ -1,11 +1,10 @@
 ## 1.3.0 (2024-02-21)
 
-
 ### 🚀 Features
 
 - **nx-aws-cdk:** implement generated projects target inference ([73d14b0](https://github.com/KozelAnatoliy/routineless/commit/73d14b0))
 
-### ❤️  Thank You
+### ❤️ Thank You
 
 - Anatoli Kozel @KozelAnatoliy
 

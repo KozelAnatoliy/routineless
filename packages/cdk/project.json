@@ -20,12 +20,8 @@
         "assets": ["packages/cdk/*.md"]
       }
     },
-    "publish-local": {
-      "command": "node tools/scripts/publish.mjs cdk {args.ver} {args.tag}",
-      "dependsOn": ["build", "^publish-local"],
-      "options": {
-        "tag": "local"
-      }
+    "publish": {
+      "command": "node tools/scripts/publish.mjs cdk {args.ver} {args.tag}"
     }
   },
   "tags": []

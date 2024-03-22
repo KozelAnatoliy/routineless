@@ -6,6 +6,7 @@ import type { Readable, Writable } from 'stream'
 import { MockProjectGraphOptions, mockProjectGraph } from './project-graph'
 
 type MockExeutorOptions = {
+  root?: string
   targetOptions?: Record<string, unknown>
   mockProjectGraphOptions?: MockProjectGraphOptions
 }
@@ -13,8 +14,8 @@ type MockExeutorOptions = {
 export const mockExecutorContext = (executorName: string, options: MockExeutorOptions = {}): ExecutorContext => {
   return {
     projectName: 'proj',
-    root: '/root',
-    cwd: '/root',
+    root: options.root || '/root',
+    cwd: options.root || '/root',
     projectsConfigurations: {
       version: 2,
       projects: {
