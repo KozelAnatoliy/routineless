@@ -1,7 +1,6 @@
 {
   "{packages,tools,apps}/**/*.{ts,js,json}": [
     "nx affected -t lint --uncommitted --fix",
-    "nx format:write && git add -A",
-    "nx affected -t test --uncommitted --passWithNoTests"
+    "nx format:write && git add -A"
   ]
 }

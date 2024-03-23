@@ -16,7 +16,10 @@
     "verbatimModuleSyntax": false,
     "baseUrl": ".",
     "paths": {
+      "@routineless/aws-sdk": ["packages/aws-sdk/src/index.ts"],
       "@routineless/cdk": ["packages/cdk/src/index.ts"],
+      "@routineless/event": ["packages/event/src/index.ts"],
+      "@routineless/logging": ["packages/logging/src/index.ts"],
       "@routineless/nx-aws-cdk": ["packages/nx-aws-cdk/src/*"]
     }
   },

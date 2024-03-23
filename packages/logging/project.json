@@ -1,0 +1,28 @@
+{
+  "name": "logging",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/logging/src",
+  "projectType": "library",
+  "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/logging"
+      },
+      "dependsOn": ["build"]
+    },
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/logging",
+        "main": "packages/logging/src/index.ts",
+        "tsConfig": "packages/logging/tsconfig.lib.json",
+        "assets": ["packages/logging/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs logging {args.ver} {args.tag}"
+    }
+  },
+  "tags": []
+}
