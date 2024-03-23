@@ -398,6 +398,10 @@ describe('cdk application', () => {
             },
           },
         )
+        await copyFile(
+          path.resolve(__dirname, 'fixtures/lambda-executor/main-without-top-awaited.ts'),
+          tmpProjPath(`apps/${project}/runtime/src/main.ts`),
+        )
         const deployResult = await runNxCommandAsync(
           `run ${infraProject}:cdk deploy ${className}StackLocal --require-approval never`,
         )
