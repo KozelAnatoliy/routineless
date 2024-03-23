@@ -1,4 +1,4 @@
-import { Tree, readProjectConfiguration } from '@nx/devkit'
+import { Tree, readJson, readProjectConfiguration } from '@nx/devkit'
 import { createTreeWithEmptyWorkspace } from '@nx/devkit/testing'
 
 import awsLambdaRuntimeApplicationGenerator from '.'
@@ -42,5 +42,13 @@ describe('awsLambdaRuntimeApplicationGenerator', () => {
     const projectConfig = readProjectConfiguration(tree, 'aws-lambda-runtime')
     expect(projectConfig.targets?.['build']).toBeUndefined()
     expect(projectConfig.targets?.['serve']).toBeUndefined()
+  })
+
+  it('should update tsconfig.app.json', async () => {
+    await awsLambdaRuntimeApplicationGenerator(tree, options)
+
+    const tsconfig = readJson(tree, 'apps/aws-lambda/runtime/tsconfig.app.json')
+    expect(tsconfig.compilerOptions.target).toContain('es2022')
+    expect(tsconfig.compilerOptions.module).toContain('es2022')
   })
 })

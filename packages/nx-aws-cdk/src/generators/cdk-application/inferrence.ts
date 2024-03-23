@@ -11,6 +11,18 @@ const createCdkAppNode: CreateNodesFunction<NxAwsCdkPluginOptions> = (projectCon
     projects: {
       [projectRoot]: {
         targets: {
+          build: {
+            executor: '@routineless/nx-aws-cdk:cdk-build',
+            outputs: ['{options.outputPath}'],
+            options: {
+              outputPath: `dist/${projectRoot}`,
+              main: `${projectRoot}/src/main.ts`,
+              tsConfig: `${projectRoot}/tsconfig.app.json`,
+            },
+            cache: true,
+            dependsOn: ['^build'],
+            inputs: ['production', '^production'],
+          },
           localstack: {
             executor: '@routineless/nx-aws-cdk:localstack',
           },

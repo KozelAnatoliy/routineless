@@ -1,0 +1,38 @@
+{
+  "version": 2,
+  "outputCapture": "direct-nodejs",
+  "title": "cdk build",
+  "description": "Bundle a package for cdk application",
+  "cli": "nx",
+  "type": "object",
+  "properties": {
+    "main": {
+      "type": "string",
+      "description": "The path to the entry file, relative to project.",
+      "alias": "entryFile",
+      "x-completion-type": "file",
+      "x-completion-glob": "**/*@(.js|.ts)",
+      "x-priority": "important"
+    },
+    "outputPath": {
+      "type": "string",
+      "description": "The output path of the generated files.",
+      "x-completion-type": "directory",
+      "x-priority": "important"
+    },
+    "tsConfig": {
+      "type": "string",
+      "description": "The path to tsconfig file.",
+      "x-completion-type": "file",
+      "x-completion-glob": "tsconfig.*.json",
+      "x-priority": "important"
+    },
+    "deleteOutputPath": {
+      "type": "boolean",
+      "description": "Remove previous output before build.",
+      "alias": "clean",
+      "default": true
+    }
+  },
+  "required": ["tsConfig", "main", "outputPath"]
+}

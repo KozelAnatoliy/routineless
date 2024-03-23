@@ -56,6 +56,18 @@ describe('cdkInferrence', () => {
         projects: {
           '/path/to': {
             targets: {
+              build: {
+                cache: true,
+                dependsOn: ['^build'],
+                executor: '@routineless/nx-aws-cdk:cdk-build',
+                inputs: ['production', '^production'],
+                options: {
+                  main: '/path/to/src/main.ts',
+                  outputPath: 'dist//path/to',
+                  tsConfig: '/path/to/tsconfig.app.json',
+                },
+                outputs: ['{options.outputPath}'],
+              },
               localstack: {
                 executor: '@routineless/nx-aws-cdk:localstack',
               },

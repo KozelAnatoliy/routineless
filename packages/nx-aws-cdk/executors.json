@@ -15,6 +15,11 @@
       "implementation": "./src/executors/lambda-runtime/executor",
       "schema": "./src/executors/lambda-runtime/schema.json",
       "description": "lambda-runtime executor"
+    },
+    "cdk-build": {
+      "implementation": "./src/executors/cdk-build",
+      "schema": "./src/executors/cdk-build/schema.json",
+      "description": "cdk-build executor"
     }
   }
 }

@@ -5,6 +5,7 @@ import {
   generateFiles,
   readProjectConfiguration,
   runTasksInSerial,
+  updateJson,
   updateProjectConfiguration,
 } from '@nx/devkit'
 import { applicationGenerator as nodeApplicationGenerator } from '@nx/node'
@@ -38,6 +39,18 @@ const updateAwsLambdaRuntumeProjectConfiguration = (tree: Tree, options: AwsLamb
   }
 
   updateProjectConfiguration(tree, options.name, projectConfig)
+}
+
+const updateAwsLambdaTsconfig = (tree: Tree, options: AwsLambdaRuntimeGeneratorOptions) => {
+  updateJson(tree, `${options.directory}/tsconfig.app.json`, (tsconfig) => {
+    tsconfig.compilerOptions = {
+      ...tsconfig.compilerOptions,
+      target: 'es2022',
+      module: 'es2022',
+    }
+
+    return tsconfig
+  })
 }
 
 const addFiles = (
@@ -74,6 +87,7 @@ const awsLambdaRuntimeApplicationGenerator = async (
     addFiles(tree, normalizedOptions, 'jest-files')
   }
   updateAwsLambdaRuntumeProjectConfiguration(tree, normalizedOptions)
+  updateAwsLambdaTsconfig(tree, normalizedOptions)
 
   if (!normalizedOptions.skipFormat) {
     await formatFiles(tree)

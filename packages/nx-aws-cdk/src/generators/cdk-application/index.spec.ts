@@ -46,7 +46,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build'])
+    expect(Object.keys(config?.targets || {})).toEqual([])
     expect(tree.exists('apps/cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('apps/cdk/jest.config.ts')).toBeFalsy()
     expect(tree.exists('apps/cdk/src/main.ts')).toBeTruthy()
@@ -60,7 +60,7 @@ describe('cdk-application generator', () => {
     const config = readProjectConfiguration(tree, 'cdk')
     const nxConfig = readJson(tree, 'nx.json')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build'])
+    expect(Object.keys(config?.targets || {})).toEqual([])
     expect(nxConfig.plugins).toContainEqual({
       plugin: '@nx/jest/plugin',
       options: {
@@ -80,7 +80,7 @@ describe('cdk-application generator', () => {
 
     const config = readProjectConfiguration(tree, 'dir-cdk')
 
-    expect(Object.keys(config?.targets || {})).toEqual(['build'])
+    expect(Object.keys(config?.targets || {})).toEqual([])
     expect(tree.exists('apps/dir/cdk/cdk.json')).toBeTruthy()
     expect(tree.exists('apps/dir/cdk/jest.config.ts')).toBeTruthy()
     expect(tree.exists('apps/dir/cdk/src/main.ts')).toBeTruthy()

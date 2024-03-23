@@ -7,12 +7,6 @@ type Event = {
   input: number
 }
 
-const asyncFunc = async () => {
-  return 'asyncResult'
-}
-
-const topLevelAwaited = await asyncFunc()
-
 export const handler: Handler = async (event: Event, context: Context) => {
   const message = `lambda handler. ${event.input} sqrt is ${getSqrt(event.input)}. ${directInternal(event.input)}`
   return {
@@ -20,6 +14,6 @@ export const handler: Handler = async (event: Event, context: Context) => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ event, context, message: message, topLevelAwaited }),
+    body: JSON.stringify({ event, context, message: message }),
   }
 }
