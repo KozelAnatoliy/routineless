@@ -1,0 +1,16 @@
+{
+  "name": "@routineless/event",
+  "version": "0.0.1",
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@routineless/logging": "0.0.1",
+    "aws-lambda": "^1.0.7",
+    "@aws-sdk/client-eventbridge": "^3.521.0",
+    "@routineless/aws-sdk": "0.0.1",
+    "@aws-sdk/client-sns": "^3.521.0",
+    "@aws-sdk/client-sqs": "^3.521.0"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "aws-sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/aws-sdk/src",
+  "projectType": "library",
+  "targets": {
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/packages/event"
+      },
+      "dependsOn": ["build"]
+    },
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/aws-sdk",
+        "main": "packages/aws-sdk/src/index.ts",
+        "tsConfig": "packages/aws-sdk/tsconfig.lib.json",
+        "assets": ["packages/aws-sdk/*.md"]
+      }
+    },
+    "publish": {
+      "command": "node tools/scripts/publish.mjs aws-sdk {args.ver} {args.tag}"
+    }
+  },
+  "tags": []
+}

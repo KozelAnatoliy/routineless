@@ -20,9 +20,16 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.535.0",
+    "@aws-sdk/client-eventbridge": "^3.535.0",
+    "@aws-sdk/client-s3": "^3.535.0",
+    "@aws-sdk/client-secrets-manager": "^3.535.0",
+    "@aws-sdk/client-sns": "^3.535.0",
+    "@aws-sdk/client-sqs": "^3.535.0",
     "@aws-sdk/client-sts": "^3.535.0",
     "@aws-sdk/credential-provider-node": "^3.535.0",
     "@aws-sdk/credential-providers": "^3.535.0",
+    "@aws-sdk/lib-dynamodb": "^3.535.0",
     "@commitlint/cli": "^18.1.0",
     "@commitlint/config-conventional": "^18.1.0",
     "@commitlint/cz-commitlint": "^18.1.0",
