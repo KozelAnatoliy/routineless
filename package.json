@@ -1,6 +1,6 @@
 {
   "name": "routineless",
-  "version": "0.0.0",
+  "version": "1.4.0",
   "license": "MIT",
   "scripts": {
     "build": "nx run-many --target=build",

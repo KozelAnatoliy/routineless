@@ -1,3 +1,22 @@
+## 1.4.0 (2024-03-23)
+
+### 🚀 Features
+
+- implement lambda runtime executor ([1ed0492](https://github.com/KozelAnatoliy/routineless/commit/1ed0492))
+- implement lambda runtime executor ([1162401](https://github.com/KozelAnatoliy/routineless/commit/1162401))
+- **nx-aws-cdk:** implement localstack executor custom compose file ([9daa5a7](https://github.com/KozelAnatoliy/routineless/commit/9daa5a7))
+- **nx-aws-cdk:** implement generated projects target inference ([73d14b0](https://github.com/KozelAnatoliy/routineless/commit/73d14b0))
+- **nx-aws-cdk:** implement localstack executor custom compose file ([1d72425](https://github.com/KozelAnatoliy/routineless/commit/1d72425))
+- **nx-aws-cdk:** implement generated projects target inference ([fbdd5fc](https://github.com/KozelAnatoliy/routineless/commit/fbdd5fc))
+
+### 🩹 Fixes
+
+- **nx-aws-cdk:** fix external relative import. Fix side effected imports for lambda runtime executor ([da7a561](https://github.com/KozelAnatoliy/routineless/commit/da7a561))
+
+### ❤️ Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 1.3.0 (2024-02-21)
 
 ### 🚀 Features

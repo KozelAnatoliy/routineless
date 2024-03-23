@@ -1,4 +1,3 @@
-[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![NPM Version](https://badge.fury.io/js/@routineless%2Fnx-aws-cdk.svg)](https://www.npmjs.com/package/@routineless/nx-aws-cdk)
 [![codecov](https://codecov.io/gh/KozelAnatoliy/routineless/graph/badge.svg?token=KLLZDSV5Z3&flag=nx-aws-cdk)](https://codecov.io/gh/KozelAnatoliy/routineless)
@@ -412,7 +411,7 @@ Or by updating `targetDefaults` section in your `nx.json` file to apply default 
 | name            | type    | default         | required | alias | description                                                                                                |
 | --------------- | ------- | --------------- | -------- | ----- | ---------------------------------------------------------------------------------------------------------- |
 | command         | string  |                 | true     | c     | Localstack commands. Accepts 'start', 'stop'.                                                              |
-| containerName    | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
+| containerName   | string  | localstack_main | false    | n     | Localstack container name.                                                                                 |
 | composeFile     | string  |                 | false    | f     | Custom localstack docker-compose file path relative to workspace root.                                     |
 | volumeMountPath | string  | jest            | false    | v     | Path to mount localstack data. By default data will not be exposed and stored withing docker named volume. |
 | debug           | boolean | false           | false    |       | Enable localstack debug mode.                                                                              |

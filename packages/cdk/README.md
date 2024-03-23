@@ -1,4 +1,3 @@
-[![standard-readme compliant](https://img.shields.io/badge/standard--readme-OK-green.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![NPM Version](https://badge.fury.io/js/@routineless%2Fcdk.svg)](https://www.npmjs.com/package/@routineless/cdk)
 [![codecov](https://codecov.io/gh/KozelAnatoliy/routineless/graph/badge.svg?token=KLLZDSV5Z3&flag=cdk)](https://codecov.io/gh/KozelAnatoliy/routineless)
