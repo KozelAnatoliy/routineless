@@ -1,3 +1,14 @@
+## 1.4.2 (2024-03-24)
+
+
+### 🩹 Fixes
+
+- **nx-aws-cdk:** fix imports containing dot ([8fdc7f6](https://github.com/KozelAnatoliy/routineless/commit/8fdc7f6))
+
+### ❤️  Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 1.4.1 (2024-03-24)
 
 

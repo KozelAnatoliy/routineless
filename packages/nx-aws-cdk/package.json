@@ -1,6 +1,6 @@
 {
   "name": "@routineless/nx-aws-cdk",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Nx plugin for AWS CDK",
   "repository": {
     "type": "git",
@@ -40,8 +40,8 @@
     "fs-extra": "11.2.0",
     "ignore": "5.3.1",
     "tslib": "^2.6.2",
-    "@routineless/cdk": "1.4.1",
-    "events": "3.3.0",
+    "@routineless/cdk": "1.4.2",
+    "events": "1.1.1",
     "esbuild": "0.19.8",
     "winston": "^3.11.0",
     "glob": "10.3.10",
