@@ -1,3 +1,14 @@
+## 1.4.1 (2024-03-24)
+
+
+### 🩹 Fixes
+
+- **nx-aws-cdk:** implement cdk build executor to exclude lambda runtime from bundling ([995e5d8](https://github.com/KozelAnatoliy/routineless/commit/995e5d8))
+
+### ❤️  Thank You
+
+- Anatoli Kozel @KozelAnatoliy
+
 ## 1.4.0 (2024-03-23)
 
 ### 🚀 Features
