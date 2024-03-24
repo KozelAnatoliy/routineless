@@ -256,6 +256,15 @@ describe('esbuild-helper', () => {
               },
             ],
             [
+              '@some.module/name',
+              {
+                namespaceImport: false,
+                defaultImport: true,
+                sideEffectImport: false,
+                namedImports: new Set(),
+              },
+            ],
+            [
               'moment/min/moment-with-locales',
               { defaultImport: true, namespaceImport: false, sideEffectImport: true, namedImports: new Set() },
             ],
@@ -318,6 +327,10 @@ describe('esbuild-helper', () => {
           expect.stringContaining(
             "export { default as momentMinMomentWithLocalesDefault } from 'moment/min/moment-with-locales'",
           ),
+        )
+        expect(mockedWriteFile).toHaveBeenCalledWith(
+          `${workspaceRoot}/tmp/proj/external/index.js`,
+          expect.stringContaining("export { default as someModuleNameDefault } from '@some.module/name'"),
         )
         expect(mockedWriteFile).toHaveBeenCalledWith(
           `${workspaceRoot}/tmp/proj/external/index.js`,
