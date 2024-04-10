@@ -40,6 +40,22 @@ describe('builder', () => {
     expect(buildedPerson.isExtroordinary).toBeTruthy()
     expect(buildedPersonWithOptional).toEqual(new Person(testPersonWithOptional))
   })
+
+  it('should build based on class generic', () => {
+    const builderInstance = builder<Person>()
+      .setAge(testPerson.age)
+      .setIsAlive(testPerson.isAlive)
+      .setName(testPerson.name)
+      .setSex(testPerson.sex)
+    const buildedPerson = builderInstance.build()
+    const buildedPersonWithOptional = builderInstance.setFavoriteColor(testPersonWithOptional.favoriteColor).build()
+
+    expect(buildedPerson).toEqual(new Person(testPerson))
+    expect(buildedPerson).not.toBeInstanceOf(Person)
+    expect(buildedPerson.getDaysTillAge).toBeUndefined()
+    expect(buildedPerson.isExtroordinary).toBeUndefined()
+    expect(buildedPersonWithOptional).toEqual(new Person(testPersonWithOptional))
+  })
 })
 
 interface IPerson {

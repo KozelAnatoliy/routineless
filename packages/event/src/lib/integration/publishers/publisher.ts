@@ -1,4 +1,4 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 
 import { DomainEvent } from '../../domain'
 import {
@@ -13,10 +13,12 @@ import { EventBridgeDestination, EventBridgeEventPublisher } from './impl/event-
 import { SnsDestination, SnsEventPublisher } from './impl/sns-publisher'
 import { SqsDestination, SqsEventPublisher } from './impl/sqs-publisher'
 
-const logger = LoggerProvider.getLogger()
-
 export interface DomainEventPublisher {
   publish(...events: DomainEvent[]): Promise<PublisherOutput>
+}
+
+export interface AwaitableDomainEventPublisher extends DomainEventPublisher {
+  awaitDispatching(): Promise<PublisherOutput>
 }
 
 export interface DomainEventPublisherImpl<D extends Destination> extends DomainEventPublisher {
@@ -49,10 +51,10 @@ export const reducePublisherOutput = (outputs: PublisherOutput[]): PublisherOutp
 }
 
 export class DomainEventPublisherFactory {
-  private static domainEventPublisher: DomainEventPublisher
+  private static domainEventPublisher: AwaitableDomainEventPublisher
   private static destinationMapper: EventDestinationMapper<Destination>
 
-  public static getPublisher(): DomainEventPublisher {
+  public static getPublisher(): AwaitableDomainEventPublisher {
     if (!this.destinationMapper) {
       logger.debug('No destination mapper found, creating default destination mapper')
       this.destinationMapper = createDefaultDestinationMapper()
@@ -72,18 +74,19 @@ export class DomainEventPublisherFactory {
   }
 
   public static registerDestinationMappings(mappings: DestinationMappings) {
-    logger.debug('Registering destination mappings: %j', mappings)
+    logger.debug('Registering destination mappings', { mappings })
     if (!this.destinationMapper || !(this.destinationMapper instanceof EventTypeDestinationMapper)) {
-      this.destinationMapper = new EventTypeDestinationMapper()
+      this.destinationMapper = new EventTypeDestinationMapper(this.destinationMapper)
     }
     const eventTypeDestinationMapper = this.destinationMapper as EventTypeDestinationMapper
     eventTypeDestinationMapper.registerMapping(mappings)
   }
 }
 
-class CompositeEventPublisher implements DomainEventPublisher {
+class CompositeEventPublisher implements AwaitableDomainEventPublisher {
   private readonly publishers: DomainEventPublisherImpl<Destination>[]
   private readonly destinationMapperResolver: DestinationMapperResolver<Destination>
+  private readonly publishPromises: Promise<PublisherOutput>[] = []
 
   constructor(
     publishers: DomainEventPublisherImpl<Destination>[],
@@ -107,11 +110,17 @@ class CompositeEventPublisher implements DomainEventPublisher {
       return acc
     }, new Map<DomainEventPublisherImpl<Destination>, DomainEvent[]>())
 
-    const publishPromises = []
+    const currentPublishPromises = []
     for (const [publisher, events] of publisherEventsMap) {
-      publishPromises.push(publisher.publish(...events))
+      currentPublishPromises.push(publisher.publish(...events))
     }
 
-    return Promise.all(publishPromises).then((results) => reducePublisherOutput(results))
+    this.publishPromises.push(...currentPublishPromises)
+
+    return Promise.all(currentPublishPromises).then((results) => reducePublisherOutput(results))
+  }
+
+  public async awaitDispatching(): Promise<PublisherOutput> {
+    return Promise.all(this.publishPromises).then((results) => reducePublisherOutput(results))
   }
 }

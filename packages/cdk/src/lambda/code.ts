@@ -8,6 +8,7 @@ import { getProjectName } from '../utils/workspace'
 type LambdaCodeContext = {
   projectName?: string
   filePath?: string
+  executionDepth?: number
 }
 /**
  *  This function will try to resolve lambda code for cdk lambda by provided context.
@@ -24,7 +25,10 @@ export const getLambdaCode = (lambdaCodeContext?: LambdaCodeContext): Code => {
 
   let resolvedProjectName =
     lambdaCodeContext?.projectName ||
-    getProjectName(lambdaCodeContext?.filePath || callsite()[1]!.getFileName(), projectGraph)
+    getProjectName(
+      lambdaCodeContext?.filePath || callsite()[lambdaCodeContext?.executionDepth || 1]!.getFileName(),
+      projectGraph,
+    )
 
   if (!resolvedProjectName) {
     throw new Error('Could resolve project name')

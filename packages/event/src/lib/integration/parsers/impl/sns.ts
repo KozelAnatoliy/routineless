@@ -1,9 +1,7 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 import type { SNSEvent } from 'aws-lambda'
 
 import { DomainEventParser, ParserOutput, isDomainEvent } from '../parser'
-
-const logger = LoggerProvider.getLogger()
 
 export class SnsDomainEventParser implements DomainEventParser<SNSEvent> {
   public parse(event: SNSEvent): ParserOutput {
@@ -18,8 +16,8 @@ export class SnsDomainEventParser implements DomainEventParser<SNSEvent> {
     try {
       const parsedObject = JSON.parse(firstRecord.Sns.Message)
       return { canParse: true, output: isDomainEvent(parsedObject) ? parsedObject : undefined }
-    } catch (e) {
-      logger.error('Error parsing SNS message: %s', e)
+    } catch (err) {
+      logger.error('Error parsing SNS message', { err })
       return { canParse: true, output: undefined }
     }
   }

@@ -5,13 +5,11 @@ import {
   PutEventsRequestEntry,
 } from '@aws-sdk/client-eventbridge'
 import { AwsClientFactory } from '@routineless/aws-sdk'
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 
 import { DomainEvent } from '../../../domain'
 import { Destination, DestinationMapperResolver } from '../destination-mapper'
 import { DomainEventPublisherImpl, PublihserOutputEntry, PublisherOutput } from '../publisher'
-
-const logger = LoggerProvider.getLogger()
 
 export type EventBridgeDestination = {
   EventBusName: string
@@ -33,7 +31,7 @@ export class EventBridgeEventPublisher implements DomainEventPublisherImpl<Event
       Entries: events.map((event) => this.mapToEventBridgeEvent(event)),
     }
     const putEventCommand = new PutEventsCommand(putEventsInput)
-    logger.debug('publishing domain events: %j', putEventCommand)
+    logger.debug('publishing domain events', { putEventCommand })
     const output = await AwsClientFactory.getEventBridgeClient().send(putEventCommand)
 
     return this.mapResult(output, events)

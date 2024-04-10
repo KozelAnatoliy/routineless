@@ -1,13 +1,11 @@
 import { PublishBatchCommand, PublishBatchCommandInput } from '@aws-sdk/client-sns'
 import { AwsClientFactory } from '@routineless/aws-sdk'
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 
 import { DomainEvent } from '../../../domain'
 import { Destination, DestinationMapperResolver } from '../destination-mapper'
 import { DomainEventPublisherImpl, PublisherOutput, reducePublisherOutput } from '../publisher'
 import { chunkify, mapResult, reduceEventsByDestination } from './message-publishers-util'
-
-const logger = LoggerProvider.getLogger()
 
 export type SnsDestination = {
   TopicArn: string
@@ -37,7 +35,7 @@ export class SnsEventPublisher implements DomainEventPublisherImpl<SnsDestinatio
     for (const [destination, chunks] of eventsChunksByDetination) {
       for (const chunk of chunks) {
         const command = this.createPublishBatchCommand(chunk, destination)
-        logger.debug('publishing domain events: %j', command)
+        logger.debug('publishing domain events', { command })
         sendPromises.push(
           AwsClientFactory.getSnsClient()
             .send(command)

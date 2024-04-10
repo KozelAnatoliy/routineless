@@ -1,11 +1,9 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 
 import { DomainEvent, EventType } from '../../domain'
 import { EventBridgeDestination } from './impl/event-bridge-publisher'
 import { SnsDestination } from './impl/sns-publisher'
 import { SqsDestination } from './impl/sqs-publisher'
-
-const logger = LoggerProvider.getLogger()
 
 export type Destination = SnsDestination | SqsDestination | EventBridgeDestination
 
@@ -19,7 +17,10 @@ export type DestinationMappings = [EventType[], Destination][]
 
 export class EventTypeDestinationMapper implements EventDestinationMapper<Destination> {
   private readonly mappings: Map<string, Destination> = new Map()
-  private readonly defaultDestinationMapper: EventDestinationMapper<Destination> = createDefaultDestinationMapper()
+
+  public constructor(
+    private readonly defaultDestinationMapper: EventDestinationMapper<Destination> = createDefaultDestinationMapper(),
+  ) {}
 
   map(event: DomainEvent): Destination {
     let destination = this.mappings.get(event.type)

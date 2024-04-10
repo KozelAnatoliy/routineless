@@ -1,11 +1,9 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 
 import { BaseDomainEvent, DomainEvent } from '../../domain/event'
 import { EventBridgeDestinationEventParser, EventBridgeEventParser } from './impl/event-bridge'
 import { SnsDomainEventParser } from './impl/sns'
 import { SqsDomainEventParser } from './impl/sqs'
-
-const logger = LoggerProvider.getLogger()
 
 export type ParserOutput = {
   canParse: boolean
@@ -39,13 +37,13 @@ export class DomainEventParserFactory {
       const parsedEvent = parser.parse(event)
       if (parsedEvent.canParse) {
         if (!parsedEvent.output) {
-          logger.info('No domain event found in: %j', event)
+          logger.info('No domain event found', { event })
           return
         }
         return DomainEventParserFactory.fromDto(parsedEvent.output)
       }
     }
-    logger.info('No parser found for event: %j', event)
+    logger.info('No parser found for event', { event })
     return
   }
 

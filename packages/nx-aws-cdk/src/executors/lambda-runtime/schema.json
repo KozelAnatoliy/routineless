@@ -60,7 +60,7 @@
     "external": {
       "type": "array",
       "description": "Mark one or more module as external. Can use * wildcards, such as '@aws-sdk/*'.",
-      "default": ["@aws-sdk/*"],
+      "default": ["@aws-sdk/*", "@aws-lambda-powertools/*"],
       "items": {
         "type": "string"
       }

@@ -1,0 +1,22 @@
+import * as cdk from 'aws-cdk-lib'
+import { Template } from 'aws-cdk-lib/assertions'
+
+import { <%= className %>Stack } from '.'
+
+describe('<%= className %>Stack', () => {
+  const envName = 'local'
+  const stackId = '<%= className %>Stack'
+
+  it('should define lambda function', () => {
+    const app = new cdk.App()
+
+    const stack = new <%= className %>Stack(app, stackId, {env: {envName}})
+
+    const template = Template.fromStack(stack)
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      Handler: 'main.handler',
+      Runtime: 'nodejs20.x',
+    })
+  })
+})

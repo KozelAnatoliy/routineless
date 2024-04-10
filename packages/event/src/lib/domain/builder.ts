@@ -15,12 +15,20 @@ import { ClassType, ExcludeFunctions, OptionalProperties, RequiredProperties } f
  *
  * @template T The type of the instances to create.
  */
-export const builder = <T>(type?: ClassType<T>): IBuilder<T> => {
+export const builder = <T>(type?: ClassType<T>, postBuildCallback?: (instance: T) => void): IBuilder<T> => {
   const object: Record<string, unknown> = {}
   const builder = new Proxy({} as IBuilder<T>, {
     get(_, prop) {
       if ('build' === prop) {
-        return type ? () => Object.assign(Object.create(type.prototype), object) : () => ({ ...object })
+        const buildFunc = type ? () => Object.assign(Object.create(type.prototype), object) : () => ({ ...object })
+        if (postBuildCallback) {
+          return () => {
+            const instance = buildFunc()
+            postBuildCallback(instance)
+            return instance
+          }
+        }
+        return buildFunc
       }
       return (x: unknown) => {
         let propName = prop.toString().replace('set', '')

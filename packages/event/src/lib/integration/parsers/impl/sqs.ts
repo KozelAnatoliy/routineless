@@ -1,9 +1,7 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 import type { SQSEvent } from 'aws-lambda'
 
 import { DomainEventParser, ParserOutput, isDomainEvent } from '../parser'
-
-const logger = LoggerProvider.getLogger()
 
 export class SqsDomainEventParser implements DomainEventParser<SQSEvent> {
   public parse(event: SQSEvent): ParserOutput {
@@ -18,8 +16,8 @@ export class SqsDomainEventParser implements DomainEventParser<SQSEvent> {
     try {
       const parsedObject = JSON.parse(firstRecord.body)
       return { canParse: true, output: isDomainEvent(parsedObject) ? parsedObject : undefined }
-    } catch (e) {
-      logger.error('Error parsing SQS message: %s', e)
+    } catch (err) {
+      logger.error('Error parsing SQS message', { err })
       return { canParse: true, output: undefined }
     }
   }

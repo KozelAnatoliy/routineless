@@ -30,7 +30,7 @@
       "x-priority": "internal"
     },
     "linter": {
-      "description": "The tool to use for running lint checks.",
+      "description": "The tool to use for running lint checks",
       "type": "string",
       "enum": ["eslint"],
       "default": "eslint"
@@ -38,7 +38,7 @@
     "unitTestRunner": {
       "type": "string",
       "enum": ["jest", "none"],
-      "description": "Test runner to use for unit tests.",
+      "description": "Test runner to use for unit tests",
       "default": "jest",
       "aslias": "u"
     },
@@ -47,6 +47,12 @@
       "description": "Add lambda to infra app",
       "default": true,
       "alias": "a"
+    },
+    "preset": {
+      "type": "string",
+      "enum": ["basic", "routineless"],
+      "description": "Lambda generator preset",
+      "aslias": "p"
     }
   },
   "required": ["name"]

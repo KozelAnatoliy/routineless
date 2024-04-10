@@ -14,6 +14,7 @@ import { join } from 'path'
 import { ProjectProperties } from '../../../utils/generators'
 import { deleteNodeAppRedundantDirs } from '../../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from '../schema'
+import { getPreset } from '../util'
 
 interface AwsLambdaRuntimeGeneratorOptions extends AwsLambdaGeneratorSchema {
   name: string
@@ -49,6 +50,15 @@ const updateAwsLambdaTsconfig = (tree: Tree, options: AwsLambdaRuntimeGeneratorO
       module: 'es2022',
     }
 
+    const preset = getPreset(tree, options)
+
+    if (preset === 'routineless') {
+      tsconfig.compilerOptions = {
+        ...tsconfig.compilerOptions,
+        experimentalDecorators: true,
+      }
+    }
+
     return tsconfig
   })
 }
@@ -61,7 +71,12 @@ const addFiles = (
   const templateOptions = {
     template: '',
   }
-  generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.directory, templateOptions)
+  generateFiles(
+    tree,
+    join(__dirname, 'generatorFiles', filesType, getPreset(tree, options)),
+    options.directory,
+    templateOptions,
+  )
 }
 
 const awsLambdaRuntimeApplicationGenerator = async (

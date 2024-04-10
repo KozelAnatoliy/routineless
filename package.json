@@ -14,6 +14,9 @@
   },
   "private": true,
   "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.0.3",
+    "@aws-lambda-powertools/metrics": "^2.0.3",
+    "@aws-lambda-powertools/tracer": "^2.0.3",
     "create-nx-workspace": "^18.0.4",
     "tslib": "^2.6.2",
     "winston": "^3.11.0",

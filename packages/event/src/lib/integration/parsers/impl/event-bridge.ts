@@ -1,10 +1,8 @@
-import { LoggerProvider } from '@routineless/logging'
+import { logger } from '@routineless/logging'
 import type { EventBridgeEvent } from 'aws-lambda'
 
 import { DomainEvent } from '../../../domain/event'
 import { DomainEventParser, ParserOutput, isDomainEvent } from '../parser'
-
-const logger = LoggerProvider.getLogger()
 
 export class EventBridgeEventParser implements DomainEventParser<EventBridgeEvent<string, DomainEvent>> {
   public parse(event: EventBridgeEvent<string, DomainEvent>): ParserOutput {

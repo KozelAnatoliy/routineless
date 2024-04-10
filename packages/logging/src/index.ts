@@ -1,1 +1,2 @@
-export * from './lib/logging'
+export * from './lib/logger'
+export * from './lib/tracer'

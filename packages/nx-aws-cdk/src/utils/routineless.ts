@@ -3,6 +3,8 @@ import type { ExecutorContext } from '@nx/devkit'
 import { existsSync } from 'fs'
 import * as path from 'path'
 
+import { LambdaPreset } from '../generators/aws-lambda/schema'
+
 const routinelessConfigPath = '.routineless.json'
 
 export const getRoutinelessConfig = (context: Tree | ExecutorContext): RoutinelessConfig => {
@@ -30,4 +32,5 @@ export const updateRoutinelessConfig = (tree: Tree, updater: (config: Routineles
 
 export interface RoutinelessConfig {
   infraApp?: string
+  defaultLambdaPreset?: LambdaPreset
 }

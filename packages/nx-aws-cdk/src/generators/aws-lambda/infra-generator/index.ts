@@ -19,6 +19,7 @@ import { ProjectProperties } from '../../../utils/generators'
 import { getRoutinelessConfig } from '../../../utils/routineless'
 import { deleteNodeLibRedundantDirs } from '../../../utils/workspace'
 import { AwsLambdaGeneratorSchema } from '../schema'
+import { getPreset } from '../util'
 
 interface AwsLambdaInfraGeneratorOptions extends AwsLambdaGeneratorSchema {
   baseProjectName: string
@@ -81,7 +82,12 @@ const addFiles = (tree: Tree, options: AwsLambdaInfraGeneratorOptions, filesType
     runtimeProjectDirectory: options.directory.replace('infra', 'runtime'),
     template: '',
   }
-  generateFiles(tree, join(__dirname, 'generatorFiles', filesType), options.directory, templateOptions)
+  generateFiles(
+    tree,
+    join(__dirname, 'generatorFiles', filesType, getPreset(tree, options)),
+    options.directory,
+    templateOptions,
+  )
 }
 
 const awsLambdaInfraLibraryGenerator = async (

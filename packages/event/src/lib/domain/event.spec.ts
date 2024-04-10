@@ -3,6 +3,7 @@ import { BaseDomainEvent, DomainEvent } from './event'
 class TestEvent extends BaseDomainEvent {
   protected static override readonly EVENT_TYPE = 'TEST_EVENT'
 
+  public override readonly type = TestEvent.EVENT_TYPE
   public readonly testData: string
 
   constructor(event: TestEvent) {
@@ -14,6 +15,7 @@ class TestEvent extends BaseDomainEvent {
 class AnotherTestEvent extends BaseDomainEvent {
   protected static override readonly EVENT_TYPE = 'ANOTHER_TEST_EVENT'
 
+  public override readonly type = AnotherTestEvent.EVENT_TYPE
   public readonly anoterTestData: string
 
   constructor(event: AnotherTestEvent) {
@@ -24,6 +26,8 @@ class AnotherTestEvent extends BaseDomainEvent {
 
 class EmptyEvent extends BaseDomainEvent {
   protected static override readonly EVENT_TYPE = 'EMPTY_EVENT'
+
+  public override readonly type = EmptyEvent.EVENT_TYPE
 }
 
 describe('BaseDomainEvent', () => {
@@ -55,5 +59,9 @@ describe('BaseDomainEvent', () => {
       timestamp: expect.any(Number),
       type: 'EMPTY_EVENT',
     })
+  })
+
+  it('should print event type on toString', () => {
+    expect(`${EmptyEvent}`).toBe('EMPTY_EVENT')
   })
 })
