@@ -40,7 +40,13 @@
   "release": {
     "groups": {
       "default": {
-        "projects": ["*", "!*e2e"],
+        "projects": ["*", "!cdk", "!create-aws-cdk-app", "!nx-aws-cdk", "!*e2e"],
+        "releaseTagPattern": "{projectName}-{version}",
+        "projectsRelationship": "independent",
+        "changelog": false
+      },
+      "core": {
+        "projects": ["cdk", "create-aws-cdk-app", "nx-aws-cdk"],
         "releaseTagPattern": "{version}",
         "changelog": false
       }
@@ -49,7 +55,8 @@
       "generator": "@nx/js:release-version",
       "generatorOptions": {
         "specifierSource": "conventional-commits",
-        "currentVersionResolver": "git-tag"
+        "currentVersionResolver": "git-tag",
+        "fallbackCurrentVersionResolver": "disk"
       }
     },
     "changelog": {

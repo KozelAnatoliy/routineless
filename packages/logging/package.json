@@ -1,14 +1,24 @@
 {
   "name": "@routineless/logging",
-  "version": "0.0.1",
+  "version": "0.0.2-beta.0",
+  "description": "Routineless logging package",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KozelAnatoliy/routineless.git",
+    "directory": "packages/logging"
+  },
   "dependencies": {
     "tslib": "^2.3.0",
-    "@aws-lambda-powertools/commons": "^2.0.3",
     "@aws-lambda-powertools/logger": "^2.0.3",
     "@aws-lambda-powertools/metrics": "^2.0.3",
     "@aws-lambda-powertools/tracer": "^2.0.3"
   },
   "type": "commonjs",
   "main": "./src/index.js",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "author": "Anatoli Kozel",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

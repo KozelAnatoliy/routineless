@@ -1,6 +1,6 @@
 {
   "name": "@routineless/nx-aws-cdk",
-  "version": "1.4.2",
+  "version": "1.4.3-beta.0",
   "description": "Nx plugin for AWS CDK",
   "repository": {
     "type": "git",
@@ -40,7 +40,7 @@
     "fs-extra": "11.2.0",
     "ignore": "5.3.1",
     "tslib": "^2.6.2",
-    "@routineless/cdk": "1.4.2",
+    "@routineless/cdk": "1.4.3-beta.0",
     "events": "1.1.1",
     "esbuild": "0.19.8",
     "winston": "^3.11.0",
@@ -48,7 +48,9 @@
     "recast": "^0.23.4",
     "ast-types": "0.16.1",
     "fast-glob": "3.2.7",
-    "tsconfig-paths": "4.2.0"
+    "tsconfig-paths": "4.2.0",
+    "@aws-lambda-powertools/commons": "2.0.3",
+    "@routineless/logging": "0.0.2-beta.0"
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.106.0"

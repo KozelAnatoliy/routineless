@@ -1,36 +1,44 @@
+import { EventType } from '@routineless/event'
 import { LogLevel } from '@routineless/logging'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { Table } from 'aws-cdk-lib/aws-dynamodb'
+import { EventBus, Rule } from 'aws-cdk-lib/aws-events'
+import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { Function, FunctionProps, LayerVersion, Runtime, Tracing } from 'aws-cdk-lib/aws-lambda'
 import { LogGroup, RetentionDays } from 'aws-cdk-lib/aws-logs'
 import type { Construct } from 'constructs'
 
 import { CdkEnvironment } from '../types/base-stack-props'
 import { getLambdaCode } from './code'
+import { getEventBridgeDestinationResponseEventPattern, getEventBridgeEventPattern } from './event-pattern'
 
 /**
- * The access mode for the table.
+ * The access mode.
  *
  * Values are: read-only (RO) or read-write (RW)
  */
 type AccessMode = 'RO' | 'RW'
 
-type BindTableProps = {
-  /**
-   * The access mode for the table, defaults to 'RO' (read-only)
-   * @default 'RO'
-   */
-  accessMode?: AccessMode
+type BindProps = {
   /**
    * Whether to grant the function access to the table only,
    * @default false
    */
   accessOnly?: boolean
   /**
-   * The name of the environment variable to use for the table name.
-   * @default `TABLE_NAME`
+   * The name of the environment variable to use for the resource.
    */
   envVarName?: string
+  /**
+   * The access mode for the resource, defaults to 'RO' (read-only)
+   * @default 'RO'
+   */
+  accessMode?: AccessMode
+}
+
+type EventBusBindProps = BindProps & {
+  events?: EventType[]
+  destinationEvents?: EventType[]
 }
 
 export type RoutinelessFunctionProps = Partial<FunctionProps> & {
@@ -57,6 +65,10 @@ export type RoutinelessFunctionProps = Partial<FunctionProps> & {
  * By setting a custom log group, you can control the log retention policy and other log group settings
  */
 export class RoutinelessFunction extends Function {
+  private readonly eventRules: Rule[] = []
+  private readonly destinationEventRules: Rule[] = []
+  private readonly id: string
+
   public constructor(scope: Construct, id: string, props: RoutinelessFunctionProps) {
     super(scope, id, {
       runtime: Runtime.NODEJS_20_X,
@@ -73,6 +85,7 @@ export class RoutinelessFunction extends Function {
         ...props.environment,
       },
     })
+    this.id = id
 
     const powertoolsLayer = LayerVersion.fromLayerVersionArn(
       this,
@@ -101,15 +114,52 @@ export class RoutinelessFunction extends Function {
    * @param accessMode The access mode for the table, defaults to 'RO' (read-only)
    * @param envVarName The name of the environment variable to use for the table name, defaults to `TABLE_NAME`
    */
-  public bindTable(table: Table, { accessMode, accessOnly, envVarName }: BindTableProps = {}): void {
+  public bindTable(table: Table, { accessMode, accessOnly, envVarName }: BindProps = {}): this {
     if (accessOnly !== true) {
       this.addEnvironment(envVarName ?? 'TABLE_NAME', table.tableName)
     }
     if (accessMode === 'RW') {
       table.grantReadWriteData(this)
-
-      return
+    } else {
+      table.grantReadData(this)
     }
-    table.grantReadData(this)
+
+    return this
+  }
+
+  public bindEventBus(
+    eventBus: EventBus,
+    { accessMode, accessOnly, envVarName, events, destinationEvents }: EventBusBindProps = {},
+  ): this {
+    if (accessOnly !== true) {
+      this.addEnvironment(envVarName ?? 'EVENT_BUS_NAME', eventBus.eventBusName)
+    }
+    if (accessMode === 'RW') {
+      eventBus.grantPutEventsTo(this)
+    }
+
+    if (events) {
+      this.eventRules.push(
+        new Rule(this, `${this.id}EventBusRule${this.eventRules.length || ''}`, {
+          ruleName: `${this.functionName}EventBusRule${this.eventRules.length || ''}`,
+          eventPattern: getEventBridgeEventPattern(...events),
+          targets: [new LambdaFunction(this)],
+          eventBus,
+        }),
+      )
+    }
+
+    if (destinationEvents) {
+      this.destinationEventRules.push(
+        new Rule(this, `${this.id}DestinationEventBusRule${this.destinationEventRules.length || ''}`, {
+          ruleName: `${this.functionName}DestinationEventBusRule${this.destinationEventRules.length || ''}`,
+          eventPattern: getEventBridgeDestinationResponseEventPattern(...destinationEvents),
+          targets: [new LambdaFunction(this)],
+          eventBus,
+        }),
+      )
+    }
+
+    return this
   }
 }

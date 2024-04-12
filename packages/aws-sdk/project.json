@@ -6,7 +6,7 @@
   "targets": {
     "nx-release-publish": {
       "options": {
-        "packageRoot": "dist/packages/event"
+        "packageRoot": "dist/packages/aws-sdk"
       },
       "dependsOn": ["build"]
     },
