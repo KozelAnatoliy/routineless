@@ -1,6 +1,6 @@
 {
   "name": "@routineless/cdk",
-  "version": "1.4.3-beta.0",
+  "version": "1.4.3-beta.1",
   "description": "Cdk utilities",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "@nx/devkit": "^18.0.4",
     "nx": "^18.0.4",
     "callsite": "1.0.0",
-    "@routineless/event": "0.0.2-beta.0",
-    "@routineless/logging": "0.0.2-beta.0"
+    "@routineless/event": "^0.0.2-beta.1",
+    "@routineless/logging": "^0.0.2-beta.1"
   },
   "peerDependencies": {
     "aws-cdk-lib": "^2.106.0"

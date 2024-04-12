@@ -1,6 +1,6 @@
 {
   "name": "@routineless/aws-sdk",
-  "version": "0.0.2-beta.0",
+  "version": "0.0.2-beta.1",
   "description": "Routineless aws-sdk package",
   "repository": {
     "type": "git",
@@ -12,7 +12,7 @@
     "@aws-sdk/client-eventbridge": "^3.521.0",
     "@aws-sdk/client-sns": "^3.521.0",
     "@aws-sdk/client-sqs": "^3.521.0",
-    "@routineless/logging": "0.0.2-beta.0",
+    "@routineless/logging": "^0.0.2-beta.1",
     "@aws-sdk/client-dynamodb": "^3.521.0",
     "@aws-sdk/client-secrets-manager": "^3.523.0",
     "@aws-sdk/client-s3": "^3.521.0",

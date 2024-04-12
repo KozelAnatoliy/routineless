@@ -1,6 +1,6 @@
 import { Metrics } from '@aws-lambda-powertools/metrics'
 
-import { defaultValues, metricsNamespace, serviceName } from './common'
+import { metricsNamespace, serviceName } from './common'
 
 /**
  * Create metrics instance with centralized configuration so that
@@ -9,7 +9,6 @@ import { defaultValues, metricsNamespace, serviceName } from './common'
 const metrics = new Metrics({
   serviceName,
   namespace: metricsNamespace,
-  defaultDimensions: defaultValues,
 })
 
 export { metrics }

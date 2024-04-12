@@ -8,7 +8,7 @@
       "options": {
         "packageRoot": "dist/packages/nx-aws-cdk"
       },
-      "dependsOn": ["^nx-release-publish", "build"]
+      "dependsOn": ["build"]
     },
     "build": {
       "executor": "@nx/js:tsc",
